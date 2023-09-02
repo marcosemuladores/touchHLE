@@ -59,6 +59,7 @@ void *memmove(void *, const void *, size_t);
 int strcmp(const char *, const char *);
 char *strncpy(char *, const char *, size_t);
 char *strncat(char *, const char *, size_t);
+size_t strlcpy(char *, const char *, size_t);
 
 // <unistd.h>
 typedef unsigned int __uint32_t;
@@ -583,6 +584,43 @@ int test_setjmp() {
   return -1;
 }
 
+int test_strlcpy() {
+  {
+    char src[7] = "origen";
+    char dst[15] = "destinodestino";
+    char expected[] = "or\0tinodestino";
+    int ret = strlcpy(dst, src, 3);
+    if (ret != 6 || memcmp(dst, expected, 15)) {
+      printf("%d %s\t", ret, dst);
+      return 1;
+    }
+  }
+
+  {
+    char src[7] = "origen";
+    char dst[15] = "destinodestino";
+    char expected[] = "orige\0odestino";
+    int ret = strlcpy(dst, src, 6);
+    if (ret != 6 || memcmp(dst, expected, 15)) {
+      printf("%d %s\t", ret, dst);
+      return 2;
+    }
+  }
+
+  {
+    char src[7] = "origen";
+    char dst[15] = "destinodestino";
+    char expected[] = "origen\0destino";
+    int ret = strlcpy(dst, src, 9);
+    if (ret != 6 || memcmp(dst, expected, 15)) {
+      printf("%d %s\t", ret, dst);
+      return 3;
+    }
+  }
+
+  return 0;
+}
+
 #define FUNC_DEF(func)                                                         \
   { &func, #func }
 struct {
@@ -596,6 +634,7 @@ struct {
     FUNC_DEF(test_sem),     FUNC_DEF(test_CGAffineTransform),
     FUNC_DEF(test_strncpy), FUNC_DEF(test_strncat),
     FUNC_DEF(test_setjmp), FUNC_DEF(test_cond_var),
+    FUNC_DEF(test_strlcpy),
 };
 
 // Because no libc is linked into this executable, there is no libc entry point

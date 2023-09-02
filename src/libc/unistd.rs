@@ -7,10 +7,12 @@
 
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::fs::GuestPath;
-use crate::libc::posix_io::{FileDescriptor, STDERR_FILENO, STDIN_FILENO, STDOUT_FILENO};
+use crate::libc::posix_io::{FileDescriptor, O_RDONLY, STDERR_FILENO, STDIN_FILENO, STDOUT_FILENO};
 use crate::mem::{ConstPtr, ConstVoidPtr, GuestISize, MutPtr, MutVoidPtr, Ptr};
 use crate::Environment;
 use std::time::Duration;
+use crate::libc::posix_io;
+use crate::libc::stdio::{FILE, fread};
 
 #[allow(non_camel_case_types)]
 type useconds_t = u32;
@@ -112,6 +114,15 @@ fn readlink(env: &mut Environment, path: ConstPtr<u8>, buf: MutPtr<u8>, bufsize:
     log!("Failing readlink() for {}", env.mem.cstr_at_utf8(path).unwrap());
     // TODO: set errno
     -1
+    // let file: MutPtr<FILE> = match posix_io::open_direct(env, path, O_RDONLY) {
+    //     -1 => Ptr::null(),
+    //     fd => env.mem.alloc_and_write(FILE { fd }),
+    // };
+    // if file.is_null() {
+    //     // TODO: set errno
+    //     return -1;
+    // }
+    // fread(env, buf.cast(), 1, bufsize.try_into().unwrap(), file) as GuestISize
 }
 
 pub const FUNCTIONS: FunctionExports = &[

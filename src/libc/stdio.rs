@@ -26,8 +26,8 @@ const EOF: i32 = -1;
 #[allow(clippy::upper_case_acronyms)]
 /// C `FILE` struct. This is an opaque type in C, so the definition here is our
 /// own.
-struct FILE {
-    fd: posix_io::FileDescriptor,
+pub struct FILE {
+    pub fd: posix_io::FileDescriptor,
 }
 unsafe impl SafeRead for FILE {}
 
@@ -76,7 +76,7 @@ fn fopen(env: &mut Environment, filename: ConstPtr<u8>, mode: ConstPtr<u8>) -> M
     }
 }
 
-fn fread(
+pub fn fread(
     env: &mut Environment,
     buffer: MutVoidPtr,
     item_size: GuestUSize,
