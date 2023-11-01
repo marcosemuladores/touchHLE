@@ -144,6 +144,15 @@ fn sysconf(env: &mut Environment, name: i32) -> i32 {
     }
 }
 
+fn waitpid(env: &mut Environment, pid: pid_t, stat_loc: MutPtr<i32>, options: i32) -> i32 {
+    log!("waitpid pid {}, options {}", pid, options);
+    // we do not have any other processes really
+    assert_eq!(pid, getpid(env));
+    // WNOHANG
+    assert_eq!(options, 1);
+    0
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(getpagesize()),
     export_c_func!(get_etext()),
@@ -162,4 +171,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(getdtablesize()),
     export_c_func!(gethostname(_, _)),
     export_c_func!(sysconf(_)),
+    export_c_func!(waitpid(_, _, _)),
 ];

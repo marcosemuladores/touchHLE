@@ -119,6 +119,7 @@ extern "C" {
 
     pub fn alIsBuffer(buffer: ALuint) -> ALboolean;
     pub fn alIsSource(source: ALuint) -> ALboolean;
+    pub fn alIsExtensionPresent(extName: *const ALchar) -> ALboolean;
 
     pub fn alListenerf(param: ALenum, value: ALfloat);
     pub fn alListener3f(param: ALenum, value1: ALfloat, value2: ALfloat, value3: ALfloat);
@@ -203,4 +204,5 @@ extern "C" {
 
     pub fn alDopplerFactor(dopplerFactor: ALfloat);
     pub fn alDopplerVelocity(dopplerVelocity: ALfloat);
+    pub fn alSpeedOfSound(speed: ALfloat);
 }

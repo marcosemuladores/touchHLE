@@ -189,6 +189,12 @@ impl GLES for GLES1Native {
     unsafe fn Lightxv(&mut self, light: GLenum, pname: GLenum, params: *const GLfixed) {
         gles11::Lightxv(light, pname, params)
     }
+    unsafe fn LightModelf(&mut self, pname: GLenum, param: GLfloat) {
+        gles11::LightModelf(pname, param)
+    }
+    unsafe fn LightModelfv(&mut self, pname: GLenum, params: *const GLfloat) {
+        gles11::LightModelfv(pname, params)
+    }
     unsafe fn Materialf(&mut self, face: GLenum, pname: GLenum, param: GLfloat) {
         gles11::Materialf(face, pname, param)
     }
@@ -666,10 +672,6 @@ impl GLES for GLES1Native {
     }
     unsafe fn GenerateMipmapOES(&mut self, target: GLenum) {
         gles11::GenerateMipmapOES(target)
-    }
-
-    unsafe fn LightModelfv(&mut self, pname: GLenum, params: *const GLfloat) {
-        gles11::LightModelfv(pname, params)
     }
 
     unsafe fn IsTexture(&mut self, texture: GLuint) -> GLboolean {

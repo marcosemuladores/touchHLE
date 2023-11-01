@@ -849,6 +849,12 @@ impl GLES for GLES1OnGL2 {
             params,
         )
     }
+    unsafe fn LightModelf(&mut self, pname: GLenum, param: GLfloat) {
+        gl21::LightModelf(pname, param)
+    }
+    unsafe fn LightModelfv(&mut self, pname: GLenum, params: *const GLfloat) {
+        gl21::LightModelfv(pname, params)
+    }
     unsafe fn Materialf(&mut self, face: GLenum, pname: GLenum, param: GLfloat) {
         assert!(face == gl21::FRONT_AND_BACK);
         MATERIAL_PARAMS.assert_component_count(pname, 1);
@@ -1717,10 +1723,6 @@ impl GLES for GLES1OnGL2 {
     }
     unsafe fn GenerateMipmapOES(&mut self, target: GLenum) {
         gl21::GenerateMipmapEXT(target)
-    }
-
-    unsafe fn LightModelfv(&mut self, pname: GLenum, params: *const GLfloat) {
-        gl21::LightModelfv(pname, params)
     }
 
     unsafe fn IsTexture(&mut self, texture: GLuint) -> GLboolean {

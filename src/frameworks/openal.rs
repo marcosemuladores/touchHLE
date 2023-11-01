@@ -238,6 +238,13 @@ fn alIsSource(_env: &mut Environment, source: ALuint) -> ALboolean {
     unsafe { al::alIsSource(source) }
 }
 
+fn alIsExtensionPresent(env: &mut Environment, extName: ConstPtr<u8>) -> ALboolean {
+    let s = env.mem.cstr_at_utf8(extName).unwrap();
+    let ss = CString::new(s).unwrap();
+    let res = unsafe { al::alIsExtensionPresent(ss.as_ptr()) };
+    res
+}
+
 fn alListenerf(_env: &mut Environment, param: ALenum, value: ALfloat) {
     unsafe { al::alListenerf(param, value) };
 }
@@ -566,6 +573,10 @@ fn alDopplerVelocity(env: &mut Environment, value: ALfloat) {
     unsafe { al::alDopplerVelocity(value) };
 }
 
+fn alSpeedOfSound(_env: &mut Environment, value: ALfloat) {
+    unsafe { al::alSpeedOfSound(value) };
+}
+
 // TODO: more functions
 
 // Note: For some reasons Wolf3d registers many OpenAl functions, but actually
@@ -592,7 +603,7 @@ fn alcIsExtensionPresent(
     _device: MutPtr<GuestALCdevice>,
     _extName: ConstPtr<u8>,
 ) -> ALCboolean {
-    0
+    todo!();
 }
 fn alGetBufferf(_env: &mut Environment, _buffer: ALuint, _param: ALenum, _value: MutPtr<ALfloat>) {
     todo!();
@@ -628,9 +639,6 @@ fn alGetIntegerv(_env: &mut Environment, _param: ALenum, _values: MutPtr<ALint>)
     todo!();
 }
 fn alGetProcAddress(_env: &mut Environment, _funcName: ConstPtr<u8>) -> MutVoidPtr {
-    todo!();
-}
-fn alIsExtensionPresent(_env: &mut Environment, _extName: ConstPtr<u8>) -> ALboolean {
     todo!();
 }
 fn alIsEnabled(_env: &mut Environment, _capability: ALenum) -> ALboolean {
@@ -736,4 +744,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(alSourcePausev(_, _)),
     export_c_func!(alSourceStopv(_, _)),
     export_c_func!(alSourceRewindv(_, _)),
+    export_c_func!(alSpeedOfSound(_)),
 ];

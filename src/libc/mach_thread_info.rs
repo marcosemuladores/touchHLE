@@ -106,7 +106,7 @@ fn thread_info(
         THREAD_BASIC_INFO => {
             let out_size_expected =
                 guest_size_of::<thread_basic_info>() / guest_size_of::<integer_t>();
-            assert!(out_size_expected == out_size_available);
+            assert!(out_size_expected <= out_size_available);
             env.mem.write(
                 thread_info_out.cast(),
                 thread_basic_info {
@@ -134,7 +134,7 @@ fn thread_info(
         THREAD_SCHED_TIMESHARE_INFO => {
             let out_size_expected =
                 guest_size_of::<policy_timeshare_info>() / guest_size_of::<integer_t>();
-            assert!(out_size_expected == out_size_available);
+            assert!(out_size_expected <= out_size_available);
             env.mem.write(
                 thread_info_out.cast(),
                 policy_timeshare_info {
