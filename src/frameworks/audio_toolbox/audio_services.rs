@@ -8,7 +8,7 @@
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::frameworks::carbon_core::OSStatus;
 use crate::frameworks::core_audio_types::fourcc;
-use crate::mem::{MutPtr, MutVoidPtr};
+use crate::mem::{MutPtr, MutVoidPtr, Ptr};
 use crate::Environment;
 
 /// Usually a FourCC.
@@ -41,7 +41,17 @@ fn AudioServicesPlaySystemSound(_env: &mut Environment, in_system_sound_id: Syst
     // TODO: implement other system sounds
 }
 
+fn AudioOutputUnitStop(_env: &mut Environment, ci: MutVoidPtr) -> OSStatus {
+    -1
+}
+
+fn AudioComponentFindNext(_env: &mut Environment, inComponent: MutVoidPtr, inDesc: MutVoidPtr) -> MutVoidPtr {
+    Ptr::null()
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(AudioServicesGetProperty(_, _, _, _, _)),
     export_c_func!(AudioServicesPlaySystemSound(_)),
+    export_c_func!(AudioOutputUnitStop(_)),
+    export_c_func!(AudioComponentFindNext(_, _)),
 ];
