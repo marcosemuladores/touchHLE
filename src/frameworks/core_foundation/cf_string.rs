@@ -14,7 +14,7 @@ use crate::abi::{DotDotDot, VaList};
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::frameworks::core_foundation::{CFIndex, CFOptionFlags};
 use crate::frameworks::foundation::ns_string;
-use crate::mem::ConstPtr;
+use crate::mem::{ConstPtr, MutPtr};
 use crate::objc::{id, msg, msg_class};
 use crate::Environment;
 
@@ -101,6 +101,20 @@ fn CFStringCompare(
     msg![env; a compare:b options:flags]
 }
 
+fn CFStringGetCString(
+    env: &mut Environment,
+    string: CFStringRef,
+    buffer: MutPtr<u8>,
+    buffer_size: CFIndex,
+    encoding: CFStringEncoding,
+) -> bool {
+    let encoding = CFStringConvertEncodingToNSStringEncoding(env, encoding);
+    let buffer_size: u32 = buffer_size.try_into().unwrap();
+    msg![env; string getCString:buffer
+                      maxLength:buffer_size
+                       encoding:encoding]
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFStringConvertEncodingToNSStringEncoding(_)),
     export_c_func!(CFStringConvertNSStringEncodingToEncoding(_)),
@@ -108,4 +122,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFStringCreateWithFormat(_, _, _, _)),
     export_c_func!(CFStringCreateWithFormatAndArguments(_, _, _, _)),
     export_c_func!(CFStringCompare(_, _, _)),
+    export_c_func!(CFStringGetCString(_, _, _, _)),
 ];

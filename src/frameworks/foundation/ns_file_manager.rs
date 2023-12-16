@@ -50,8 +50,15 @@ fn NSHomeDirectory(env: &mut Environment) -> id {
     autorelease(env, dir)
 }
 
+fn NSTemporaryDirectory(env: &mut Environment) -> id {
+    let dir = env.fs.home_directory().join("tmp");
+    let dir = ns_string::from_rust_string(env, String::from(dir.as_str()));
+    autorelease(env, dir)
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(NSHomeDirectory()),
+    export_c_func!(NSTemporaryDirectory()),
     export_c_func!(NSSearchPathForDirectoriesInDomains(_, _, _)),
 ];
 
@@ -153,6 +160,14 @@ pub const CLASSES: ClassExports = objc_classes! {
     let class = env.objc.get_known_class("NSDirectoryEnumerator", &mut env.mem);
     let enumerator = env.objc.alloc_object(class, host_object, &mut env.mem);
     autorelease(env, enumerator)
+}
+
+- (bool)changeCurrentDirectoryPath:(id)path { // NSString*
+    let path = ns_string::to_rust_string(env, path); // TODO: avoid copy
+    match env.fs.change_working_directory(GuestPath::new(&path)) {
+        Ok(_) => true,
+        Err(()) => false
+    }
 }
 
 - (id)directoryContentsAtPath:(id)path /* NSString* */ { // NSArray*

@@ -144,6 +144,16 @@ fn fgets(
     str
 }
 
+fn fputc(env: &mut Environment, c: i32, stream: MutPtr<FILE>) -> i32 {
+    let cc: u8 = c as u8;
+    let ptr = env.mem.alloc_and_write(cc);
+    let res = fwrite(env, ptr.cast_const().cast(), 1, 1, stream)
+        .try_into()
+        .unwrap();
+    env.mem.free(ptr.cast());
+    res
+}
+
 fn fputs(env: &mut Environment, str: ConstPtr<u8>, stream: MutPtr<FILE>) -> i32 {
     // TODO: this function doesn't set errno or return EOF yet
     let str_len = strlen(env, str);
@@ -260,7 +270,7 @@ fn feof(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
     posix_io::eof(env, fd)
 }
 
-fn puts(env: &mut Environment, s: ConstPtr<u8>) -> i32 {
+pub fn puts(env: &mut Environment, s: ConstPtr<u8>) -> i32 {
     let _ = std::io::stdout().write_all(env.mem.cstr_at(s));
     let _ = std::io::stdout().write_all(b"\n");
     // TODO: I/O error handling
@@ -341,6 +351,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(fread(_, _, _, _)),
     export_c_func!(fgetc(_)),
     export_c_func!(fgets(_, _, _)),
+    export_c_func!(fputc(_, _)),
     export_c_func!(fputs(_, _)),
     export_c_func!(fwrite(_, _, _, _)),
     export_c_func!(fseek(_, _, _)),
