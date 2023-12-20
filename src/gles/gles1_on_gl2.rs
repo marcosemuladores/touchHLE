@@ -151,6 +151,7 @@ const GET_PARAMS: ParamTable = ParamTable(&[
     (gl21::COLOR_MATERIAL, ParamType::Boolean, 1),
     (gl21::COLOR_WRITEMASK, ParamType::Boolean, 4),
     // TODO: COMPRESSED_TEXTURE_FORMATS (need to support PVRTC etc)
+    (gl21::COMPRESSED_TEXTURE_FORMATS, ParamType::Int, 1),
     (gl21::CULL_FACE, ParamType::Boolean, 1),
     (gl21::CULL_FACE_MODE, ParamType::Int, 1),
     (gl21::CURRENT_COLOR, ParamType::FloatSpecial, 4), // TODO correct type
@@ -209,6 +210,7 @@ const GET_PARAMS: ParamTable = ParamTable(&[
     (gl21::NORMAL_ARRAY_TYPE, ParamType::Int, 1),
     (gl21::NORMALIZE, ParamType::Boolean, 1),
     // TODO: NUM_COMPRESSED_TEXTURE_FORMATS (need to support PVRTC etc)
+    (gl21::NUM_COMPRESSED_TEXTURE_FORMATS, ParamType::Int, 1),
     (gl21::PACK_ALIGNMENT, ParamType::Int, 1),
     (gl21::PERSPECTIVE_CORRECTION_HINT, ParamType::Int, 1),
     (gl21::POINT_DISTANCE_ATTENUATION, ParamType::Float, 3),
