@@ -130,6 +130,9 @@ fn scandir(
     assert!(compar.to_ptr().is_null());
 
     let dirp = opendir(env, dirname);
+    if dirp.is_null() {
+        return 0;
+    }
     let mut next_dir_entry = readdir(env, dirp);
     let mut tmp_vec: Vec<MutPtr<dirent>> = vec![];
     while !next_dir_entry.is_null() {

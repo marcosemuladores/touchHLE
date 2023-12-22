@@ -15,6 +15,11 @@ use crate::objc::{
 };
 use crate::Environment;
 
+struct ObjectEnumeratorHostObject {
+    iterator: std::vec::IntoIter<id>,
+}
+impl HostObject for ObjectEnumeratorHostObject {}
+
 /// Belongs to _touchHLE_NSSet
 #[derive(Debug, Default)]
 struct SetHostObject {
@@ -193,6 +198,26 @@ pub const CLASSES: ClassExports = objc_classes! {
     let mut host_obj: SetHostObject = std::mem::take(env.objc.borrow_mut(this));
     host_obj.dict.insert(env, object, null, /* copy_key: */ false);
     *env.objc.borrow_mut(this) = host_obj;
+}
+
+- (id)objectEnumerator { // NSEnumerator*
+    let array_host_object: &mut SetHostObject = env.objc.borrow_mut(this);
+    let vec: Vec<id> = array_host_object.dict.iter_keys().collect();
+    let host_object = Box::new(ObjectEnumeratorHostObject {
+        iterator: vec.into_iter(),
+    });
+    let class = env.objc.get_known_class("_touchHLE_NSMutableSet_ObjectEnumerator", &mut env.mem);
+    let enumerator = env.objc.alloc_object(class, host_object, &mut env.mem);
+    autorelease(env, enumerator)
+}
+
+@end
+
+@implementation _touchHLE_NSMutableSet_ObjectEnumerator: NSEnumerator
+
+- (id)nextObject {
+    let host_obj = env.objc.borrow_mut::<ObjectEnumeratorHostObject>(this);
+    host_obj.iterator.next().map_or(nil, |o| o)
 }
 
 @end
