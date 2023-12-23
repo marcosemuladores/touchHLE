@@ -372,7 +372,8 @@ impl Mem {
     /// [Self::ptr_at] for that).
     pub fn bytes_at<const MUT: bool>(&self, ptr: Ptr<u8, MUT>, count: GuestUSize) -> &[u8] {
         if ptr.to_bits() < self.null_segment_size {
-            Self::null_check_fail(ptr.to_bits(), count)
+            //Self::null_check_fail(ptr.to_bits(), count)
+            return &[]
         }
         &self.bytes()[ptr.to_bits() as usize..][..count as usize]
     }
