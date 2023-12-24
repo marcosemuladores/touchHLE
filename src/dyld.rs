@@ -325,6 +325,11 @@ impl Dyld {
             {
                 // Often used for C++ RTTI
                 Ptr::from_bits(external_addr)
+            } else if let Some(&(symbol, _)) = search_lists(function_lists::FUNCTION_LISTS, name) {
+                self
+                    .create_proc_address_no_inval(mem, symbol)
+                    .unwrap()
+                    .to_ptr()
             } else {
                 unhandled_relocations
                     .entry(name)
