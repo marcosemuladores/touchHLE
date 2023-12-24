@@ -15,6 +15,7 @@ use crate::objc::{id, msg};
 use crate::Environment;
 use std::collections::HashSet;
 use std::io::Write;
+use crate::libc::stdlib::atof_inner;
 
 const INTEGER_SPECIFIERS: [u8; 6] = [b'd', b'i', b'o', b'u', b'x', b'X'];
 const FLOAT_SPECIFIERS: [u8; 1] = [b'f'];
@@ -399,6 +400,12 @@ fn sscanf(env: &mut Environment, src: ConstPtr<u8>, format: ConstPtr<u8>, args: 
                         env.mem.write(c_int_ptr.cast_mut(), val);
                     }
                 }
+            }
+            b'f' => {
+                let (number, length) = atof_inner(env, src_ptr.cast_const()).unwrap();
+                src_ptr += length;
+                let c_f32_ptr: ConstPtr<f32> = args.next(env);
+                env.mem.write(c_f32_ptr.cast_mut(), number as f32);
             }
             b'[' => {
                 assert!(length_modifier.is_none());
