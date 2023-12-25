@@ -5,14 +5,14 @@
  */
 //! `NSURL`.
 
-use super::ns_string::{to_rust_string, NSUTF8StringEncoding};
+use super::ns_string::{get_static_str, to_rust_string, NSUTF8StringEncoding};
 use super::NSUInteger;
 use crate::fs::GuestPath;
 use crate::mem::MutPtr;
 use crate::objc::{
     autorelease, id, msg, nil, objc_classes, release, retain, ClassExports, HostObject, NSZonePtr,
 };
-use crate::Environment;
+use crate::{Environment, msg_class};
 use std::borrow::Cow;
 
 /// It seems like there's two kinds of NSURLs: ones for file paths, and others.
@@ -134,6 +134,16 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; ns_string getCString:buffer
                          maxLength:buffer_size
                           encoding:NSUTF8StringEncoding]
+}
+
+- (id)URLByAppendingPathComponent:(id)path_component // NSString *
+                      isDirectory:(bool)is_directory {
+    let path: id = msg![env; this path];
+    let mut path: id = msg![env; path stringByAppendingPathComponent:path_component];
+    if is_directory {
+        path = msg![env; path stringByAppendingString:(get_static_str(env, "/"))];
+    }
+    msg_class![env; NSURL fileURLWithPath:path]
 }
 
 // TODO: more constructors, more accessors

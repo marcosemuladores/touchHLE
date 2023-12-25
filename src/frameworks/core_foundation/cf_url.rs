@@ -17,7 +17,7 @@ use crate::frameworks::foundation::ns_string::{
 };
 use crate::frameworks::foundation::{ns_string, NSUInteger};
 use crate::mem::{ConstPtr, MutPtr};
-use crate::objc::{id, msg, msg_class, retain};
+use crate::objc::{id, msg, msg_class, nil, retain};
 use crate::Environment;
 
 pub type CFURLRef = super::CFTypeRef;
@@ -101,9 +101,22 @@ fn CFURLCopyFileSystemPath(
     retain(env, res)
 }
 
+fn CFURLCreateCopyAppendingPathComponent(
+    env: &mut Environment,
+    allocator: CFAllocatorRef,
+    url: CFURLRef,
+    path_component: CFStringRef,
+    is_directory: bool
+) -> CFURLRef {
+    assert!(allocator.is_null());
+    let new_url = msg![env; url URLByAppendingPathComponent:path_component isDirectory:is_directory];
+    msg![env; new_url copy]
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFURLGetFileSystemRepresentation(_, _, _, _)),
     export_c_func!(CFURLCreateFromFileSystemRepresentation(_, _, _, _)),
     export_c_func!(CFURLCreateWithFileSystemPath(_, _, _, _)),
     export_c_func!(CFURLCopyFileSystemPath(_, _)),
+    export_c_func!(CFURLCreateCopyAppendingPathComponent(_, _, _, _)),
 ];

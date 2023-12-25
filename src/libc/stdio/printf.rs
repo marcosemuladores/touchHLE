@@ -18,7 +18,7 @@ use std::io::Write;
 use crate::libc::stdlib::atof_inner;
 
 const INTEGER_SPECIFIERS: [u8; 6] = [b'd', b'i', b'o', b'u', b'x', b'X'];
-const FLOAT_SPECIFIERS: [u8; 1] = [b'f'];
+const FLOAT_SPECIFIERS: [u8; 2] = [b'f', b'g'];
 
 /// String formatting implementation for `printf` and `NSLog` function families.
 ///
@@ -161,7 +161,7 @@ pub fn printf_inner<const NS_LOG: bool, F: Fn(&Mem, GuestUSize) -> u8>(
                     res.extend_from_slice(int_with_precision.as_bytes());
                 }
             }
-            b'f' => {
+            b'g' | b'f' => {
                 // TODO: support length modifier
                 assert!(length_modifier.is_none());
                 let float: f64 = args.next(env);
