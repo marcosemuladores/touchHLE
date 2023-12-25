@@ -114,6 +114,10 @@ fn __strcat_chk(
 ) -> MutPtr<u8> {
     GenericChar::<u8>::strcat(env, dest, src, size)
 }
+fn strcspn(env: &mut Environment, s: ConstPtr<u8>, charset: ConstPtr<u8>) -> GuestUSize {
+    log!("strcspn: '{}' '{}'", env.mem.cstr_at_utf8(s).unwrap(), env.mem.cstr_at_utf8(charset).unwrap());
+    GenericChar::<u8>::strcspn(env, s, charset)
+}
 fn strncpy(
     env: &mut Environment,
     dest: MutPtr<u8>,
@@ -232,6 +236,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(strcpy(_, _)),
     export_c_func!(__strcpy_chk(_, _, _)),
     export_c_func!(strcat(_, _)),
+    export_c_func!(strcspn(_, _)),
     export_c_func!(__strcat_chk(_, _, _)),
     export_c_func!(strncpy(_, _, _)),
     export_c_func!(strsep(_, _)),

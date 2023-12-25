@@ -13,12 +13,13 @@ use super::cf_dictionary::CFDictionaryRef;
 use crate::abi::{DotDotDot, VaList};
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::frameworks::core_foundation::{CFIndex, CFOptionFlags};
-use crate::frameworks::foundation::ns_string;
+use crate::frameworks::foundation::{ns_string, NSInteger};
 use crate::mem::{ConstPtr, MutPtr};
 use crate::objc::{id, msg, msg_class};
 use crate::Environment;
 
 pub type CFStringRef = super::CFTypeRef;
+pub type CFMutableStringRef = CFStringRef;
 
 pub type CFStringEncoding = u32;
 pub const kCFStringEncodingASCII: CFStringEncoding = 0x600;
@@ -115,6 +116,24 @@ fn CFStringGetCString(
                        encoding:encoding]
 }
 
+fn CFStringCreateMutableCopy(
+    env: &mut Environment,
+    allocator: CFAllocatorRef,
+    max_length: CFIndex,
+    the_string: CFStringRef
+) -> CFMutableStringRef {
+    assert!(allocator.is_null());
+    assert_eq!(max_length, 0);
+    let ns_mut_string: id = msg_class![env; NSMutableString alloc];
+    msg![env; ns_mut_string initWithString:the_string]
+}
+
+fn CFStringNormalize(
+    env: &mut Environment, the_string: CFMutableStringRef, the_form: NSInteger
+) {
+    // TODO
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFStringConvertEncodingToNSStringEncoding(_)),
     export_c_func!(CFStringConvertNSStringEncodingToEncoding(_)),
@@ -123,4 +142,6 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFStringCreateWithFormatAndArguments(_, _, _, _)),
     export_c_func!(CFStringCompare(_, _, _)),
     export_c_func!(CFStringGetCString(_, _, _, _)),
+    export_c_func!(CFStringCreateMutableCopy(_, _, _)),
+    export_c_func!(CFStringNormalize(_, _)),
 ];

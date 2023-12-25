@@ -364,6 +364,10 @@ fn alSourceiv(env: &mut Environment, source: ALuint, param: ALenum, values: Cons
     unsafe { al::alSourceiv(source, param, values) };
 }
 
+fn alEnable(_env: &mut Environment, capability: ALenum) {
+    unsafe { al::alEnable(capability) };
+}
+
 fn alGetSourcef(env: &mut Environment, source: ALuint, param: ALenum, value: MutPtr<ALfloat>) {
     unsafe { al::alGetSourcef(source, param, env.mem.ptr_at_mut(value, 1)) };
 }
@@ -421,6 +425,13 @@ fn alGetSource3i(
 fn alGetSourceiv(env: &mut Environment, source: ALuint, param: ALenum, values: MutPtr<ALint>) {
     let values = env.mem.ptr_at_mut(values, 3); // upper bound
     unsafe { al::alGetSourceiv(source, param, values) };
+}
+fn alGetString(env: &mut Environment, param: ALenum) -> ConstPtr<u8> {
+    let res = unsafe { al::alGetString(param) };
+    let s = unsafe { CStr::from_ptr(res) };
+    log_dbg!("alGetString({:?}) => {:?}", param, s);
+    log!("TODO: alGetString({}) leaks memory", param);
+    env.mem.alloc_and_write_cstr(s.to_bytes()).cast_const()
 }
 
 fn alSourcePlay(_env: &mut Environment, source: ALuint) {
@@ -589,9 +600,6 @@ fn alGetBufferf(_env: &mut Environment, _buffer: ALuint, _param: ALenum, _value:
 fn alGetBufferi(_env: &mut Environment, _buffer: ALuint, _param: ALenum, _value: MutPtr<ALint>) {
     todo!();
 }
-fn alEnable(_env: &mut Environment, _capability: ALenum) {
-    todo!();
-}
 fn alDisable(_env: &mut Environment, _capability: ALenum) {
     todo!();
 }
@@ -620,9 +628,6 @@ fn alGetIntegerv(_env: &mut Environment, _param: ALenum, _values: MutPtr<ALint>)
     todo!();
 }
 fn alGetProcAddress(_env: &mut Environment, _funcName: ConstPtr<u8>) -> MutVoidPtr {
-    todo!();
-}
-fn alGetString(_env: &mut Environment, _param: ALenum) -> ConstPtr<u8> {
     todo!();
 }
 fn alIsExtensionPresent(_env: &mut Environment, _extName: ConstPtr<u8>) -> ALboolean {

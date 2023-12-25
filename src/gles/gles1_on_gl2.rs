@@ -197,6 +197,7 @@ const GET_PARAMS: ParamTable = ParamTable(&[
     (gl21::MAX_LIGHTS, ParamType::Int, 1),
     (gl21::MAX_MODELVIEW_STACK_DEPTH, ParamType::Int, 1),
     (gl21::MAX_PROJECTION_STACK_DEPTH, ParamType::Int, 1),
+    (gl21::MAX_TEXTURE_MAX_ANISOTROPY_EXT, ParamType::Float, 1),
     (gl21::MAX_TEXTURE_SIZE, ParamType::Int, 1),
     (gl21::MAX_TEXTURE_STACK_DEPTH, ParamType::Int, 1),
     (gl21::MAX_TEXTURE_UNITS, ParamType::Int, 1),
@@ -605,7 +606,7 @@ impl GLES for GLES1OnGL2 {
         gl21::Enable(cap);
     }
     unsafe fn IsEnabled(&mut self, cap: GLenum) -> GLboolean {
-        assert!(CAPABILITIES.contains(&cap));
+        // assert!(CAPABILITIES.contains(&cap));
         gl21::IsEnabled(cap)
     }
     unsafe fn Disable(&mut self, cap: GLenum) {

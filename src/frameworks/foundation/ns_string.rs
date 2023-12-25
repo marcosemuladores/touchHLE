@@ -250,6 +250,11 @@ pub const CLASSES: ClassExports = objc_classes! {
 // For the time being, that will always be _touchHLE_NSString.
 @implementation NSString: NSObject
 
++ (id)string {
+    let null: NSZonePtr = MutPtr::null();
+    msg_class![env; NSString allocWithZone:null]
+}
+
 + (id)allocWithZone:(NSZonePtr)zone {
     // NSString might be subclassed by something which needs allocWithZone:
     // to have the normal behaviour. Unimplemented: call superclass alloc then.
@@ -887,6 +892,15 @@ pub const CLASSES: ClassExports = objc_classes! {
     this
 }
 
+// TODO: handle in copy
+- (id)initWithBytesNoCopy:(ConstPtr<u8>)bytes
+                   length:(NSUInteger)len
+                 encoding:(NSStringEncoding)encoding
+             freeWhenDone:(bool)free_buffer {
+    assert!(!free_buffer);
+    msg![env; this initWithBytes:bytes length:len encoding:encoding]
+}
+
 - (id)initWithString:(id)string { // NSString *
     // TODO: optimize for more common cases (or maybe just call copy?)
     let mut code_units = Vec::new();
@@ -935,6 +949,25 @@ pub const CLASSES: ClassExports = objc_classes! {
     // TODO: avoid copy?
     let path = to_rust_string(env, this);
     path.starts_with('/') || path.starts_with('~')
+}
+
+@end
+
+@implementation NSMutableString: _touchHLE_NSString
+
++ (id)allocWithZone:(NSZonePtr)zone {
+    assert!(this == env.objc.get_known_class("NSMutableString", &mut env.mem));
+    msg_class![env; _touchHLE_NSString allocWithZone:zone]
+}
+
++ (id)stringWithCapacity:(NSUInteger)_capacity {
+    msg_class![env; NSMutableString string]
+}
+
+- (())setString:(id)aString { // NSString*
+    let str = to_rust_string(env, aString);
+    let host_object = StringHostObject::Utf8(str);
+    *env.objc.borrow_mut(this) = host_object;
 }
 
 @end
