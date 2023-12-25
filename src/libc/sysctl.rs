@@ -8,6 +8,7 @@
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::mem::{ConstPtr, GuestUSize, MutPtr, MutVoidPtr};
 use crate::Environment;
+use crate::libc::errno::ENOENT;
 
 fn sysctl(
     env: &mut Environment,
@@ -55,6 +56,8 @@ fn sysctlbyname(
         "hw.machine" => (b"iPhone1,1", 10),
         "hw.model" => (b"M68AP", 6),
         "hw.ncpu" => (b"1", 2),
+        "hw.cputype" => (b"12", 3),
+        "hw.cpusubtype" => (b"6", 2),
         "hw.cpufrequency" => (b"412000000", 10),
         "hw.busfrequency" => (b"103000000", 10),
         "hw.physmem" => (b"121634816", 10),
@@ -64,6 +67,8 @@ fn sysctlbyname(
         "kern.ostype" => (b"Darwin", 7),
         "kern.osrelease" => (b"10.0.0d3", 9),
         "kern.version" => (b"Darwin Kernel Version 10.0.0d3: Wed May 13 22:11:58 PDT 2009; root:xnu-1357.2.89~4/RELEASE_ARM_S5L8900X", 104),
+        "hw.optional.mmx" => return ENOENT,
+        "hw.optional.sse" => return ENOENT,
         _str => unimplemented!("{}", _str)
     };
     if oldp.is_null() && newp.is_null() {
