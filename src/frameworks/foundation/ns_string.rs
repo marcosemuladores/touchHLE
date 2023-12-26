@@ -932,7 +932,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (id)initWithContentsOfFile:(id)path // NSString*
                     encoding:(NSStringEncoding)encoding
                        error:(MutPtr<id>)error { // NSError**
-    assert!(error.is_null()); // TODO: error handling
+    // assert!(error.is_null()); // TODO: error handling
 
     // TODO: avoid copy?
     let path = to_rust_string(env, path);

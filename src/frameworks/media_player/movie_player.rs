@@ -37,6 +37,16 @@ pub const MPMoviePlayerPlaybackDidFinishNotification: &str =
 pub const MPMoviePlayerContentPreloadDidFinishNotification: &str =
     "MPMoviePlayerContentPreloadDidFinishNotification";
 // TODO: More notifications?
+pub const UIKeyboardDidShowNotification: &str =
+    "UIKeyboardDidShowNotification";
+pub const UIKeyboardWillShowNotification: &str =
+    "UIKeyboardWillShowNotification";
+pub const UIKeyboardDidHideNotification: &str =
+    "UIKeyboardDidHideNotification";
+pub const UIKeyboardWillHideNotification: &str =
+    "UIKeyboardWillHideNotification";
+pub const UIDeviceOrientationDidChangeNotification: &str =
+    "UIDeviceOrientationDidChangeNotification";
 
 /// `NSNotificationName` values.
 pub const CONSTANTS: ConstantExports = &[
@@ -47,6 +57,26 @@ pub const CONSTANTS: ConstantExports = &[
     (
         "_MPMoviePlayerContentPreloadDidFinishNotification",
         HostConstant::NSString(MPMoviePlayerContentPreloadDidFinishNotification),
+    ),
+    (
+        "_UIKeyboardDidShowNotification",
+        HostConstant::NSString(UIKeyboardDidShowNotification),
+    ),
+    (
+        "_UIKeyboardWillShowNotification",
+        HostConstant::NSString(UIKeyboardWillShowNotification),
+    ),
+    (
+        "_UIKeyboardDidHideNotification",
+        HostConstant::NSString(UIKeyboardDidHideNotification),
+    ),
+    (
+        "_UIKeyboardWillHideNotification",
+        HostConstant::NSString(UIKeyboardWillHideNotification),
+    ),
+    (
+        "_UIDeviceOrientationDidChangeNotification",
+        HostConstant::NSString(UIDeviceOrientationDidChangeNotification),
     ),
 ];
 

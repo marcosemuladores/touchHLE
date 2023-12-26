@@ -8,9 +8,11 @@
 use crate::abi::{CallFromHost, GuestFunction};
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::mem::{ConstPtr, ConstVoidPtr, GuestUSize, MutPtr, MutVoidPtr, Ptr};
-use crate::Environment;
+use crate::{Environment, export_c_func2};
 use std::collections::HashMap;
 use std::str::FromStr;
+use crate::libc::posix_io::getcwd;
+use crate::libc::string::{strlen, strcpy};
 
 pub mod qsort;
 
@@ -231,6 +233,29 @@ fn strtof(env: &mut Environment, nptr: ConstPtr<u8>, endptr: MutPtr<ConstPtr<u8>
     number as f32
 }
 
+fn realpath(env: &mut Environment, file_name: ConstPtr<u8>, resolve_name: MutPtr<u8>) -> MutPtr<u8> {
+    assert!(!resolve_name.is_null());
+
+    let file_name_str = env.mem.cstr_at_utf8(file_name).unwrap();
+    assert!(file_name_str.as_bytes()[0] != b'/' && file_name_str.as_bytes()[0] != b'.');
+
+    let cwd_ptr = getcwd(env, Ptr::null(), 0);
+    let cwd_len = strlen(env, cwd_ptr.cast_const());
+
+    strcpy(env, resolve_name, cwd_ptr.cast_const());
+    env.mem.write(resolve_name + cwd_len, b'/');
+    strcpy(env, resolve_name + cwd_len + 1, file_name);
+
+    let resolve_name_str = env.mem.cstr_at_utf8(resolve_name).unwrap();
+    log!("realpath {}", resolve_name_str);
+
+    resolve_name
+}
+
+fn sched_yield(env: &mut Environment) -> i32 {
+    0
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(malloc(_)),
     export_c_func!(calloc(_, _)),
@@ -250,6 +275,8 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(exit(_)),
     export_c_func!(bsearch(_, _, _, _, _)),
     export_c_func!(strtof(_, _)),
+    export_c_func2!("_realpath$DARWIN_EXTSN", realpath(_, _)),
+    export_c_func!(sched_yield()),
 ];
 
 /// Returns a tuple containing the parsed number and the length of the number in

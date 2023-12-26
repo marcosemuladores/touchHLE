@@ -154,6 +154,9 @@ impl GLES for GLES1Native {
     unsafe fn Viewport(&mut self, x: GLint, y: GLint, width: GLsizei, height: GLsizei) {
         gles11::Viewport(x, y, width, height)
     }
+    unsafe fn PointSize(&mut self, size: GLfloat) {
+        gles11::PointSize(size)
+    }
     unsafe fn LineWidth(&mut self, val: GLfloat) {
         gles11::LineWidth(val)
     }
@@ -377,7 +380,7 @@ impl GLES for GLES1Native {
         &mut self,
         target: GLenum,
         level: GLint,
-        internalformat: GLint,
+        mut internalformat: GLint,
         width: GLsizei,
         height: GLsizei,
         border: GLint,
@@ -385,6 +388,9 @@ impl GLES for GLES1Native {
         type_: GLenum,
         pixels: *const GLvoid,
     ) {
+        if format == 0x80E1 {
+            internalformat = 0x80E1
+        }
         gles11::TexImage2D(
             target,
             level,
@@ -660,6 +666,10 @@ impl GLES for GLES1Native {
     }
     unsafe fn GenerateMipmapOES(&mut self, target: GLenum) {
         gles11::GenerateMipmapOES(target)
+    }
+
+    unsafe fn LightModelfv(&mut self, pname: GLenum, params: *const GLfloat) {
+        gles11::LightModelfv(pname, params)
     }
 
     unsafe fn IsTexture(&mut self, texture: GLuint) -> GLboolean {

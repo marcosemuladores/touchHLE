@@ -39,6 +39,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     // TODO
 }
 
+- (())setClearButtonMode:(NSInteger)_mode {
+    // TODO
+}
+
 // weak/non-retaining
 - (())setDelegate:(id)_delegate { // something implementing UITextFieldDelegate
     // TODO

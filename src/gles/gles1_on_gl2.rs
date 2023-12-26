@@ -174,6 +174,8 @@ const GET_PARAMS: ParamTable = ParamTable(&[
     (gl21::FOG_END, ParamType::Float, 1),
     (gl21::FRONT_FACE, ParamType::Int, 1),
     (gl21::GREEN_BITS, ParamType::Int, 1),
+    (0x8842, ParamType::Int, 1),
+    (0x86a4, ParamType::Int, 1),
     // TODO: IMPLEMENTATION_COLOR_READ_FORMAT_OES? (not shared)
     // TODO: IMPLEMENTATION_COLOR_READ_TYPE_OES? (not shared)
     // TODO: LIGHT_MODEL_AMBIENT (has special type conversion behavior)
@@ -788,6 +790,9 @@ impl GLES for GLES1OnGL2 {
     unsafe fn Viewport(&mut self, x: GLint, y: GLint, width: GLsizei, height: GLsizei) {
         gl21::Viewport(x, y, width, height)
     }
+    unsafe fn PointSize(&mut self, size: GLfloat) {
+        gl21::PointSize(size)
+    }
     unsafe fn LineWidth(&mut self, val: GLfloat) {
         gl21::LineWidth(val)
     }
@@ -1247,6 +1252,7 @@ impl GLES for GLES1OnGL2 {
                 || format == gl21::RGBA
                 || format == gl21::LUMINANCE
                 || format == gl21::LUMINANCE_ALPHA
+                || format == gl21::BGRA
         );
         assert!(
             type_ == gl21::UNSIGNED_BYTE
@@ -1711,6 +1717,10 @@ impl GLES for GLES1OnGL2 {
     }
     unsafe fn GenerateMipmapOES(&mut self, target: GLenum) {
         gl21::GenerateMipmapEXT(target)
+    }
+
+    unsafe fn LightModelfv(&mut self, pname: GLenum, params: *const GLfloat) {
+        gl21::LightModelfv(pname, params)
     }
 
     unsafe fn IsTexture(&mut self, texture: GLuint) -> GLboolean {

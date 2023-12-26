@@ -55,6 +55,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, new)
 }
 
++ (id)dataWithContentsOfURL:(id)url {
+    nil
+}
+
 // Calling the standard `init` is also allowed, in which case we just get data
 // of size 0.
 

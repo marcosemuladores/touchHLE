@@ -35,6 +35,7 @@ fn CFRunLoopRunInMode(
 
 pub const kCFRunLoopCommonModes: &str = "kCFRunLoopCommonModes";
 pub const kCFRunLoopDefaultMode: &str = "kCFRunLoopDefaultMode";
+pub const kCFPreferencesCurrentApplication: &str = "kCFPreferencesCurrentApplication";
 
 pub const CONSTANTS: ConstantExports = &[
     (
@@ -44,6 +45,10 @@ pub const CONSTANTS: ConstantExports = &[
     (
         "_kCFRunLoopDefaultMode",
         HostConstant::NSString(kCFRunLoopDefaultMode),
+    ),
+    (
+        "_kCFPreferencesCurrentApplication",
+        HostConstant::NSString(kCFPreferencesCurrentApplication),
     ),
 ];
 

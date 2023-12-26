@@ -90,6 +90,17 @@ macro_rules! export_c_func {
 }
 pub use crate::export_c_func; // #[macro_export] is weird...
 
+#[macro_export]
+macro_rules! export_c_func2 {
+    ($name_over:literal, $name:ident ($($_:ty),*)) => {
+        (
+            $name_over,
+            &($name as fn(&mut $crate::Environment, $($_),*) -> _)
+        )
+    };
+}
+pub use crate::export_c_func2; // #[macro_export] is weird...
+
 /// Type for describing a constant (C `extern const` symbol) that will be
 /// created by the linker if the guest app references it. See [ConstantExports].
 pub enum HostConstant {

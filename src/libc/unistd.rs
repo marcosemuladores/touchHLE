@@ -8,7 +8,7 @@
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::fs::GuestPath;
 use crate::libc::posix_io::{FileDescriptor, STDERR_FILENO, STDIN_FILENO, STDOUT_FILENO};
-use crate::mem::ConstPtr;
+use crate::mem::{ConstPtr, MutVoidPtr};
 use crate::Environment;
 use std::time::Duration;
 
@@ -76,6 +76,10 @@ fn access(env: &mut Environment, path: ConstPtr<u8>, mode: i32) -> i32 {
     }
 }
 
+fn uname(_env: &mut Environment, name: MutVoidPtr) -> i32 {
+    -1
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(sleep(_)),
     export_c_func!(usleep(_)),
@@ -83,4 +87,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(getppid()),
     export_c_func!(isatty(_)),
     export_c_func!(access(_, _)),
+    export_c_func!(uname(_)),
 ];
