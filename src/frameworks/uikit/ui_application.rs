@@ -7,7 +7,7 @@
 
 use super::ui_device::*;
 use crate::dyld::{export_c_func, FunctionExports};
-use crate::frameworks::foundation::{ns_array, ns_string, NSInteger};
+use crate::frameworks::foundation::{ns_array, ns_string, NSInteger, NSTimeInterval};
 use crate::frameworks::uikit::ui_nib::load_main_nib_file;
 use crate::mem::MutPtr;
 use crate::objc::{
@@ -109,6 +109,13 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 - (())setStatusBarStyle:(NSInteger)statusBarStyle {
     // TODO
+}
+
+- (NSTimeInterval)statusBarOrientationAnimationDuration {
+    0.0
+}
+- (bool)isStatusBarHidden {
+    true
 }
 
 - (bool)isIdleTimerDisabled {

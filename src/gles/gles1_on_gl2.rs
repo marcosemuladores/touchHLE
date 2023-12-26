@@ -1519,6 +1519,14 @@ impl GLES for GLES1OnGL2 {
         }
     }
 
+    unsafe fn LogicOp(&mut self, opcode: GLenum) {
+        gl21::LogicOp(opcode);
+    }
+
+    unsafe fn StencilFunc(&mut self, func: GLenum, ref_: GLint, mask: GLuint) {
+        gl21::StencilFunc(func, ref_, mask);
+    }
+
     // Matrix stack operations
     unsafe fn MatrixMode(&mut self, mode: GLenum) {
         assert!(mode == gl21::MODELVIEW || mode == gl21::PROJECTION || mode == gl21::TEXTURE);
