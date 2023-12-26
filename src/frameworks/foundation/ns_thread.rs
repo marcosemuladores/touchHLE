@@ -98,6 +98,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 // TODO: construction etc
 
++ (())exit {
+
+}
+
 @end
 
 };
