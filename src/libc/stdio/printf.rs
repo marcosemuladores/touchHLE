@@ -16,6 +16,7 @@ use crate::Environment;
 use std::collections::HashSet;
 use std::io::Write;
 use crate::libc::stdlib::atof_inner;
+use crate::libc::wchar::wchar_t;
 
 const INTEGER_SPECIFIERS: [u8; 6] = [b'd', b'i', b'o', b'u', b'x', b'X'];
 const FLOAT_SPECIFIERS: [u8; 2] = [b'f', b'g'];
@@ -290,6 +291,23 @@ fn vsprintf(env: &mut Environment, dest: MutPtr<u8>, format: ConstPtr<u8>, arg: 
     res.len().try_into().unwrap()
 }
 
+
+fn swprintf(
+    env: &mut Environment,
+    ws: MutPtr<wchar_t>,
+    n: GuestUSize,
+    format: ConstPtr<wchar_t>,
+    args: DotDotDot,
+) -> i32 {
+    // let ws_len = wcslen(env, ws.cast_const());
+    // for i in 0..ws_len {
+    //     let n_wc = env.mem.read(ws + i);
+    //     let n_c = wctob(env, n_wc);
+    //     assert_ne!(n_c, WEOF);
+    // }
+    0
+}
+
 fn sprintf(env: &mut Environment, dest: MutPtr<u8>, format: ConstPtr<u8>, args: DotDotDot) -> i32 {
     log_dbg!(
         "sprintf({:?}, {:?} ({:?}), ...)",
@@ -545,6 +563,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(vprintf(_, _)),
     export_c_func!(vsnprintf(_, _, _, _)),
     export_c_func!(vsprintf(_, _, _)),
+    export_c_func!(swprintf(_, _, _, _)),
     export_c_func!(sprintf(_, _, _)),
     export_c_func!(printf(_, _)),
     export_c_func!(fprintf(_, _, _)),
