@@ -237,7 +237,12 @@ fn realpath(env: &mut Environment, file_name: ConstPtr<u8>, resolve_name: MutPtr
     assert!(!resolve_name.is_null());
 
     let file_name_str = env.mem.cstr_at_utf8(file_name).unwrap();
-    assert!(file_name_str.as_bytes()[0] != b'/' && file_name_str.as_bytes()[0] != b'.');
+    log_dbg!("realpath file name {}", file_name_str);
+    assert!(!file_name_str.contains("/.") && file_name_str.as_bytes()[0] != b'.');
+    if file_name_str.as_bytes()[0] == b'/' {
+        strcpy(env, resolve_name, file_name);
+        return resolve_name;
+    }
 
     let cwd_ptr = getcwd(env, Ptr::null(), 0);
     let cwd_len = strlen(env, cwd_ptr.cast_const());
@@ -247,7 +252,7 @@ fn realpath(env: &mut Environment, file_name: ConstPtr<u8>, resolve_name: MutPtr
     strcpy(env, resolve_name + cwd_len + 1, file_name);
 
     let resolve_name_str = env.mem.cstr_at_utf8(resolve_name).unwrap();
-    log!("realpath {}", resolve_name_str);
+    log_dbg!("realpath resolve name {}", resolve_name_str);
 
     resolve_name
 }
