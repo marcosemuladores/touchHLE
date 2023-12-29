@@ -6,8 +6,9 @@
 //! `UIDevice`.
 
 use crate::frameworks::foundation::ns_string;
-use crate::frameworks::foundation::NSInteger;
-use crate::objc::{id, objc_classes, ClassExports, TrivialHostObject};
+use crate::frameworks::foundation::{NSInteger, NSUInteger, NSTimeInterval};
+use crate::objc::{id, nil, objc_classes, ClassExports, TrivialHostObject};
+use crate::mem::MutPtr;
 
 pub type UIDeviceOrientation = NSInteger;
 #[allow(dead_code)]
@@ -64,6 +65,9 @@ pub const CLASSES: ClassExports = objc_classes! {
     // TODO: Hardcoded to iPhone for now
     ns_string::get_static_str(env, "iPhone")
 }
+- (id)localizedModel {
+    ns_string::get_static_str(env, "iPhone")
+}
 
 // NSString
 - (id)systemVersion {
@@ -79,6 +83,29 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (bool)isMultitaskingSupported {
     false
 }
+
+@end
+
+@implementation NSMutableURLRequest: NSObject
++ (id)requestWithURL:(id)url {
+    nil
+}
++ (id)requestWithURL:(id)url
+         cachePolicy:(NSUInteger)policy
+     timeoutInterval:(NSTimeInterval)timeoutInterval {
+    nil
+}
+@end
+
+@implementation NSURLConnection: NSObject
++ (id)sendSynchronousRequest:(id)request
+           returningResponse:(MutPtr<id>)response
+                       error:(MutPtr<id>)error {
+    nil
+}
+@end
+
+@implementation NSHTTPURLResponse: NSObject
 
 @end
 

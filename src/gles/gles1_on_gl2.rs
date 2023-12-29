@@ -673,7 +673,7 @@ impl GLES for GLES1OnGL2 {
             gl21::POINT_SMOOTH_HINT
         ]
         .contains(&target));
-        assert!([gl21::FASTEST, gl21::NICEST, gl21::DONT_CARE].contains(&mode));
+        // assert!([gl21::FASTEST, gl21::NICEST, gl21::DONT_CARE].contains(&mode));
         gl21::Hint(target, mode);
     }
     unsafe fn Flush(&mut self) {

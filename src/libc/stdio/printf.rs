@@ -16,7 +16,7 @@ use crate::Environment;
 use std::collections::HashSet;
 use std::io::Write;
 use crate::libc::stdlib::atof_inner;
-use crate::libc::wchar::wchar_t;
+use crate::libc::wchar::{wchar_t, wmemcpy};
 
 const INTEGER_SPECIFIERS: [u8; 6] = [b'd', b'i', b'o', b'u', b'x', b'X'];
 const FLOAT_SPECIFIERS: [u8; 2] = [b'f', b'g'];
@@ -291,7 +291,6 @@ fn vsprintf(env: &mut Environment, dest: MutPtr<u8>, format: ConstPtr<u8>, arg: 
     res.len().try_into().unwrap()
 }
 
-
 fn swprintf(
     env: &mut Environment,
     ws: MutPtr<wchar_t>,
@@ -306,6 +305,25 @@ fn swprintf(
     //     assert_ne!(n_c, WEOF);
     // }
     0
+}
+
+// int
+//      vswprintf(wchar_t * restrict ws, size_t n, const wchar_t *restrict format, va_list ap);
+fn vswprintf(
+    env: &mut Environment,
+    ws: MutPtr<wchar_t>,
+    n: GuestUSize,
+    format: ConstPtr<wchar_t>,
+    arg: VaList
+) -> i32 {
+    let y = env.mem.wcstr_at_utf16(format);
+    log!("vswprintf: format {}", y);
+    let to_write = n.min(y.len() as GuestUSize);
+    wmemcpy(env, ws, format, to_write);
+    if to_write < n {
+        env.mem.write(ws + to_write, wchar_t::default());
+    }
+    to_write as i32
 }
 
 fn sprintf(env: &mut Environment, dest: MutPtr<u8>, format: ConstPtr<u8>, args: DotDotDot) -> i32 {
@@ -563,8 +581,9 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(vprintf(_, _)),
     export_c_func!(vsnprintf(_, _, _, _)),
     export_c_func!(vsprintf(_, _, _)),
-    export_c_func!(swprintf(_, _, _, _)),
+    export_c_func!(vswprintf(_, _, _, _)),
     export_c_func!(sprintf(_, _, _)),
+    export_c_func!(swprintf(_, _, _, _)),
     export_c_func!(printf(_, _)),
     export_c_func!(fprintf(_, _, _)),
 ];

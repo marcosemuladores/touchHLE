@@ -120,6 +120,12 @@ fn fgetc(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
     }
 }
 
+fn ungetc(env: &mut Environment, c: u8, file_ptr: MutPtr<FILE>) -> i32 {
+    let FILE { fd } = env.mem.read(file_ptr);
+
+    posix_io::lseek(env, fd, -1, SEEK_CUR) as i32
+}
+
 fn fgets(
     env: &mut Environment,
     str: MutPtr<u8>,
@@ -355,6 +361,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(fread(_, _, _, _)),
     export_c_func!(fgetc(_)),
     export_c_func!(fgets(_, _, _)),
+    export_c_func!(ungetc(_, _)),
     export_c_func!(fputc(_, _)),
     export_c_func!(fflush(_)),
     export_c_func!(fputs(_, _)),

@@ -10,9 +10,11 @@ use crate::dyld::{export_c_func, FunctionExports};
 use crate::mem::{ConstPtr, ConstVoidPtr, GuestUSize, MutPtr, MutVoidPtr, Ptr};
 use crate::{Environment, export_c_func2};
 use std::collections::HashMap;
+use std::io::Write;
 use std::str::FromStr;
 use crate::libc::posix_io::getcwd;
 use crate::libc::string::{strlen, strcpy};
+use crate::libc::wchar::{wchar_t, wmemcpy};
 
 pub mod qsort;
 
@@ -261,6 +263,28 @@ fn sched_yield(env: &mut Environment) -> i32 {
     0
 }
 
+fn mbstowcs(env: &mut Environment, pwcs: MutPtr<wchar_t>, s: ConstPtr<u8>, n: GuestUSize) -> GuestUSize {
+    let (_, size) = env.mem.wcstr_at(s.cast());
+    let to_write = size.min(n);
+    wmemcpy(env, pwcs, s.cast(), to_write);
+    if to_write < n {
+        env.mem.write(pwcs + to_write, wchar_t::default());
+    }
+    to_write
+}
+
+// size_t
+//      wcstombs(char *restrict s, const wchar_t *restrict pwcs, size_t n);
+fn wcstombs(env: &mut Environment, s: ConstPtr<u8>, pwcs: MutPtr<wchar_t>, n: GuestUSize) -> GuestUSize {
+    if n == 0 {
+        return 0;
+    }
+    let x = env.mem.wcstr_at_utf16(pwcs);
+    log!("wcstombs {}", x);
+    env.mem.bytes_at_mut(s.cast_mut(), n).write(x.as_bytes()).unwrap();
+    x.bytes().len() as GuestUSize
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(malloc(_)),
     export_c_func!(calloc(_, _)),
@@ -282,6 +306,8 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(strtof(_, _)),
     export_c_func2!("_realpath$DARWIN_EXTSN", realpath(_, _)),
     export_c_func!(sched_yield()),
+    export_c_func!(mbstowcs(_, _, _)),
+    export_c_func!(wcstombs(_, _, _)),
 ];
 
 /// Returns a tuple containing the parsed number and the length of the number in

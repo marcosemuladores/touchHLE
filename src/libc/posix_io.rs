@@ -140,7 +140,11 @@ pub fn open_direct(env: &mut Environment, path: ConstPtr<u8>, flags: i32) -> Fil
         options.truncate();
     }
 
-    let path_string = env.mem.cstr_at_utf8(path).unwrap().to_owned();
+    let y = env.mem.cstr_at_utf8(path);
+    if y.is_err() {
+        return -1;
+    }
+    let path_string = y.unwrap().to_owned();
     let res = match env
         .fs
         .open_with_options(GuestPath::new(&path_string), options)
