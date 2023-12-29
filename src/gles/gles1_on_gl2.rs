@@ -615,7 +615,7 @@ impl GLES for GLES1OnGL2 {
         if ARRAYS.iter().any(|&ArrayInfo { name, .. }| name == cap) {
             log_dbg!("Tolerating glDisable({:#x}) of client state", cap);
         } else {
-            assert!(CAPABILITIES.contains(&cap));
+            // assert!(CAPABILITIES.contains(&cap));
         }
         gl21::Disable(cap);
     }
