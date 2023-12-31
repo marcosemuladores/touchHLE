@@ -227,6 +227,15 @@ fn bsearch(
     Ptr::null()
 }
 
+fn strtod(env: &mut Environment, nptr: ConstPtr<u8>, endptr: MutPtr<MutPtr<u8>>) -> f64 {
+    log!("strtod nptr {}", env.mem.cstr_at_utf8(nptr).unwrap());
+    let (d, len) = atof_inner(env, nptr).unwrap_or((0.0, 0));
+    if !endptr.is_null() {
+        env.mem.write(endptr, (nptr + len).cast_mut());
+    }
+    d
+}
+
 fn strtof(env: &mut Environment, nptr: ConstPtr<u8>, endptr: MutPtr<ConstPtr<u8>>) -> f32 {
     let (number, length) = atof_inner(env, nptr).unwrap_or((0.0, 0));
     if !endptr.is_null() {
@@ -304,6 +313,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(exit(_)),
     export_c_func!(bsearch(_, _, _, _, _)),
     export_c_func!(strtof(_, _)),
+    export_c_func!(strtod(_, _)),
     export_c_func2!("_realpath$DARWIN_EXTSN", realpath(_, _)),
     export_c_func!(sched_yield()),
     export_c_func!(mbstowcs(_, _, _)),

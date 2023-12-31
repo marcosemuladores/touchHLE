@@ -14,7 +14,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 @implementation MPMusicPlayerController: NSObject
 
 + (id)iPodMusicPlayer {
-    log!(
+    log_dbg!(
         "TODO: [(MPMusicPlayerController*){:?} iPodMusicPlayer]",
         this
     );
