@@ -153,6 +153,12 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 @end
 
+@implementation MPMediaQuery: NSObject
++ (id)playlistsQuery {
+    crate::objc::nil
+}
+@end
+
 };
 
 /// For use by `NSRunLoop` via [super::handle_players]: check movie players'

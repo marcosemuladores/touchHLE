@@ -87,6 +87,15 @@ fn AudioSessionSetProperty(
     0 // success
 }
 
+fn AudioSessionAddPropertyListener(
+    _env: &mut Environment,
+    in_ID: AudioSessionPropertyID,
+    in_proc: MutVoidPtr,
+    in_client_data: MutVoidPtr,
+) -> OSStatus {
+    0 // success
+}
+
 fn AudioSessionSetActive(_env: &mut Environment, _active: bool) -> OSStatus {
     0 // success
 }
@@ -95,5 +104,6 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(AudioSessionInitialize(_, _, _, _)),
     export_c_func!(AudioSessionGetProperty(_, _, _)),
     export_c_func!(AudioSessionSetProperty(_, _, _)),
+    export_c_func!(AudioSessionAddPropertyListener(_, _, _)),
     export_c_func!(AudioSessionSetActive(_)),
 ];

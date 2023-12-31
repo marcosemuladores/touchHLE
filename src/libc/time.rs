@@ -52,6 +52,27 @@ fn time(env: &mut Environment, out: MutPtr<time_t>) -> time_t {
     time
 }
 
+fn ftime(env: &mut Environment, tb: MutPtr<timeb>) -> i32 {
+    let time = time(env, Ptr::null());
+    env.mem.write(tb, timeb {
+        time,
+        millitm: 0,
+        timezone: 0,
+        dstflag: 0,
+    });
+    0
+}
+
+#[repr(C, packed)]
+#[derive(Copy, Clone, Debug)]
+struct timeb {
+    time: time_t,
+    millitm: u16,
+    timezone: i16,
+    dstflag: i16
+}
+unsafe impl SafeRead for timeb {}
+
 #[allow(non_camel_case_types)]
 #[repr(C, packed)]
 #[derive(Copy, Clone, Debug)]
@@ -346,6 +367,7 @@ fn nanosleep(env: &mut Environment, rqtp: ConstPtr<timespec>, _rmtp: MutPtr<time
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(clock()),
     export_c_func!(time(_)),
+    export_c_func!(ftime(_)),
     export_c_func!(gmtime_r(_, _)),
     export_c_func!(gmtime(_)),
     export_c_func!(localtime_r(_, _)),
