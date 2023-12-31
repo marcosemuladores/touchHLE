@@ -79,6 +79,9 @@ impl Bundle {
     }
 
     pub fn bundle_localizations(&self) -> &[Value] {
+        if !self.plist.contains_key("CFBundleLocalizations") {
+            return &[];
+        }
         self.plist["CFBundleLocalizations"].as_array().unwrap()
     }
 

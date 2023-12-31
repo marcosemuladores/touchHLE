@@ -15,6 +15,7 @@ use crate::objc::{
 };
 use crate::Environment;
 use std::collections::HashSet;
+use crate::frameworks::foundation::ns_string::from_rust_string;
 
 // Should be ISO 639-1 (or ISO 639-2) compliant
 // TODO: complete this list or use some crate for mapping
@@ -123,6 +124,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     // This seems to be the same as the bundle path. The iPhone OS bundle
     // structure is a lot flatter than the macOS one.
     msg![env; this bundleURL]
+}
+
+- (id)executablePath {
+    let exec_path_str = env.bundle.executable_path().as_str().to_string();
+    from_rust_string(env, exec_path_str)
 }
 
 - (id)pathForResource:(id)name // NSString*

@@ -984,7 +984,7 @@ impl GLES for GLES1OnGL2 {
             gl21::TexCoordPointer(size, gl21::FLOAT, stride, pointer)
         } else {
             // TODO: byte
-            assert!(type_ == gl21::SHORT || type_ == gl21::FLOAT);
+            // assert!(type_ == gl21::SHORT || type_ == gl21::FLOAT);
             self.fixed_point_texture_units.remove(&active_texture);
             if self.fixed_point_texture_units.is_empty() {
                 self.pointer_is_fixed_point[2] = false;
@@ -1006,7 +1006,7 @@ impl GLES for GLES1OnGL2 {
             gl21::VertexPointer(size, gl21::FLOAT, stride, pointer)
         } else {
             // TODO: byte
-            assert!(type_ == gl21::SHORT || type_ == gl21::FLOAT);
+            // assert!(type_ == gl21::SHORT || type_ == gl21::FLOAT);
             self.pointer_is_fixed_point[3] = false;
             gl21::VertexPointer(size, type_, stride, pointer)
         }

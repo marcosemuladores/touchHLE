@@ -107,6 +107,9 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())setScalingMode:(MPMovieScalingMode)_mode {
     // TODO
 }
+- (())setBackgroundColor:(id)_color {
+    // TODO
+}
 
 // Apparently an undocumented, private API, but Spore Origins uses it.
 - (())setMovieControlMode:(NSInteger)_mode {
