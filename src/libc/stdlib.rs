@@ -289,9 +289,13 @@ fn wcstombs(env: &mut Environment, s: ConstPtr<u8>, pwcs: MutPtr<wchar_t>, n: Gu
         return 0;
     }
     let x = env.mem.wcstr_at_utf16(pwcs);
-    log!("wcstombs {}", x);
+    let len: GuestUSize = x.bytes().len() as GuestUSize;
+    log!("wcstombs '{}', len {}, n {}", x, len, n);
     env.mem.bytes_at_mut(s.cast_mut(), n).write(x.as_bytes()).unwrap();
-    x.bytes().len() as GuestUSize
+    if len < n {
+        env.mem.write((s + len).cast_mut(), b'\0');
+    }
+    len
 }
 
 fn setlocale(env: &mut Environment, _category: i32, locale: ConstPtr<u8>) -> MutPtr<u8> {
