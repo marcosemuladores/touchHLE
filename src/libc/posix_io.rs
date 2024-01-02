@@ -15,6 +15,7 @@ use crate::mem::{ConstPtr, ConstVoidPtr, GuestISize, GuestUSize, MutPtr, MutVoid
 use crate::Environment;
 use std::io::{Read, Seek, SeekFrom, Write};
 use std::rc::Rc;
+use crate::libc::string::strcat;
 
 #[derive(Default)]
 pub struct State {
@@ -102,6 +103,22 @@ fn open(env: &mut Environment, path: ConstPtr<u8>, flags: i32, _args: DotDotDot)
 
 /// Special extension for host code: [open] without the [DotDotDot].
 pub fn open_direct(env: &mut Environment, path: ConstPtr<u8>, flags: i32) -> FileDescriptor {
+    let res = open_direct2(env, path, flags);
+    if res == -1 {
+        let buf: MutPtr<u8> = env.mem.alloc(1024).cast();
+        _ = env.mem
+            .bytes_at_mut(buf, 1024)
+            .write(env.bundle.bundle_path().join("").as_str().as_bytes());
+        strcat(env, buf, path);
+        let res = open_direct2(env, buf.cast_const(), flags);
+        env.mem.free(buf.cast());
+        return res;
+    }
+    res
+}
+
+/// Special extension for host code: [open] without the [DotDotDot].
+fn open_direct2(env: &mut Environment, path: ConstPtr<u8>, flags: i32) -> FileDescriptor {
     // TODO: support more flags, this list is not complete
     assert!(
         flags

@@ -489,6 +489,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     log!("WARNING: Ignoring setAutoresizingMask: for an UIView");
 }
 
+- (bool)endEditing:(bool)_force {
+    true
+}
+
 @end
 
 };

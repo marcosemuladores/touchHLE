@@ -110,6 +110,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())setBackgroundColor:(id)_color {
     // TODO
 }
+- (())setOrientation:(NSInteger)_orient
+            animated:(bool)_animated {
+    // TODO why this is even called here?
+}
 
 // Apparently an undocumented, private API, but Spore Origins uses it.
 - (())setMovieControlMode:(NSInteger)_mode {
