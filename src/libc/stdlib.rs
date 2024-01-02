@@ -294,6 +294,16 @@ fn wcstombs(env: &mut Environment, s: ConstPtr<u8>, pwcs: MutPtr<wchar_t>, n: Gu
     x.bytes().len() as GuestUSize
 }
 
+fn setlocale(env: &mut Environment, _category: i32, locale: ConstPtr<u8>) -> MutPtr<u8> {
+    // assert_eq!(category, 0); // LC_ALL
+    if !locale.is_null() {
+        assert_eq!("C", env.mem.cstr_at_utf8(locale).unwrap());
+        locale.cast_mut()
+    } else {
+        env.mem.alloc_and_write_cstr(b"C")
+    }
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(malloc(_)),
     export_c_func!(calloc(_, _)),
@@ -318,6 +328,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(sched_yield()),
     export_c_func!(mbstowcs(_, _, _)),
     export_c_func!(wcstombs(_, _, _)),
+    export_c_func!(setlocale(_, _)),
 ];
 
 /// Returns a tuple containing the parsed number and the length of the number in
