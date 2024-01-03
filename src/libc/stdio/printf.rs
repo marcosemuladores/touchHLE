@@ -16,6 +16,7 @@ use crate::Environment;
 use std::collections::HashSet;
 use std::io::Write;
 use crate::libc::stdlib::atof_inner;
+use crate::libc::string::strlen;
 use crate::libc::wchar::{wchar_t, wmemcpy};
 
 const INTEGER_SPECIFIERS: [u8; 6] = [b'd', b'i', b'o', b'u', b'x', b'X'];
@@ -298,13 +299,20 @@ fn swprintf(
     format: ConstPtr<wchar_t>,
     args: DotDotDot,
 ) -> i32 {
-    // let ws_len = wcslen(env, ws.cast_const());
-    // for i in 0..ws_len {
-    //     let n_wc = env.mem.read(ws + i);
-    //     let n_c = wctob(env, n_wc);
-    //     assert_ne!(n_c, WEOF);
-    // }
-    0
+    let z = env.mem.wcstr_at_utf16(format);
+    assert_eq!(z, "%s");
+    let mut x = args.start();
+    let c_string: ConstPtr<u8> = x.next(env);
+    let c_len: GuestUSize = strlen(env, c_string);
+    let to_write = n.min(c_len);
+    for i in 0..to_write {
+        let c = env.mem.read(c_string + i);
+        env.mem.write(ws + i, c as wchar_t);
+    }
+    if to_write < n {
+        env.mem.write(ws + to_write, wchar_t::default());
+    }
+    to_write as i32
 }
 
 // int
@@ -581,7 +589,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(vprintf(_, _)),
     export_c_func!(vsnprintf(_, _, _, _)),
     export_c_func!(vsprintf(_, _, _)),
-    export_c_func!(vswprintf(_, _, _, _)),
+    // export_c_func!(vswprintf(_, _, _, _)),
     export_c_func!(sprintf(_, _, _)),
     export_c_func!(swprintf(_, _, _, _)),
     export_c_func!(printf(_, _)),
