@@ -273,9 +273,13 @@ fn sched_yield(env: &mut Environment) -> i32 {
 }
 
 fn mbstowcs(env: &mut Environment, pwcs: MutPtr<wchar_t>, s: ConstPtr<u8>, n: GuestUSize) -> GuestUSize {
-    let (_, size) = env.mem.wcstr_at(s.cast());
+    // TODO: assert C locale
+    let size = strlen(env, s);
     let to_write = size.min(n);
-    wmemcpy(env, pwcs, s.cast(), to_write);
+    for i in 0..to_write {
+        let c = env.mem.read(s + i);
+        env.mem.write(pwcs + i, c as wchar_t);
+    }
     if to_write < n {
         env.mem.write(pwcs + to_write, wchar_t::default());
     }
@@ -288,7 +292,7 @@ fn wcstombs(env: &mut Environment, s: ConstPtr<u8>, pwcs: MutPtr<wchar_t>, n: Gu
     if n == 0 {
         return 0;
     }
-    let x = env.mem.wcstr_at_utf16(pwcs);
+    let x = env.mem.wcstr_at(pwcs);
     let len: GuestUSize = x.bytes().len() as GuestUSize;
     log!("wcstombs '{}', len {}, n {}", x, len, n);
     env.mem.bytes_at_mut(s.cast_mut(), n).write(x.as_bytes()).unwrap();

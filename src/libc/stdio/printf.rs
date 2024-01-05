@@ -299,7 +299,7 @@ fn swprintf(
     format: ConstPtr<wchar_t>,
     args: DotDotDot,
 ) -> i32 {
-    let z = env.mem.wcstr_at_utf16(format);
+    let z = env.mem.wcstr_at(format);
     assert_eq!(z, "%s");
     let mut x = args.start();
     let c_string: ConstPtr<u8> = x.next(env);
@@ -309,9 +309,10 @@ fn swprintf(
         let c = env.mem.read(c_string + i);
         env.mem.write(ws + i, c as wchar_t);
     }
-    if to_write < n {
-        env.mem.write(ws + to_write, wchar_t::default());
-    }
+    assert!(to_write < n);
+    env.mem.write(ws + to_write, wchar_t::default());
+    let x= env.mem.wcstr_at(ws);
+    log!("swprintf: {}", x);
     to_write as i32
 }
 
@@ -324,7 +325,7 @@ fn vswprintf(
     format: ConstPtr<wchar_t>,
     arg: VaList
 ) -> i32 {
-    let y = env.mem.wcstr_at_utf16(format);
+    let y = env.mem.wcstr_at(format);
     log!("vswprintf: format {}", y);
     let to_write = n.min(y.len() as GuestUSize);
     wmemcpy(env, ws, format, to_write);

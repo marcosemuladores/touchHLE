@@ -514,10 +514,7 @@ impl Mem {
         ptr
     }
 
-    pub fn wcstr_at<const MUT: bool>(
-        &self,
-        ptr: Ptr<wchar_t, MUT>,
-    ) -> (impl Iterator<Item = u16> + '_, GuestUSize) {
+    pub fn wcstr_at<const MUT: bool>(&self, ptr: Ptr<wchar_t, MUT>) -> String {
         let mut len = 0;
         while self.read(ptr + len) != wchar_t::default() {
             len += 1;
@@ -525,15 +522,14 @@ impl Mem {
         let iter = self
             .bytes_at(ptr.cast(), len * guest_size_of::<wchar_t>())
             .chunks(4);
-        (
-            iter.map(|chunk| u16::from_le_bytes(chunk[..2].try_into().unwrap())),
-            len,
-        )
-    }
-
-    pub fn wcstr_at_utf16<const MUT: bool>(&self, ptr: Ptr<wchar_t, MUT>) -> String {
-        let (wchars, _) = self.wcstr_at(ptr);
-        String::from_utf16(&wchars.collect::<Vec<u16>>()).unwrap()
+        let x = iter.map(|chunk| {
+            let tmp = u32::from_le_bytes(chunk.try_into().unwrap());
+            char::from_u32(tmp).unwrap_or_else(|| {
+                log!("last char: '{}' '{:#x}'", tmp, tmp);
+                panic!()
+            })
+        });
+        String::from_iter(x)
     }
 
     /// Get a C string (null-terminated) as a slice. The null terminator is not
