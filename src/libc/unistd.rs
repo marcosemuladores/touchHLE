@@ -8,7 +8,7 @@
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::fs::GuestPath;
 use crate::libc::posix_io::{FileDescriptor, STDERR_FILENO, STDIN_FILENO, STDOUT_FILENO};
-use crate::mem::{ConstPtr, MutVoidPtr};
+use crate::mem::{ConstPtr, ConstVoidPtr, MutVoidPtr};
 use crate::Environment;
 use std::time::Duration;
 
@@ -92,6 +92,11 @@ fn get_end(env: &mut Environment) -> u32 {
     927506432
 }
 
+// int sigaction(int sig, const struct sigaction *restrict act, struct sigaction *restrict oact);
+fn sigaction(env: &mut Environment, sig: i32, act: ConstVoidPtr, oact: MutVoidPtr) -> i32 {
+    0
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(getpagesize()),
     export_c_func!(get_etext()),
@@ -103,4 +108,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(isatty(_)),
     export_c_func!(access(_, _)),
     export_c_func!(uname(_)),
+    export_c_func!(sigaction(_, _, _)),
 ];
