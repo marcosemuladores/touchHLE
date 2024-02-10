@@ -133,6 +133,15 @@ pub fn pthread_create(
     0 // success
 }
 
+fn pthread_equal(env: &mut Environment, thread1: pthread_t, thread2: pthread_t) -> i32 {
+    if State::get(env).threads.get_mut(&thread1).unwrap().thread_id ==
+       State::get(env).threads.get_mut(&thread2).unwrap().thread_id {
+        1
+    } else {
+        0
+    }
+}
+
 fn pthread_self(env: &mut Environment) -> pthread_t {
     let current_thread = env.current_thread;
 
@@ -239,15 +248,23 @@ fn pthread_setschedparam(env: &mut Environment, thread: pthread_t, policy: i32, 
     0
 }
 
+fn pthread_get_stackaddr_np(env: &mut Environment, thread: pthread_t) -> MutVoidPtr {
+    let x = env.libc_state.pthread.thread.threads.get_mut(&thread).unwrap();
+    let y = *env.threads.get(x.thread_id).unwrap().stack.clone().unwrap().end();// + 1;
+    MutVoidPtr::from_bits(y)
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_attr_init(_)),
     export_c_func!(pthread_attr_setdetachstate(_, _)),
     export_c_func!(pthread_attr_destroy(_)),
     export_c_func!(pthread_create(_, _, _, _)),
+    export_c_func!(pthread_equal(_, _)),
     export_c_func!(pthread_self()),
     export_c_func!(pthread_join(_, _)),
     export_c_func!(pthread_setcanceltype(_, _)),
     export_c_func!(pthread_mach_thread_np(_)),
     export_c_func!(pthread_getschedparam(_, _, _)),
     export_c_func!(pthread_setschedparam(_, _, _)),
+    export_c_func!(pthread_get_stackaddr_np(_)),
 ];

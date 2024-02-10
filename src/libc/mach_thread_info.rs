@@ -10,7 +10,7 @@
 #![allow(non_camel_case_types)]
 
 use crate::dyld::{export_c_func, FunctionExports};
-use crate::mem::{guest_size_of, MutPtr, SafeRead};
+use crate::mem::{guest_size_of, GuestUSize, MutPtr, Ptr, SafeRead};
 use crate::Environment;
 
 type kern_return_t = i32;
@@ -21,6 +21,16 @@ type mach_port_t = u32;
 type natural_t = u32;
 type integer_t = i32;
 type boolean_t = i32;
+
+type task_t = mach_port_t;
+type thread_act_t = mach_port_t;
+type thread_act_array_t = MutPtr<thread_act_t>;
+type ipc_space_t = mach_port_t;
+type mach_port_name_t = natural_t;
+
+type vm_map_t = mach_port_t;
+type mach_vm_address_t = u32;
+type mach_vm_size_t = u32;
 
 type thread_inspect_t = mach_port_t;
 type thread_flavor_t = natural_t;
@@ -152,7 +162,54 @@ fn thread_policy_set(
     KERN_SUCCESS
 }
 
+fn mach_thread_self(env: &mut Environment) -> i32 {
+    assert_eq!(env.current_thread, 0);
+    0
+}
+
+fn task_threads(
+    env: &mut Environment,
+    task: task_t,
+    thread_list: MutPtr<thread_act_array_t>,
+    thread_count_: MutPtr<mach_msg_type_number_t>
+) -> kern_return_t {
+    assert_eq!(task, 0); // mach_task_self_
+    let thread_count = env.threads.len() as GuestUSize;
+    let arr: MutPtr<thread_act_t> = env.mem.alloc(thread_count * guest_size_of::<thread_act_t>()).cast();
+    for i in 0..thread_count {
+        env.mem.write(arr + i, i);
+    }
+    env.mem.write(thread_list, arr);
+    env.mem.write(thread_count_, thread_count);
+    KERN_SUCCESS
+}
+
+fn mach_port_deallocate(
+    env: &mut Environment,
+    task: ipc_space_t,
+    name: mach_port_name_t
+) -> kern_return_t {
+    // TODO: implement
+    KERN_SUCCESS
+}
+
+fn vm_deallocate(
+    env: &mut Environment,
+    target_task: vm_map_t,
+    address: mach_vm_address_t,
+    size: mach_vm_size_t
+) -> kern_return_t {
+    // Is it OK? vm_deallocate() can be called to free a list created by task_threads()
+    // But in general there is no guarantee what memory was previously allocated by malloc!
+    env.mem.free(Ptr::from_bits(address));
+    KERN_SUCCESS
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(thread_info(_, _, _, _)),
     export_c_func!(thread_policy_set(_, _, _, _)),
+    export_c_func!(mach_thread_self()),
+    export_c_func!(task_threads(_, _, _)),
+    export_c_func!(mach_port_deallocate(_, _)),
+    export_c_func!(vm_deallocate(_, _, _)),
 ];

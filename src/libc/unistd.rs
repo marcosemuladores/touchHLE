@@ -80,7 +80,22 @@ fn uname(_env: &mut Environment, name: MutVoidPtr) -> i32 {
     -1
 }
 
+fn getpagesize(env: &mut Environment) -> i32 {
+    4096
+}
+
+fn get_etext(env: &mut Environment) -> u32 {
+    4096
+}
+
+fn get_end(env: &mut Environment) -> u32 {
+    927506432
+}
+
 pub const FUNCTIONS: FunctionExports = &[
+    export_c_func!(getpagesize()),
+    export_c_func!(get_etext()),
+    export_c_func!(get_end()),
     export_c_func!(sleep(_)),
     export_c_func!(usleep(_)),
     export_c_func!(getpid()),

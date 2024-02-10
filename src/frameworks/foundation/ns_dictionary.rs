@@ -6,7 +6,7 @@
 //! The `NSDictionary` class cluster, including `NSMutableDictionary`.
 
 use super::ns_property_list_serialization::deserialize_plist_from_file;
-use super::{ns_string, ns_url, NSUInteger};
+use super::{ns_array, ns_string, ns_url, NSInteger, NSUInteger};
 use crate::abi::VaList;
 use crate::fs::GuestPath;
 use crate::objc::{
@@ -187,6 +187,13 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 // TODO
+
+- (())setInteger:(NSInteger)value forKey:(id)defaultName {
+    let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+    let value_id: id = msg_class![env; NSNumber numberWithInteger:value];
+    host_obj.insert(env, defaultName, value_id, false);
+    *env.objc.borrow_mut(this) = host_obj;
+}
 
 @end
 
