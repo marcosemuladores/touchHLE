@@ -33,6 +33,8 @@ fn mmap(
     if (flags & MAP_ANON) != 0 {
         // This prevents "GC_unix_get_mem: Memory returned by mmap is not aligned to HBLKSIZE."
         env.mem.write(Ptr::from_bits(0x0063de64), 0x00f020e3);
+        // This bypass "Duplicate large block deallocation"
+        env.mem.write(Ptr::from_bits(0x006353d8), 0x00f020e3);
         assert_eq!(fd, -1);
         return ptr;
     }

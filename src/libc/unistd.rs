@@ -8,7 +8,7 @@
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::fs::GuestPath;
 use crate::libc::posix_io::{FileDescriptor, STDERR_FILENO, STDIN_FILENO, STDOUT_FILENO};
-use crate::mem::{ConstPtr, ConstVoidPtr, MutVoidPtr};
+use crate::mem::{ConstPtr, ConstVoidPtr, GuestISize, MutPtr, MutVoidPtr, Ptr};
 use crate::Environment;
 use std::time::Duration;
 
@@ -97,6 +97,23 @@ fn sigaction(env: &mut Environment, sig: i32, act: ConstVoidPtr, oact: MutVoidPt
     0
 }
 
+// int sigprocmask(int how, const sigset_t *restrict set, sigset_t *restrict oset);
+fn sigprocmask(env: &mut Environment, how: i32, set: ConstVoidPtr, oact: MutVoidPtr) -> i32 {
+    0
+}
+
+// sig_t signal(int sig, sig_t func);
+fn signal(env: &mut Environment, sig: i32, func: MutVoidPtr) -> MutVoidPtr {
+    Ptr::null()
+}
+
+// ssize_t readlink(const char *restrict path, char *restrict buf, size_t bufsize)
+fn readlink(env: &mut Environment, path: ConstPtr<u8>, buf: MutPtr<u8>, bufsize: GuestISize) -> GuestISize {
+    log!("Failing readlink() for {}", env.mem.cstr_at_utf8(path).unwrap());
+    // TODO: set errno
+    -1
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(getpagesize()),
     export_c_func!(get_etext()),
@@ -109,4 +126,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(access(_, _)),
     export_c_func!(uname(_)),
     export_c_func!(sigaction(_, _, _)),
+    export_c_func!(sigprocmask(_, _, _)),
+    export_c_func!(signal(_, _)),
+    export_c_func!(readlink(_, _, _)),
 ];

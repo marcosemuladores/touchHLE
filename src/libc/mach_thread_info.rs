@@ -10,10 +10,11 @@
 #![allow(non_camel_case_types)]
 
 use crate::dyld::{export_c_func, FunctionExports};
-use crate::mem::{guest_size_of, GuestUSize, MutPtr, Ptr, SafeRead};
+use crate::mem::{guest_size_of, GuestUSize, MutPtr, MutVoidPtr, Ptr, SafeRead};
 use crate::Environment;
 
 type kern_return_t = i32;
+type mach_msg_return_t = kern_return_t;
 const KERN_SUCCESS: kern_return_t = 0;
 
 type mach_port_t = u32;
@@ -27,6 +28,7 @@ type thread_act_t = mach_port_t;
 type thread_act_array_t = MutPtr<thread_act_t>;
 type ipc_space_t = mach_port_t;
 type mach_port_name_t = natural_t;
+type mach_port_right_t = natural_t;
 
 type vm_map_t = mach_port_t;
 type mach_vm_address_t = u32;
@@ -35,7 +37,17 @@ type mach_vm_size_t = u32;
 type thread_inspect_t = mach_port_t;
 type thread_flavor_t = natural_t;
 type thread_info_t = MutPtr<integer_t>;
+type thread_state_flavor_t = i32;
+
 type mach_msg_type_number_t = natural_t;
+type mach_msg_type_name_t = u32;
+
+type mach_msg_option_t = integer_t;
+type mach_msg_size_t = natural_t;
+type mach_msg_timeout_t = natural_t;
+
+type exception_mask_t = u32;
+type exception_behavior_t = i32;
 
 type policy_t = i32;
 const POLICY_TIMESHARE: policy_t = 1;
@@ -163,8 +175,8 @@ fn thread_policy_set(
 }
 
 fn mach_thread_self(env: &mut Environment) -> i32 {
-    assert_eq!(env.current_thread, 0);
-    0
+    //assert_eq!(env.current_thread, 0);
+    env.current_thread as i32
 }
 
 fn task_threads(
@@ -184,10 +196,45 @@ fn task_threads(
     KERN_SUCCESS
 }
 
+fn mach_msg(
+    env: &mut Environment,
+    msg: MutVoidPtr, // MutPtr<mach_msg_header_t>,
+    option: mach_msg_option_t,
+    send_size: mach_msg_size_t,
+    rcv_size: mach_msg_size_t,
+    rcv_name: mach_port_name_t,
+    timeout: mach_msg_timeout_t,
+    notify: mach_port_name_t,
+) -> mach_msg_return_t {
+    log!("TOD0: mach_msg send/rcv");
+    KERN_SUCCESS
+}
+
+fn mach_port_allocate(
+    env: &mut Environment,
+    task: ipc_space_t,
+    right: mach_port_right_t,
+    name: MutPtr<mach_port_name_t>
+) -> kern_return_t {
+    // TODO: implement
+    KERN_SUCCESS
+}
+
 fn mach_port_deallocate(
     env: &mut Environment,
     task: ipc_space_t,
     name: mach_port_name_t
+) -> kern_return_t {
+    // TODO: implement
+    KERN_SUCCESS
+}
+
+fn mach_port_insert_right(
+    env: &mut Environment,
+    task: ipc_space_t,
+    name: mach_port_name_t,
+    poly: mach_port_t,
+    polyPoly: mach_msg_type_name_t
 ) -> kern_return_t {
     // TODO: implement
     KERN_SUCCESS
@@ -205,11 +252,35 @@ fn vm_deallocate(
     KERN_SUCCESS
 }
 
+fn exc_server(
+    env: &mut Environment,
+    request_msg: MutVoidPtr, // MutPtr<mach_msg_header_t>,
+    reply_ms: MutVoidPtr, // MutPtr<mach_msg_header_t>,
+) -> boolean_t {
+    1 // FALSE
+}
+
+fn task_set_exception_ports(
+    env: &mut Environment,
+    task: task_t,
+    exception_mask: exception_mask_t,
+    new_port: mach_port_t,
+    behavior: exception_behavior_t,
+    new_flavor: thread_state_flavor_t
+) -> kern_return_t {
+    KERN_SUCCESS
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(thread_info(_, _, _, _)),
     export_c_func!(thread_policy_set(_, _, _, _)),
     export_c_func!(mach_thread_self()),
     export_c_func!(task_threads(_, _, _)),
+    export_c_func!(mach_msg(_, _, _, _, _, _, _)),
+    export_c_func!(mach_port_allocate(_, _, _)),
     export_c_func!(mach_port_deallocate(_, _)),
+    export_c_func!(mach_port_insert_right(_, _, _, _)),
     export_c_func!(vm_deallocate(_, _, _)),
+    export_c_func!(exc_server(_, _)),
+    export_c_func!(task_set_exception_ports(_, _, _, _, _)),
 ];

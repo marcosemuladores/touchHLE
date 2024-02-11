@@ -72,6 +72,15 @@ pub fn pthread_attr_init(env: &mut Environment, attr: MutPtr<pthread_attr_t>) ->
     env.mem.write(attr, DEFAULT_ATTR);
     0 // success
 }
+fn pthread_attr_getdetachstate(
+    env: &mut Environment,
+    attr: ConstPtr<pthread_attr_t>,
+    detachstate: MutPtr<DetachState>
+) -> i32 {
+    let attr_val = env.mem.read(attr);
+    env.mem.write(detachstate, attr_val.detachstate);
+    0 // success
+}
 pub fn pthread_attr_setdetachstate(
     env: &mut Environment,
     attr: MutPtr<pthread_attr_t>,
@@ -256,6 +265,7 @@ fn pthread_get_stackaddr_np(env: &mut Environment, thread: pthread_t) -> MutVoid
 
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_attr_init(_)),
+    export_c_func!(pthread_attr_getdetachstate(_, _)),
     export_c_func!(pthread_attr_setdetachstate(_, _)),
     export_c_func!(pthread_attr_destroy(_)),
     export_c_func!(pthread_create(_, _, _, _)),
