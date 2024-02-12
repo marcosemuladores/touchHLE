@@ -12,6 +12,7 @@
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::mem::{guest_size_of, GuestUSize, MutPtr, MutVoidPtr, Ptr, SafeRead};
 use crate::Environment;
+use crate::environment::ThreadId;
 
 type kern_return_t = i32;
 type mach_msg_return_t = kern_return_t;
@@ -126,7 +127,11 @@ fn thread_info(
                         TH_STATE_STOPPED
                     },
                     flags: 0, // FIXME
-                    suspend_count: 0,
+                    suspend_count: if thread.active {
+                        0
+                    } else {
+                        1
+                    },
                     sleep_time: 0,
                 },
             );
@@ -271,6 +276,16 @@ fn task_set_exception_ports(
     KERN_SUCCESS
 }
 
+fn thread_suspend(
+    env: &mut Environment,
+    target_thread: thread_inspect_t
+) -> kern_return_t {
+    let thread = env.threads.get(target_thread as usize).unwrap();
+    assert!(thread.active);
+    env.suspend_thread(target_thread as usize);
+    0
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(thread_info(_, _, _, _)),
     export_c_func!(thread_policy_set(_, _, _, _)),
@@ -283,4 +298,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(vm_deallocate(_, _, _)),
     export_c_func!(exc_server(_, _)),
     export_c_func!(task_set_exception_ports(_, _, _, _, _)),
+    export_c_func!(thread_suspend(_)),
 ];

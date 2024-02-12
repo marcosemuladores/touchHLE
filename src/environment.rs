@@ -111,7 +111,7 @@ enum ThreadNextAction {
 }
 
 /// If/what a thread is blocked by.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum ThreadBlock {
     // Default state. (thread is not blocked)
     NotBlocked,
@@ -127,6 +127,8 @@ pub enum ThreadBlock {
     Joining(ThreadId, MutPtr<MutVoidPtr>),
     // Deferred guest-to-host return
     DeferredReturn,
+    // Thread is suspended.
+    Suspended
 }
 
 impl Environment {
@@ -580,6 +582,16 @@ impl Environment {
             self.run_call();
             self.cpu.branch(old_pc);
         }
+    }
+
+    pub fn suspend_thread(&mut self, thread: ThreadId) {
+        //assert_eq!(self.threads[thread].blocked_by, ThreadBlock::NotBlocked);
+        self.threads[thread].blocked_by = ThreadBlock::Suspended;
+    }
+
+    pub fn resume_thread(&mut self, thread: ThreadId) {
+        //assert_eq!(self.threads[thread].blocked_by, ThreadBlock::Suspended);
+        self.threads[thread].blocked_by = ThreadBlock::NotBlocked;
     }
 
     /// Block the current thread until the given mutex unlocks.
@@ -1043,6 +1055,7 @@ impl Environment {
                             suitable_thread = Some(i);
                             break;
                         }
+                        ThreadBlock::Suspended => {}
                     }
                 }
 
