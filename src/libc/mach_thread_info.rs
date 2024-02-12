@@ -12,6 +12,7 @@
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::mem::{guest_size_of, GuestUSize, MutPtr, MutVoidPtr, Ptr, SafeRead};
 use crate::Environment;
+use crate::environment::ThreadBlock::Suspended;
 use crate::environment::ThreadId;
 
 type kern_return_t = i32;
@@ -39,6 +40,7 @@ type thread_inspect_t = mach_port_t;
 type thread_flavor_t = natural_t;
 type thread_info_t = MutPtr<integer_t>;
 type thread_state_flavor_t = i32;
+type thread_state_t = MutPtr<natural_t>;
 
 type mach_msg_type_number_t = natural_t;
 type mach_msg_type_name_t = u32;
@@ -55,6 +57,19 @@ const POLICY_TIMESHARE: policy_t = 1;
 
 const THREAD_BASIC_INFO: thread_flavor_t = 3;
 const THREAD_SCHED_TIMESHARE_INFO: thread_flavor_t = 10;
+
+const ARM_THREAD_STATE: thread_state_flavor_t = 1;
+const MACHINE_THREAD_STATE: thread_state_flavor_t = ARM_THREAD_STATE;
+
+#[repr(C, packed)]
+struct arm_thread_state {
+    r: [u32; 13], // General purpose register r0-r12
+    sp: u32, // Stack pointer r13
+    lr: u32, // Link register r14
+    pc: u32, // Program counter r15
+    cpsr: u32 // Current program status register
+}
+unsafe impl SafeRead for arm_thread_state {}
 
 #[repr(C, packed)]
 struct time_value_t {
@@ -127,14 +142,15 @@ fn thread_info(
                         TH_STATE_STOPPED
                     },
                     flags: 0, // FIXME
-                    suspend_count: if thread.active {
-                        0
-                    } else {
+                    suspend_count: if thread.blocked_by == Suspended {
                         1
+                    } else {
+                        0
                     },
                     sleep_time: 0,
                 },
             );
+            env.mem.write(thread_info_out_count, out_size_expected);
         }
         THREAD_SCHED_TIMESHARE_INFO => {
             let out_size_expected =
@@ -150,6 +166,7 @@ fn thread_info(
                     depress_priority: 0,
                 },
             );
+            env.mem.write(thread_info_out_count, out_size_expected);
         }
         _ => unimplemented!("TODO: flavor {:?}", flavor),
     }
@@ -280,9 +297,44 @@ fn thread_suspend(
     env: &mut Environment,
     target_thread: thread_inspect_t
 ) -> kern_return_t {
-    let thread = env.threads.get(target_thread as usize).unwrap();
-    assert!(thread.active);
-    env.suspend_thread(target_thread as usize);
+    env.suspend_thread(target_thread as ThreadId);
+    0
+}
+
+fn thread_resume(
+    env: &mut Environment,
+    target_thread: thread_inspect_t
+) -> kern_return_t {
+    env.resume_thread(target_thread as ThreadId);
+    0
+}
+
+fn thread_get_state(
+    env: &mut Environment,
+    target_thread: thread_act_t,
+    flavor: thread_state_flavor_t,
+    old_state: thread_state_t,
+    old_state_count: MutPtr<mach_msg_type_number_t>,
+) -> kern_return_t {
+    assert_eq!(flavor, MACHINE_THREAD_STATE);
+    let old_thread = env.current_thread;
+    env.switch_thread(target_thread as ThreadId);
+
+    let out_size_available = env.mem.read(old_state_count);
+    let out_size_expected =
+        guest_size_of::<arm_thread_state>() / guest_size_of::<integer_t>();
+    assert!(out_size_expected <= out_size_available);
+    let state = arm_thread_state {
+        r: env.cpu.regs()[..13].try_into().unwrap(),
+        sp: env.cpu.regs()[crate::cpu::Cpu::SP],
+        lr: env.cpu.regs()[crate::cpu::Cpu::LR],
+        pc: env.cpu.regs()[crate::cpu::Cpu::PC],
+        cpsr: env.cpu.cpsr()
+    };
+    env.mem.write(old_state.cast(), state);
+    env.mem.write(old_state_count, out_size_expected);
+
+    env.switch_thread(old_thread);
     0
 }
 
@@ -299,4 +351,6 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(exc_server(_, _)),
     export_c_func!(task_set_exception_ports(_, _, _, _, _)),
     export_c_func!(thread_suspend(_)),
+    export_c_func!(thread_resume(_)),
+    export_c_func!(thread_get_state(_, _, _, _)),
 ];
