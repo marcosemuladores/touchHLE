@@ -12,6 +12,7 @@ use crate::objc::{
     NSZonePtr,
 };
 
+#[derive(Debug)]
 enum NSNumberHostObject {
     Bool(bool),
     Int(i32),
@@ -169,6 +170,22 @@ pub const CLASSES: ClassExports = objc_classes! {
         todo!();
     };
     a == b
+}
+
+- (i32)intValue {
+    match env.objc.borrow(this) {
+        &NSNumberHostObject::Int(value) => value,
+        &NSNumberHostObject::LongLong(value) => value as i32,
+        x => todo!("{:?}", x)
+    }
+}
+
+- (f32)floatValue {
+    match env.objc.borrow(this) {
+        &NSNumberHostObject::Float(value) => value,
+        &NSNumberHostObject::Double(value) => value as f32,
+        x => todo!("{:?}", x)
+    }
 }
 
 // TODO: accessors etc

@@ -582,7 +582,7 @@ unsafe fn present_renderbuffer(gles: &mut dyn GLES, window: &mut Window) {
     let old_blend_dfactor: GLenum = get_int(gles, gles11::BLEND_DST) as _;
 
     let old_tex_env_mode = get_tex_env_int(gles, gles11::TEXTURE_ENV, gles11::TEXTURE_ENV_MODE);
-    let default_tex_env_mode_arr = [gles11::MODULATE; 1];
+    let default_tex_env_mode_arr = [gles11::REPLACE; 1];
     gles.TexEnviv(
         gles11::TEXTURE_ENV,
         gles11::TEXTURE_ENV_MODE,

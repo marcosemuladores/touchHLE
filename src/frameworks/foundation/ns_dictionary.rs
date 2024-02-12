@@ -70,6 +70,19 @@ impl DictionaryHostObject {
         collisions.push((key, value));
         self.count += 1;
     }
+    pub(super) fn remove(&mut self, env: &mut Environment, key: id) {
+        let hash: Hash = msg![env; key hash];
+        let Some(collisions) = self.map.get_mut(&hash) else {
+            return;
+        };
+        let idx = collisions.iter().position(|&(candidate_key, _)| {
+            candidate_key == key || msg![env; candidate_key isEqualTo:key]
+        }).unwrap();
+        let (existing_key, value) = collisions[idx];
+        release(env, existing_key);
+        release(env, value);
+        collisions.remove(idx);
+    }
     pub(super) fn release(&mut self, env: &mut Environment) {
         for collisions in self.map.values() {
             for &(key, value) in collisions {
@@ -188,11 +201,52 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 // TODO
 
+- (id)allKeys {
+    let dict_host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+    let keys: Vec<id> = dict_host_obj.iter_keys().collect();
+    ns_array::from_vec(env, keys)
+}
+
+// FIXME: those are from NSUserDefaults!
+- (())setObject:(id)anObject
+         forKey:(id)key { // NSString*
+    assert!(!anObject.is_null());
+    assert!(anObject != nil);
+    assert!(!key.is_null());
+    assert!(key != nil);
+    let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+    host_obj.insert(env, key, anObject, false);
+    *env.objc.borrow_mut(this) = host_obj;
+}
 - (())setInteger:(NSInteger)value forKey:(id)defaultName {
     let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
     let value_id: id = msg_class![env; NSNumber numberWithInteger:value];
     host_obj.insert(env, defaultName, value_id, false);
     *env.objc.borrow_mut(this) = host_obj;
+}
+- (())setDouble:(f64)value forKey:(id)defaultName {
+    let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+    // TODO: do not down cast
+    let float: f32 = value as f32;
+    let value_id: id = msg_class![env; NSNumber numberWithFloat:float];
+    host_obj.insert(env, defaultName, value_id, false);
+    *env.objc.borrow_mut(this) = host_obj;
+}
+- (())setFloat:(f32)value forKey:(id)defaultName {
+    let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+    let value_id: id = msg_class![env; NSNumber numberWithFloat:value];
+    host_obj.insert(env, defaultName, value_id, false);
+    *env.objc.borrow_mut(this) = host_obj;
+}
+- (())removeObjectForKey:(id)defaultName {
+    let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+    host_obj.remove(env, defaultName);
+    *env.objc.borrow_mut(this) = host_obj;
+}
+- (id)dictionaryRepresentation {
+    this
+}
+- (())synchronize {
 }
 
 @end

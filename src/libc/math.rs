@@ -5,6 +5,7 @@
  */
 //! `math.h`
 
+use std::num::FpCategory;
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::Environment;
 use crate::mem::MutPtr;
@@ -222,6 +223,23 @@ fn fminf(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
     arg1.min(arg2)
 }
 
+type GuestFPCategory = i32;
+const FP_NAN: GuestFPCategory = 1;
+const FP_INFINITE: GuestFPCategory = 1;
+const FP_ZERO: GuestFPCategory = 3;
+const FP_NORMAL: GuestFPCategory = 4;
+const FP_SUBNORMAL: GuestFPCategory = 4;
+
+fn __fpclassifyf(_env: &mut Environment, arg: f32) -> GuestFPCategory {
+    match arg.classify() {
+        FpCategory::Nan => FP_NAN,
+        FpCategory::Infinite => FP_INFINITE,
+        FpCategory::Zero => FP_ZERO,
+        FpCategory::Normal => FP_NORMAL,
+        FpCategory::Subnormal => FP_SUBNORMAL
+    }
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     // Trigonometric functions
     export_c_func!(sin(_)),
@@ -289,4 +307,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(fmaxf(_, _)),
     export_c_func!(fmin(_, _)),
     export_c_func!(fminf(_, _)),
+    export_c_func!(__fpclassifyf(_)),
 ];
