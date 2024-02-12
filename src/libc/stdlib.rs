@@ -185,6 +185,11 @@ fn setenv(env: &mut Environment, name: ConstPtr<u8>, value: ConstPtr<u8>, overwr
     );
     0 // success
 }
+fn unsetenv(env: &mut Environment, name: ConstPtr<u8>) -> i32 {
+    let name_cstr = env.mem.cstr_at(name);
+    assert!(env.libc_state.stdlib.env.get(name_cstr).is_none());
+    0 // success
+}
 
 fn exit(_env: &mut Environment, exit_code: i32) {
     echo!("App called exit(), exiting.");
@@ -328,6 +333,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(arc4random()),
     export_c_func!(getenv(_)),
     export_c_func!(setenv(_, _, _)),
+    export_c_func!(unsetenv(_)),
     export_c_func!(exit(_)),
     export_c_func!(bsearch(_, _, _, _, _)),
     export_c_func!(strtof(_, _)),

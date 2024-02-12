@@ -8,7 +8,7 @@
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::fs::GuestPath;
 use crate::libc::posix_io::{FileDescriptor, O_RDONLY, STDERR_FILENO, STDIN_FILENO, STDOUT_FILENO};
-use crate::mem::{ConstPtr, ConstVoidPtr, GuestISize, MutPtr, MutVoidPtr, Ptr};
+use crate::mem::{ConstPtr, ConstVoidPtr, GuestISize, GuestUSize, MutPtr, MutVoidPtr, Ptr};
 use crate::Environment;
 use std::time::Duration;
 use crate::libc::posix_io;
@@ -125,6 +125,25 @@ fn readlink(env: &mut Environment, path: ConstPtr<u8>, buf: MutPtr<u8>, bufsize:
     // fread(env, buf.cast(), 1, bufsize.try_into().unwrap(), file) as GuestISize
 }
 
+fn getdtablesize(env: &mut Environment) -> i32 {
+    2
+}
+
+fn gethostname(env: &mut Environment, name: ConstPtr<u8>, namelen: GuestUSize) -> i32 {
+    -1
+}
+
+fn sysconf(env: &mut Environment, name: i32) -> i32 {
+    log!("sysconf {}", name);
+    match name {
+        // _SC_PAGESIZE => 4 Kib
+        29 => 4096,
+        // _SC_NPROCESSORS_ONLN => 1
+        58 => 1,
+        _ => -1
+    }
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(getpagesize()),
     export_c_func!(get_etext()),
@@ -140,4 +159,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(sigprocmask(_, _, _)),
     export_c_func!(signal(_, _)),
     export_c_func!(readlink(_, _, _)),
+    export_c_func!(getdtablesize()),
+    export_c_func!(gethostname(_, _)),
+    export_c_func!(sysconf(_)),
 ];

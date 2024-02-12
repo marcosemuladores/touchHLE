@@ -206,7 +206,7 @@ fn mach_msg(
     timeout: mach_msg_timeout_t,
     notify: mach_port_name_t,
 ) -> mach_msg_return_t {
-    log!("TOD0: mach_msg send/rcv");
+    log_dbg!("TOD0: mach_msg send/rcv");
     KERN_SUCCESS
 }
 
