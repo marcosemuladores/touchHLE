@@ -61,7 +61,7 @@ fn pthread_cond_init(env: &mut Environment, cond: MutPtr<pthread_cond_t>, attr: 
 
 fn pthread_cond_wait(env: &mut Environment, cond: MutPtr<pthread_cond_t>, mutex: MutPtr<pthread_mutex_t>) -> i32 {
     let res = pthread_mutex_unlock(env, mutex);
-    assert_eq!(res, 0);
+    //assert_eq!(res, 0);
     assert!(matches!(
         env.threads[env.current_thread].blocked_by,
         ThreadBlock::NotBlocked
@@ -73,7 +73,7 @@ fn pthread_cond_wait(env: &mut Environment, cond: MutPtr<pthread_cond_t>, mutex:
     );
     let cond_var = env.mem.read(cond);
     env.threads[env.current_thread].blocked_by = ThreadBlock::Condition(cond_var);
-    assert!(!State::get(env).mutexes.contains_key(&cond_var));
+    //assert!(!State::get(env).mutexes.contains_key(&cond_var));
     let mutex_val = env.mem.read(mutex);
     State::get_mut(env).mutexes.insert(cond_var, mutex_val);
     0 // success

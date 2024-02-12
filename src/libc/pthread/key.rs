@@ -5,7 +5,7 @@
  */
 //! Thread-specific data keys.
 
-use crate::abi::GuestFunction;
+use crate::abi::{CallFromHost, GuestFunction};
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::mem::{ConstVoidPtr, MutPtr, MutVoidPtr, Ptr};
 use crate::{Environment, ThreadId};
@@ -37,6 +37,21 @@ fn pthread_key_create(
     0 // success
 }
 
+fn pthread_key_delete(
+    env: &mut Environment,
+    key: pthread_key_t
+) -> i32 {
+    let data = pthread_getspecific(env, key);
+    //assert!(!data.is_null());
+    let idx: usize = key.checked_sub(1).unwrap().try_into().unwrap();
+    let destructor = get_state(env).keys[idx].1;
+    if !data.is_null() && !destructor.to_ptr().is_null() {
+        <GuestFunction as CallFromHost<(), (MutVoidPtr,)>>::call_from_host(&destructor, env, (data,));
+    }
+    get_state(env).keys.remove(idx);
+    0 // success
+}
+
 fn pthread_getspecific(env: &mut Environment, key: pthread_key_t) -> MutVoidPtr {
     // Use of invalid key is undefined, panicking is fine.
     let idx: usize = key.checked_sub(1).unwrap().try_into().unwrap();
@@ -60,6 +75,7 @@ fn pthread_setspecific(env: &mut Environment, key: pthread_key_t, value: ConstVo
 
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_key_create(_, _)),
+    export_c_func!(pthread_key_delete(_)),
     export_c_func!(pthread_getspecific(_)),
     export_c_func!(pthread_setspecific(_, _)),
 ];

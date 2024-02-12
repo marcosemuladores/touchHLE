@@ -29,14 +29,24 @@ fn mmap(
     //assert!(addr.is_null());
     assert_eq!(offset, 0);
     //assert_eq!((flags & MAP_ANON), 0);
-    let ptr = env.mem.alloc(len);
+    let mut ptr = env.mem.alloc(len);
     if (flags & MAP_ANON) != 0 {
-        // This prevents "GC_unix_get_mem: Memory returned by mmap is not aligned to HBLKSIZE."
-        env.mem.write(Ptr::from_bits(0x0063de64), 0x00f020e3);
-        // This bypass "Duplicate large block deallocation"
-        env.mem.write(Ptr::from_bits(0x006353d8), 0x00f020e3);
-        // * Assertion at gc.c:205, condition `GC_base (obj) == (char*)obj - offset' not met
-        env.mem.write(Ptr::from_bits(0x0059c318), 0x00f020e3);
+        // // This prevents "GC_unix_get_mem: Memory returned by mmap is not aligned to HBLKSIZE."
+        // env.mem.write(Ptr::from_bits(0x0063de64), 0x00f020e3);
+        // // This bypass "Duplicate large block deallocation"
+        // env.mem.write(Ptr::from_bits(0x006353d8), 0x00f020e3);
+        // // * Assertion at gc.c:205, condition `GC_base (obj) == (char*)obj - offset' not met
+        // env.mem.write(Ptr::from_bits(0x0059c318), 0x00f020e3);
+        log!("mmap ANON ptr {:?}", ptr);
+        let mut to_free = vec![];
+        while ptr.to_bits() & 0xfff != 0 {
+            to_free.push(ptr);
+            ptr = env.mem.alloc(len);
+            log!("mmap ANON ptr {:?}", ptr);
+        }
+        for x in to_free {
+            env.mem.free(x);
+        }
         assert_eq!(fd, -1);
         return ptr;
     }
