@@ -35,6 +35,8 @@ fn mmap(
         env.mem.write(Ptr::from_bits(0x0063de64), 0x00f020e3);
         // This bypass "Duplicate large block deallocation"
         env.mem.write(Ptr::from_bits(0x006353d8), 0x00f020e3);
+        // * Assertion at gc.c:205, condition `GC_base (obj) == (char*)obj - offset' not met
+        env.mem.write(Ptr::from_bits(0x0059c318), 0x00f020e3);
         assert_eq!(fd, -1);
         return ptr;
     }

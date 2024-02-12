@@ -288,6 +288,17 @@ fn pthread_get_stackaddr_np(env: &mut Environment, thread: pthread_t) -> MutVoid
     MutVoidPtr::from_bits(y)
 }
 
+fn pthread_get_stacksize_np(env: &mut Environment, thread: pthread_t) -> GuestUSize {
+    env.mem
+        .secondary_thread_stack_size_override
+        .or_else(|| Some(Mem::SECONDARY_THREAD_STACK_SIZE))
+        .unwrap()
+}
+
+fn pthread_detach(env: &mut Environment, thread: pthread_t) -> i32 {
+    0
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_attr_init(_)),
     export_c_func!(pthread_attr_getdetachstate(_, _)),
@@ -304,4 +315,6 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_get_stackaddr_np(_)),
     export_c_func!(pthread_attr_getstacksize(_, _)),
     export_c_func!(pthread_attr_setstacksize(_, _)),
+    export_c_func!(pthread_get_stacksize_np(_)),
+    export_c_func!(pthread_detach(_)),
 ];

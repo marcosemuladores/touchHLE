@@ -98,9 +98,14 @@ fn pthread_cond_destroy(env: &mut Environment, cond: MutPtr<pthread_cond_t>) -> 
     0 // success
 }
 
+fn pthread_cond_broadcast(env: &mut Environment, cond: MutPtr<pthread_cond_t>) -> i32 {
+    pthread_cond_signal(env, cond)
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_cond_init(_, _)),
     export_c_func!(pthread_cond_wait(_, _)),
     export_c_func!(pthread_cond_signal(_)),
     export_c_func!(pthread_cond_destroy(_)),
+    export_c_func!(pthread_cond_broadcast(_)),
 ];
