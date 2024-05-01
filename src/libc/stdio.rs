@@ -288,7 +288,6 @@ fn feof(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
 
 fn clearerr(env: &mut Environment, file_ptr: MutPtr<FILE>) {
     let FILE { fd } = env.mem.read(file_ptr);
-    posix_io::clearerr(env, fd);
 }
 
 pub fn puts(env: &mut Environment, s: ConstPtr<u8>) -> i32 {
