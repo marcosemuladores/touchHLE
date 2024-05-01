@@ -7,32 +7,28 @@
 
 pub mod stat;
 
-use std::cell::{RefCell, RefMut};
 use crate::abi::DotDotDot;
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::fs::{GuestFile, GuestOpenOptions, GuestPath};
-use crate::mem::{ConstPtr, ConstVoidPtr, GuestISize, GuestUSize, MutPtr, MutVoidPtr, Ptr, SafeRead};
+use crate::mem::{ConstPtr, ConstVoidPtr, GuestISize, GuestUSize, MutPtr, MutVoidPtr, Ptr};
 use crate::Environment;
 use std::io::{Read, Seek, SeekFrom, Write};
-use std::rc::Rc;
-use crate::libc::string::strcat;
 
 #[derive(Default)]
 pub struct State {
     /// File descriptors _other than stdin, stdout, and stderr_
-    files: Vec<Option<Rc<RefCell<PosixFileHostObject>>>>,
+    files: Vec<Option<PosixFileHostObject>>,
 }
 impl State {
-    pub fn file_for_fd(&mut self, fd: FileDescriptor) -> Option<RefMut<PosixFileHostObject>> {
+    fn file_for_fd(&mut self, fd: FileDescriptor) -> Option<&mut PosixFileHostObject> {
         self.files
             .get_mut(fd_to_file_idx(fd))
             .and_then(|file_or_none| file_or_none.as_mut())
-            .map(|file| file.borrow_mut())
     }
 }
 
-pub struct PosixFileHostObject {
-    pub file: GuestFile,
+struct PosixFileHostObject {
+    file: GuestFile,
     reached_eof: bool,
 }
 
@@ -79,23 +75,6 @@ pub const LOCK_NB: FLockFlag = 4;
 #[allow(dead_code)]
 pub const LOCK_UN: FLockFlag = 8;
 
-pub const F_GETLK: i32 = 7;
-pub const F_SETLK: i32 = 8;
-pub const F_NOCACHE: i32 = 48;
-pub const F_UNLCK: i16 = 2;
-
-#[repr(C, packed)]
-#[derive(Debug)]
-struct FLockInfo {
-    start: off_t,
-    len: off_t,
-    pid: i32,
-    type_: i16,
-    whence: i16
-}
-
-unsafe impl SafeRead for FLockInfo {}
-
 fn open(env: &mut Environment, path: ConstPtr<u8>, flags: i32, _args: DotDotDot) -> FileDescriptor {
     // TODO: parse variadic arguments and pass them on (file creation mode)
     self::open_direct(env, path, flags)
@@ -103,38 +82,19 @@ fn open(env: &mut Environment, path: ConstPtr<u8>, flags: i32, _args: DotDotDot)
 
 /// Special extension for host code: [open] without the [DotDotDot].
 pub fn open_direct(env: &mut Environment, path: ConstPtr<u8>, flags: i32) -> FileDescriptor {
-    let res = open_direct2(env, path, flags);
-    if res == -1 {
-        let buf: MutPtr<u8> = env.mem.alloc(1024).cast();
-        _ = env.mem
-            .bytes_at_mut(buf, 1024)
-            .write(env.bundle.bundle_path().join("").as_str().as_bytes());
-        strcat(env, buf, path);
-        let res = open_direct2(env, buf.cast_const(), flags);
-        env.mem.free(buf.cast());
-        return res;
-    }
-    res
-}
-
-/// Special extension for host code: [open] without the [DotDotDot].
-fn open_direct2(env: &mut Environment, path: ConstPtr<u8>, flags: i32) -> FileDescriptor {
     // TODO: support more flags, this list is not complete
     assert!(
         flags
             & !(O_ACCMODE
-            | O_NONBLOCK
-            | O_APPEND
-            | O_SHLOCK
-            | O_NOFOLLOW
-            | O_CREAT
-            | O_TRUNC
-            | O_EXCL)
+                | O_NONBLOCK
+                | O_APPEND
+                | O_SHLOCK
+                | O_NOFOLLOW
+                | O_CREAT
+                | O_TRUNC
+                | O_EXCL)
             == 0
     );
-    // TODO: symlinks don't exist in the FS yet, so we can't "not follow" them.
-    // (Should we just ignore this?)
-    assert!(flags & O_NOFOLLOW == 0);
     // TODO: exclusive mode not implemented yet
     assert!(flags & O_EXCL == 0);
 
@@ -162,26 +122,11 @@ fn open_direct2(env: &mut Environment, path: ConstPtr<u8>, flags: i32) -> FileDe
         options.truncate();
     }
 
-    let path_string = match env.mem.cstr_at_utf8(path) {
-    let y = env.mem.cstr_at_utf8(path);
-        Ok(path_str) => path_str.to_owned(),
-    if y.is_err() {
-        Err(err) => {
-        return -1;
-            log!(
-                "open() error, unable to treat {:?} as utf8 str: {:?}",
-                path,
-                err
-            );
-            // TODO: set errno
-            return -1;
-        }
-    };
+    let path_string = env.mem.cstr_at_utf8(path).unwrap().to_owned();
     // TODO: symlinks don't exist in the FS yet, so we can't "not follow" them.
     if flags & O_NOFOLLOW != 0 {
         log!("Ignoring O_NOFOLLOW when opening {:?}", path_string);
     }
-    let path_string = y.unwrap().to_owned();
     let res = match env
         .fs
         .open_with_options(GuestPath::new(&path_string), options)
@@ -199,11 +144,11 @@ fn open_direct2(env: &mut Environment, path: ConstPtr<u8>, flags: i32) -> FileDe
                 .iter()
                 .position(|f| f.is_none())
             {
-                env.libc_state.posix_io.files[free_idx] = Some(Rc::new(RefCell::new(host_object)));
+                env.libc_state.posix_io.files[free_idx] = Some(host_object);
                 free_idx
             } else {
                 let idx = env.libc_state.posix_io.files.len();
-                env.libc_state.posix_io.files.push(Some(Rc::new(RefCell::new(host_object))));
+                env.libc_state.posix_io.files.push(Some(host_object));
                 idx
             };
             file_idx_to_fd(idx)
@@ -227,39 +172,14 @@ fn open_direct2(env: &mut Environment, path: ConstPtr<u8>, flags: i32) -> FileDe
     res
 }
 
-fn dup(env: &mut Environment, fd: FileDescriptor) -> FileDescriptor {
-    let Some(file) = env.libc_state.posix_io.files[fd_to_file_idx(fd)].as_ref() else {
-        return -1; // TODO: set errno
-    };
-
-    let idx = if let Some(free_idx) = env
-        .libc_state
-        .posix_io
-        .files
-        .iter()
-        .position(|f| f.is_none())
-    {
-        env.libc_state.posix_io.files[free_idx] = Some(file.clone());
-        free_idx
-    } else {
-        let idx = env.libc_state.posix_io.files.len();
-        env.libc_state.posix_io.files.push(Some(file.clone()));
-        idx
-    };
-    file_idx_to_fd(idx)
-}
-
 pub fn read(
     env: &mut Environment,
     fd: FileDescriptor,
     buffer: MutVoidPtr,
     size: GuestUSize,
 ) -> GuestISize {
-    if buffer.is_null() {
-        return 0;
-    }
     // TODO: error handling for unknown fd?
-    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
+    let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
 
     let buffer_slice = env.mem.bytes_at_mut(buffer.cast(), size);
     match file.file.read(buffer_slice) {
@@ -301,34 +221,6 @@ pub fn read(
     }
 }
 
-pub fn pread(
-    env: &mut Environment,
-    fd: FileDescriptor,
-    buffer: MutVoidPtr,
-    size: GuestUSize,
-    offset: off_t,
-) -> GuestISize {
-    let old = lseek(env, fd, 0, SEEK_CUR);
-    lseek(env, fd, offset, SEEK_SET);
-    let ret = read(env, fd, buffer, size);
-    lseek(env, fd, old, SEEK_SET);
-    ret
-}
-
-pub fn pwrite(
-    env: &mut Environment,
-    fd: FileDescriptor,
-    buffer: ConstVoidPtr,
-    size: GuestUSize,
-    offset: off_t,
-) -> GuestISize {
-    let old = lseek(env, fd, 0, SEEK_CUR);
-    lseek(env, fd, offset, SEEK_SET);
-    let ret = write(env, fd, buffer, size);
-    lseek(env, fd, old, SEEK_SET);
-    ret
-}
-
 /// Helper for C `feof()`.
 pub(super) fn eof(env: &mut Environment, fd: FileDescriptor) -> i32 {
     let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
@@ -339,37 +231,14 @@ pub(super) fn eof(env: &mut Environment, fd: FileDescriptor) -> i32 {
     }
 }
 
-pub(super) fn clearerr(env: &mut Environment, fd: FileDescriptor) {
-    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
-    file.reached_eof = false;
-}
-
-
 pub fn write(
     env: &mut Environment,
     fd: FileDescriptor,
     buffer: ConstVoidPtr,
     size: GuestUSize,
 ) -> GuestISize {
-    if fd == STDERR_FILENO {
-        let buffer_slice = env.mem.bytes_at(buffer.cast(), size);
-        return match std::io::stderr().write(buffer_slice) {
-            Ok(bytes_written) => bytes_written as GuestUSize,
-            Err(_err) => 0,
-        } as GuestISize
-    }
-    if fd == STDOUT_FILENO {
-        let buffer_slice = env.mem.bytes_at(buffer.cast(), size);
-        return match std::io::stdout().write(buffer_slice) {
-            Ok(bytes_written) => bytes_written as GuestUSize,
-            Err(_err) => 0,
-        } as GuestISize
-    }
     // TODO: error handling for unknown fd?
-    // if env.libc_state.posix_io.file_for_fd(fd).is_none() {
-    //     return -1;
-    // }
-    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
+    let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
 
     let buffer_slice = env.mem.bytes_at(buffer.cast(), size);
     match file.file.write(buffer_slice) {
@@ -414,7 +283,7 @@ pub const SEEK_CUR: i32 = 1;
 pub const SEEK_END: i32 = 2;
 pub fn lseek(env: &mut Environment, fd: FileDescriptor, offset: off_t, whence: i32) -> off_t {
     // TODO: error handling for unknown fd?
-    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
+    let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
 
     let from = match whence {
         // not sure whether offset is treated as signed or unsigned when using
@@ -448,21 +317,18 @@ pub fn close(env: &mut Environment, fd: FileDescriptor) -> i32 {
 
     match env.libc_state.posix_io.files[fd_to_file_idx(fd)].take() {
         Some(file) => {
-            // The actual closing of the file happens implicitly when `file` falls out
-            // of scope. The return value is about whether flushing succeeds.
-            match Rc::into_inner(file).map(|f| f.into_inner().file.sync_all()) {
-                Some(Ok(())) => {
+            // The actual closing of the file happens implicitly when `file`
+            // falls out of scope. The return value is about whether flushing
+            // succeeds.
+            match file.file.sync_all() {
+                Ok(()) => {
                     log_dbg!("close({:?}) => 0", fd);
                     0
                 }
-                Some(Err(_)) => {
+                Err(_) => {
                     // TODO: set errno
                     log!("Warning: close({:?}) failed, returning -1", fd);
                     -1
-                },
-                None => {
-                    log_dbg!("close({:?}) => 0, references remaining", fd);
-                    0
                 }
             }
         }
@@ -474,7 +340,7 @@ pub fn close(env: &mut Environment, fd: FileDescriptor) -> i32 {
     }
 }
 
-pub fn getcwd(env: &mut Environment, buf_ptr: MutPtr<u8>, buf_size: GuestUSize) -> MutPtr<u8> {
+fn getcwd(env: &mut Environment, buf_ptr: MutPtr<u8>, buf_size: GuestUSize) -> MutPtr<u8> {
     let working_directory = env.fs.working_directory();
     if !env.fs.is_dir(working_directory) {
         // TODO: set errno to ENOENT
@@ -557,41 +423,15 @@ fn ftruncate(env: &mut Environment, fd: FileDescriptor, len: off_t) -> i32 {
     }
 }
 
-fn fcntl(env: &mut Environment, fd: FileDescriptor, operation: i32, args: DotDotDot) -> i32 {
-    match operation {
-        F_GETLK => {
-            let ptr = args.start().next::<MutPtr<FLockInfo>>(env);
-            let mut data = env.mem.read(ptr);
-            data.type_ = F_UNLCK;
-            env.mem.write(ptr, data);
-            0
-        },
-        F_SETLK => {
-            let ptr = args.start().next::<MutPtr<FLockInfo>>(env);
-            let data = env.mem.read(ptr);
-            log!("TODO: fcntl({:?}, {:?}, {:?})", fd, operation, data);
-            0
-        }
-        F_NOCACHE => {
-            log!("Ignoring F_NOCACHE for {} fd", fd);
-            0
-        }
-        _ => unimplemented!("fcntl({}, {})", fd, operation)
-    }
-}
-
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(open(_, _, _)),
     export_c_func!(read(_, _, _)),
-    export_c_func!(dup(_)),
-    export_c_func!(pread(_, _, _, _)),
     export_c_func!(write(_, _, _)),
-    export_c_func!(pwrite(_, _, _, _)),
     export_c_func!(lseek(_, _, _)),
     export_c_func!(close(_)),
+    export_c_func!(getcwd(_, _)),
     export_c_func!(getcwd(_, _)),
     export_c_func!(chdir(_)),
     export_c_func!(flock(_, _)),
     export_c_func!(ftruncate(_, _)),
-    export_c_func!(fcntl(_, _, _)),
 ];
