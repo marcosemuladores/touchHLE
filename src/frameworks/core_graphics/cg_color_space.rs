@@ -8,11 +8,13 @@
 use crate::dyld::{export_c_func, ConstantExports, FunctionExports, HostConstant};
 use crate::frameworks::core_foundation::cf_string::CFStringRef;
 use crate::frameworks::core_foundation::{CFRelease, CFRetain, CFTypeRef};
+use crate::frameworks::core_graphics::CGFloat;
 use crate::frameworks::foundation::ns_string;
+use crate::frameworks::uikit::ui_color;
+use crate::mem::{guest_size_of, MutPtr};
 use crate::objc::{msg, objc_classes, ClassExports, HostObject};
 use crate::Environment;
-use crate::frameworks::core_graphics::CGFloat;
-use crate::frameworks::uikit::ui_color;
+
 
 pub const CLASSES: ClassExports = objc_classes! {
 
@@ -117,8 +119,26 @@ pub fn CGColorSpaceGetModel(env: &mut Environment, cs: CGColorSpaceRef) -> CGCol
 }
 
 fn CGColorGetAlpha(env: &mut Environment, color: crate::objc::id) -> CGFloat {
+pub type CGColorRef = CFTypeRef;
     let (_, _, _, a) = ui_color::get_rgba(&env.objc, color);
+
     a
+pub type CGColorRef = CFTypeRef;
+
+pub fn CGColorGetComponents(env: &mut Environment, color: CGColorRef) -> MutPtr<CGFloat> {
+    let (r, g, b, a) = ui_color::get_rgba(&env.objc, color);
+    let ptr: MutPtr<CGFloat> = env.mem.alloc(4 * guest_size_of::<CGFloat>()).cast();
+    env.mem.write(ptr, r);
+    env.mem.write(ptr + 1, g);
+    env.mem.write(ptr + 2, b);
+    env.mem.write(ptr + 3, a);
+    ptr
+}
+
+pub fn CGColorGetColorSpace(env: &mut Environment, _color: CGColorRef) -> CGColorSpaceRef {
+    // FIXME: what if a color is not sRGB?
+    let srgb_name = ns_string::get_static_str(env, kCGColorSpaceGenericRGB);
+    CGColorSpaceCreateWithName(env, srgb_name)
 }
 
 pub const kCGColorSpaceGenericRGB: &str = "kCGColorSpaceGenericRGB";
@@ -142,5 +162,8 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGColorSpaceRetain(_)),
     export_c_func!(CGColorSpaceRelease(_)),
     export_c_func!(CGColorSpaceGetModel(_)),
+    export_c_func!(CGColorGetComponents(_)),
+    export_c_func!(CGColorGetColorSpace(_)),
     export_c_func!(CGColorGetAlpha(_)),
+    export_c_func!(CGColorGetComponents(_)),
 ];
