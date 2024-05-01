@@ -15,14 +15,16 @@ pub mod ui_label;
 pub mod ui_window;
 
 use super::ui_graphics::{UIGraphicsPopContext, UIGraphicsPushContext};
-use crate::frameworks::core_graphics::cg_affine_transform::CGAffineTransform;
+use crate::frameworks::core_graphics::cg_affine_transform::{CGAffineTransform, CGAffineTransformIdentity};
 use crate::frameworks::core_graphics::cg_context::{CGContextClearRect, CGContextRef};
 use crate::frameworks::core_graphics::{CGFloat, CGPoint, CGRect};
+use crate::frameworks::core_graphics::cg_context::CGContextConcatCTM;
 use crate::frameworks::foundation::ns_string::get_static_str;
 use crate::frameworks::foundation::{ns_array, NSInteger, NSUInteger};
+use crate::mem::MutVoidPtr;
 use crate::objc::{
     autorelease, id, msg, nil, objc_classes, release, retain, Class, ClassExports, HostObject,
-    NSZonePtr,
+    NSZonePtr, SEL,
 };
 use crate::Environment;
 
@@ -94,6 +96,20 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 + (Class)layerClass {
     env.objc.get_known_class("CALayer", &mut env.mem)
+}
+
++ (())beginAnimations:(id)animId
+              context:(MutVoidPtr)context {
+    log!("WARNING: Ignoring beginAnimations:context:");
+}
++ (())setAnimationDelegate:(id)delegate {
+    log!("WARNING: Ignoring setAnimationDelegate:");
+}
++ (())setAnimationDidStopSelector:(SEL)selector {
+    log!("WARNING: Ignoring setAnimationDidStopSelector:");
+}
++ (())commitAnimations {
+    log!("WARNING: Ignoring commitAnimations");
 }
 
 // TODO: accessors etc
@@ -180,6 +196,14 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 - (())setMultipleTouchEnabled:(bool)enabled {
     env.objc.borrow_mut::<UIViewHostObject>(this).multiple_touch_enabled = enabled;
+}
+
+- (())setExclusiveTouch:(bool)enabled {
+
+}
+
+- (())setClipsToBounds:(bool)_clip {
+
 }
 
 - (())layoutSubviews {
@@ -368,7 +392,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 - (())setTransform:(CGAffineTransform)transform {
     log!("TODO: [{:?} setTransform:{:?}]", this, transform);
-}
+}    
 
 - (())setContentMode:(NSInteger)content_mode { // should be UIViewContentMode
     log!("TODO: [UIView {:?} setContentMode:{:?}] => ()", this, content_mode);
@@ -394,8 +418,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     if env.objc.borrow::<UIViewHostObject>(this).clears_context_before_drawing {
         CGContextClearRect(env, context, bounds);
     }
+    let affine_transformation = msg![env; layer affineTransform];
     UIGraphicsPushContext(env, context);
+    CGContextConcatCTM(env, context, affine_transformation);
     () = msg![env; this drawRect:bounds];
+    CGContextConcatCTM(env, context, affine_transformation.invert());
     UIGraphicsPopContext(env);
 }
 
@@ -471,6 +498,27 @@ pub const CLASSES: ClassExports = objc_classes! {
     let this_layer = env.objc.borrow::<UIViewHostObject>(this).layer;
     let other_layer = env.objc.borrow::<UIViewHostObject>(other).layer;
     msg![env; this_layer convertPoint:point toLayer:other_layer]
+}
+
+- (CGAffineTransform)transform {
+    let layer = env.objc.borrow_mut::<UIViewHostObject>(this).layer;
+    msg![env; layer affineTransform]
+}
+
+- (())setTransform:(CGAffineTransform)transform {
+    log!("setTransform: {:?}", transform);
+    let layer = env.objc.borrow_mut::<UIViewHostObject>(this).layer;
+    () = msg![env; layer setAffineTransform:transform];
+    () = msg![env; layer setNeedsDisplay];
+    () = msg![env; layer displayIfNeeded];
+}
+
+- (())setAutoresizingMask:(NSUInteger)mask {
+    log!("WARNING: Ignoring setAutoresizingMask: for an UIView");
+}
+
+- (bool)endEditing:(bool)_force {
+    true
 }
 
 @end
