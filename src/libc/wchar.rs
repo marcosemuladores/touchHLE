@@ -52,7 +52,7 @@ fn wmemset(
 ) -> MutPtr<wchar_t> {
     GenericChar::<wchar_t>::memset(env, dest, ch, count)
 }
-fn wmemcpy(
+pub fn wmemcpy(
     env: &mut Environment,
     dest: MutPtr<wchar_t>,
     src: ConstPtr<wchar_t>,
@@ -151,6 +151,15 @@ fn wcslcpy(
 ) -> GuestUSize {
     GenericChar::<wchar_t>::strlcpy(env, dst, src, size)
 }
+// long
+//      wcstol(const wchar_t *restrict nptr, wchar_t **restrict endptr, int base);
+fn wcstol(env: &mut Environment, nptr: ConstPtr<wchar_t>, endptr: MutPtr<MutPtr<wchar_t>>, base: i32) -> i32 {
+    assert_eq!(base, 10);
+    assert!(endptr.is_null());
+    let x = env.mem.wcstr_at(nptr);
+    log!("wcstol {}", x);
+    x.parse().unwrap_or(0)
+}
 
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(btowc(_)),
@@ -174,4 +183,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(wcschr(_, _)),
     export_c_func!(wcsrchr(_, _)),
     export_c_func!(wcslcpy(_, _, _)),
+    export_c_func!(wcstol(_, _, _)),
 ];
