@@ -136,10 +136,6 @@ pub fn CGColorGetColorSpace(env: &mut Environment, _color: CGColorRef) -> CGColo
     CGColorSpaceCreateWithName(env, srgb_name)
 }
 
-fn CGColorGetAlpha(env: &mut Environment, color: crate::objc::id) -> CGFloat {
-pub type CGColorRef = CFTypeRef;
-    let (_, _, _, a) = ui_color::get_rgba(&env.objc, color);
-
 pub const kCGColorSpaceGenericRGB: &str = "kCGColorSpaceGenericRGB";
 pub const kCGColorSpaceGenericGray: &str = "kCGColorSpaceGenericGray";
 
@@ -163,7 +159,6 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGColorSpaceGetModel(_)),
     export_c_func!(CGColorGetComponents(_)),
     export_c_func!(CGColorGetColorSpace(_)),
-    export_c_func!(CGColorGetAlpha(_)),
     export_c_func!(CGColorGetComponents(_)),
     export_c_func!(CGColorGetColorSpace(_)),
 ];
