@@ -167,6 +167,20 @@ pub fn printf_inner<const NS_LOG: bool, F: Fn(&Mem, GuestUSize) -> u8>(
                     } else {
                         write!(&mut res, "{:>1$}", int_with_precision, pad_width).unwrap();
                     }
+                 if specifier == b'g' {
+                    while let Some(&c) = res.last() {
+                        if c == b'0' {
+                            res.pop();
+                        } else {
+                            break;
+                        }
+                    }
+                    if let Some(&c) = res.last() {
+                        if c == b'.' {
+                            res.pop();
+                        }
+                    }
+                }
                 } else {
                     res.extend_from_slice(int_with_precision.as_bytes());
                 }
