@@ -165,6 +165,18 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())setKeyboardType:(UIKeyboardType)type_ {
     log!("TODO: setKeyboardType:{}", type_);
 }
+- (())setPlaceholder:(id)_text {
+    // TODO
+}
+- (())setTextAlignment:(NSInteger)_align {
+    // TODO
+}
+- (())setBorderStyle:(NSInteger)_style {
+    // TODO
+}
+- (())setFont:(id)_font {
+    // TODO
+}
 - (())setBorderStyle:(NSInteger)style {
     log!("TODO: setBorderStyle:{}", style);
 }
