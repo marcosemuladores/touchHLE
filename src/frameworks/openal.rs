@@ -11,6 +11,7 @@
 //! - [OpenAL 1.1 specification](https://www.openal.org/documentation/openal-1.1-specification.pdf)
 //! - Apple's [Technical Note TN2199: OpenAL FAQ for iPhone OS](https://web.archive.org/web/20090826202158/http://developer.apple.com/iPhone/library/technotes/tn2008/tn2199.html) (also available [here](https://developer.apple.com/library/archive/technotes/tn2199/_index.html))
 
+use crate::frameworks::openal::alGetString;
 use crate::audio::openal as al;
 use crate::audio::openal::al_types::*;
 use crate::audio::openal::alc_types::*;
@@ -241,7 +242,6 @@ fn alIsSource(_env: &mut Environment, source: ALuint) -> ALboolean {
 fn alIsExtensionPresent(env: &mut Environment, extName: ConstPtr<u8>) -> ALboolean {
     let s = env.mem.cstr_at_utf8(extName).unwrap();
     let ss = CString::new(s).unwrap();
-    let res = unsafe { al::alIsExtensionPresent(ss.as_ptr()) };
     res
 }
 
@@ -372,7 +372,6 @@ fn alSourceiv(env: &mut Environment, source: ALuint, param: ALenum, values: Cons
 }
 
 fn alEnable(_env: &mut Environment, capability: ALenum) {
-    unsafe { al::alEnable(capability) };
 }
 
 fn alGetSourcef(env: &mut Environment, source: ALuint, param: ALenum, value: MutPtr<ALfloat>) {
@@ -433,8 +432,8 @@ fn alGetSourceiv(env: &mut Environment, source: ALuint, param: ALenum, values: M
     let values = env.mem.ptr_at_mut(values, 3); // upper bound
     unsafe { al::alGetSourceiv(source, param, values) };
 }
-fn alGetString(env: &mut Environment, param: ALenum) -> ConstPtr<u8> {
-    let res = unsafe { al::alGetString(param) };
+fn alGetString(env: &mut Environment, param: ALenum) -> ConstPtr<u8>
+let res = unsafe { alGetString(param) };
     let s = unsafe { CStr::from_ptr(res) };
     log_dbg!("alGetString({:?}) => {:?}", param, s);
     log!("TODO: alGetString({}) leaks memory", param);
@@ -574,7 +573,6 @@ fn alDopplerVelocity(env: &mut Environment, value: ALfloat) {
 }
 
 fn alSpeedOfSound(_env: &mut Environment, value: ALfloat) {
-    unsafe { al::alSpeedOfSound(value) };
 }
 
 // TODO: more functions
