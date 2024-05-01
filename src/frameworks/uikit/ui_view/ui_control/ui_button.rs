@@ -217,6 +217,8 @@ pub const CLASSES: ClassExports = objc_classes! {
     () = msg_super![env; this setHighlighted:highlighted];
     update(env, this);
 }
+- (())setFont:(id)_font {
+}
 // TODO: observe focussing somehow
 
 - (id)currentTitle {
