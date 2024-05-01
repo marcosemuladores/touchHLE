@@ -108,6 +108,30 @@ struct method_t {
 }
 unsafe impl SafeRead for method_t {}
 
+/// The layout of a property list in an app binary.
+///
+/// The name, field names and field layout are based on what Ghidra outputs.
+#[repr(C, packed)]
+pub(super) struct ivar_list_t {
+    entsize: GuestUSize,
+    count: GuestUSize,
+    // entries follow the struct
+}
+unsafe impl SafeRead for ivar_list_t {}
+
+/// The layout of a property in an app binary.
+///
+/// The name, field names and field layout are based on what Ghidra outputs.
+#[repr(C, packed)]
+struct ivar_t {
+    offset: ConstPtr<GuestUSize>,
+    name: ConstPtr<u8>,
+    types: ConstPtr<u8>,
+    alignment: u32,
+    size: u32,
+}
+unsafe impl SafeRead for ivar_t {}
+
 impl ClassHostObject {
     // See classes.rs for host method parsing
 
@@ -137,6 +161,39 @@ impl ClassHostObject {
             // We must deduplicate it like any other.
             let sel = objc.register_bin_selector(name, mem);
             self.methods.insert(sel, IMP::Guest(imp));
+        }
+    }
+
+    pub(super) fn add_ivars_from_bin(
+        &mut self,
+        ivar_list_ptr: ConstPtr<ivar_list_t>,
+        mem: &Mem,
+        objc: &mut ObjC,
+    ) {
+        let ivar_list_t { entsize, count } = mem.read(ivar_list_ptr);
+        assert!(entsize == guest_size_of::<ivar_t>());
+
+        let ivars_base_ptr: ConstPtr<ivar_t> = (ivar_list_ptr + 1).cast();
+
+        for i in 0..count {
+            let ivar_ptr: ConstPtr<ivar_t> = Ptr::from_bits(ivars_base_ptr.to_bits() + i * entsize);
+
+            // TODO: support type strings
+            let ivar_t {
+                offset,
+                name,
+                types: _,
+                // TODO: Something with these
+                alignment: _,
+                size: _,
+            } = mem.read(ivar_ptr);
+
+            // There is no guarantee this string is unique or known.
+            // We must deduplicate it like any other.
+            let sel = objc.register_bin_selector(name, mem);
+            // TODO: Shift offsets if the superclass has "grown into"
+            // the subclass pointers (https://alwaysprocessing.blog/2023/03/12/objc-ivar-abi)
+            self.ivars.insert(sel, offset);
         }
     }
 }
@@ -218,5 +275,52 @@ impl ObjC {
                 class = superclass;
             }
         }
+    }
+
+    /// Checks if the provided class has an ivar in it's class chain (that is
+    /// to say, objects of the given class respond to a selector).
+    pub fn class_has_ivar(&self, class: Class, sel: SEL) -> Option<ConstPtr<GuestUSize>> {
+        let mut class = class;
+        loop {
+            let &ClassHostObject {
+                superclass,
+                ref ivars,
+                ..
+            } = self.borrow(class);
+            if ivars.contains_key(&sel) {
+                return ivars.get(&sel).copied();
+            } else if superclass == nil {
+                return None;
+            } else {
+                class = superclass;
+            }
+        }
+    }
+
+    /// Checks if a given object has a ivar (responds to a selector).
+
+    pub fn all_class_selectors_as_strings(&self, mem: &Mem, class: Class) -> Vec<String> {
+        let mut class = class;
+        let mut selector_strings = Vec::new();
+        loop {
+            let &ClassHostObject {
+                superclass,
+                ref methods,
+                ref ivars,
+                ..
+            } = self.borrow(class);
+            let mut class_selector_strings = methods
+                .keys()
+                .chain(ivars.keys())
+                .map(|sel| sel.as_str(mem).to_string())
+                .collect();
+            selector_strings.append(&mut class_selector_strings);
+            if superclass == nil {
+                break;
+            } else {
+                class = superclass;
+            }
+        }
+        selector_strings
     }
 }
