@@ -6,7 +6,6 @@
 //! `UIImage`.
 
 use crate::frameworks::core_graphics::cg_affine_transform::CGRectApplyAffineTransform;
-use crate::frameworks::core_graphics::cg_context::CGContextDrawImage;
 use crate::frameworks::core_graphics::cg_image::{self, CGImageRef, CGImageRelease, CGImageRetain};
 use crate::frameworks::core_graphics::{CGFloat, CGSize, CGPoint, CGRect};
 use crate::frameworks::core_graphics::cg_context::{CGContextDrawImage, CGContextGetCTM};
