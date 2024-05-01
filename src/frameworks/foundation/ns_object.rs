@@ -15,10 +15,12 @@
 //! See also: [crate::objc], especially the `objects` module.
 
 use super::ns_string::to_rust_string;
-use super::NSUInteger;
+use super::ns_run_loop::NSDefaultRunLoopMode;
+use super::{NSUInteger, ns_string};
+use super::ns_dictionary::dict_from_keys_and_objects;
 use crate::mem::MutVoidPtr;
 use crate::objc::{
-    id, msg, msg_class, msg_send, objc_classes, Class, ClassExports, NSZonePtr, ObjC,
+    id, nil, msg, msg_class, msg_send, objc_classes, Class, ClassExports, NSZonePtr, ObjC,
     TrivialHostObject, SEL,
 };
 
@@ -58,6 +60,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 + (bool)instancesRespondToSelector:(SEL)selector {
     env.objc.class_has_method(this, selector)
+}
+
++ (bool)accessInstanceVariablesDirectly {
+    true
 }
 
 - (id)init {
@@ -122,34 +128,84 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 // NSKeyValueCoding
+// https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/KeyValueCoding/SearchImplementation.html
 - (())setValue:(id)value
        forKey:(id)key { // NSString*
-    let key = to_rust_string(env, key); // TODO: avoid copy?
-    assert!(key.is_ascii()); // TODO: do we have to handle non-ASCII keys?
+    let key_string = to_rust_string(env, key); // TODO: avoid copy?
+    assert!(key_string.is_ascii()); // TODO: do we have to handle non-ASCII keys?
 
     let class = msg![env; this class];
 
+    // Look for the first accessor named set<Key>: or _set<Key>, in that order.
+    // If found, invoke it with the input value (or unwrapped value, as needed)
+    // and finish.
     if let Some(sel) = env.objc.lookup_selector(&format!(
         "set{}{}:",
-        key.as_bytes()[0].to_ascii_uppercase() as char,
-        &key[1..],
-    )) {
-        if env.objc.class_has_method(class, sel) {
-            return msg_send(env, (this, sel, value));
-        }
-    }
-
-    if let Some(sel) = env.objc.lookup_selector(&format!(
+        key_string.as_bytes()[0].to_ascii_uppercase() as char,
+        &key_string[1..],
+    )).or_else(|| env.objc.lookup_selector(&format!(
         "_set{}{}:",
-        key.as_bytes()[0].to_ascii_uppercase() as char,
-        &key[1..],
-    )) {
+        key_string.as_bytes()[0].to_ascii_uppercase() as char,
+        &key_string[1..],
+    ))) {
         if env.objc.class_has_method(class, sel) {
-            return msg_send(env, (this, sel, value));
+            () = msg_send(env, (this, sel, value));
+            return;
         }
     }
 
-    unimplemented!("TODO: object {:?} does not have simple setter method for {}, use fallback", this, key);
+    // If no simple accessor is found, and if the class method
+    // accessInstanceVariablesDirectly returns YES, look for an instance
+    // variable with a name like _<key>, _is<Key>, <key>, or is<Key>,
+    // in that order.
+    // If found, set the variable directly with the input value
+    // (or unwrapped value) and finish.
+    let sel = env.objc.lookup_selector("accessInstanceVariablesDirectly").unwrap();
+    let accessInstanceVariablesDirectly = msg_send(env, (class, sel));
+    // These ways of accessing are kinda hacky,
+    // it'd be better if it was integrated with msg_send
+    if accessInstanceVariablesDirectly {
+        if let Some(sel) = env.objc.lookup_selector(&format!(
+                "_{}",
+                &key_string
+            ))
+            .or_else(|| env.objc.lookup_selector(&format!(
+                "_is{}{}:",
+                key_string.as_bytes()[0].to_ascii_uppercase() as char,
+                &key_string[1..],
+            )))
+            .or_else(|| env.objc.lookup_selector(&format!(
+                "{}",
+                key_string,
+            )))
+            .or_else(|| env.objc.lookup_selector(&format!(
+                "is{}{}:",
+                key_string.as_bytes()[0].to_ascii_uppercase() as char,
+                &key_string[1..],
+            ))
+        ) {
+            if env.objc.class_has_method(class, sel) || env.objc.class_has_ivar(class, sel) {
+                () = msg_send(env, (this, sel, value));
+                return;
+            }
+        }
+    }
+
+    // Upon finding no accessor or instance variable,
+    // invoke setValue:forUndefinedKey:.
+    // This raises an exception by default, but a subclass of NSObject
+    // may provide key-specific behavior.
+    let sel = env.objc.lookup_selector("setValue:forUndefinedKey:").unwrap();
+    () = msg_send(env, (this, sel, value, key));
+}
+
+- (())setValue:(id)_value
+forUndefinedKey:(id)key { // NSString*
+    // TODO: Raise NSUnknownKeyException
+    let class: Class = ObjC::read_isa(this, &env.mem);
+    let class_name_string = env.objc.get_class_name(class).to_owned(); // TODO: Avoid copying
+    let key_string = to_rust_string(env, key);
+    panic!("Object {:?} of class {:?} ({:?}) does not have a setter for {} ({:?})\nAvailable selectors: {}", this, class_name_string, class, key_string, key, env.objc.all_class_selectors_as_strings(&env.mem, class).join(", "));
 }
 
 - (bool)respondsToSelector:(SEL)selector {
@@ -173,6 +229,45 @@ pub const CLASSES: ClassExports = objc_classes! {
            withObject:(id)o2 {
     assert!(!sel.is_null());
     msg_send(env, (this, sel, o1, o2))
+}
+
+- (())performSelectorOnMainThread:(SEL)sel withObject:(id)arg waitUntilDone:(bool)wait {
+    // // FIXME: main thread...
+    // () = msg_send(env, (this, sel, arg));
+
+    assert!(env.current_thread != 0);
+    log!("performSelectorOnMainThread:{} withObject:{:?} waitUntilDone:{}", sel.as_str(&env.mem), arg, wait);
+    assert!(!wait);
+
+    let sel_key: id = ns_string::get_static_str(env, "SEL");
+    let sel_str = ns_string::from_rust_string(env, sel.as_str(&env.mem).to_string());
+    let arg_key: id = ns_string::get_static_str(env, "arg");
+    let dict = dict_from_keys_and_objects(env, &[(sel_key, sel_str), (arg_key, arg)]);
+
+    let selector = env.objc.lookup_selector("timerFireMethod:").unwrap();
+    let timer:id = msg_class![env; NSTimer timerWithTimeInterval:0.0
+                                              target:this
+                                            selector:selector
+                                            userInfo:dict
+                                             repeats:false];
+
+    let run_loop: id = msg_class![env; NSRunLoop mainRunLoop];
+    let mode: id = ns_string::get_static_str(env, NSDefaultRunLoopMode);
+    let _: () = msg![env; run_loop addTimer:timer forMode:mode];
+}
+
+- (())timerFireMethod:(id)which { // NSTimer *
+    let dict: id = msg![env; which userInfo];
+
+    let sel_key: id = ns_string::get_static_str(env, "SEL");
+    let sel_str_id: id = msg![env; dict objectForKey:sel_key];
+    let sel_str = ns_string::to_rust_string(env, sel_str_id);
+    let sel = env.objc.lookup_selector(&sel_str).unwrap();
+
+    let arg_key: id = ns_string::get_static_str(env, "arg");
+    let arg: id = msg![env; dict objectForKey:arg_key];
+
+    () = msg_send(env, (this, sel, arg));
 }
 
 @end
