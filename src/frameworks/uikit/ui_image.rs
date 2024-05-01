@@ -6,8 +6,8 @@
 //! `UIImage`.
 
 use super::ui_graphics::UIGraphicsGetCurrentContext;
-use crate::frameworks::core_graphics::cg_context::CGContextDrawImage;
 use crate::frameworks::core_graphics::cg_affine_transform::CGRectApplyAffineTransform;
+use crate::frameworks::core_graphics::cg_context::CGContextDrawImage;
 use crate::frameworks::core_graphics::cg_image::{self, CGImageRef, CGImageRelease, CGImageRetain};
 use crate::frameworks::core_graphics::{CGFloat, CGSize, CGPoint, CGRect};
 use crate::frameworks::core_graphics::cg_context::{CGContextDrawImage, CGContextGetCTM};
@@ -128,7 +128,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     }
 }
 
-- (())drawInRect:(CGRect)rect {
 - (())drawAtPoint:(CGPoint)point {
     msg![env; this drawAtPoint:point blendMode:0 alpha:1.0f32]
 }
