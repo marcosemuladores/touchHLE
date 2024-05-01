@@ -5,7 +5,6 @@
  */
 //! `UIImage`.
 
-use super::ui_graphics::UIGraphicsGetCurrentContext;
 use crate::frameworks::core_graphics::cg_affine_transform::CGRectApplyAffineTransform;
 use crate::frameworks::core_graphics::cg_context::CGContextDrawImage;
 use crate::frameworks::core_graphics::cg_image::{self, CGImageRef, CGImageRelease, CGImageRetain};
