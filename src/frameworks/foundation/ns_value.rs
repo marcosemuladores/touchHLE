@@ -5,7 +5,7 @@
  */
 //! The `NSValue` class cluster, including `NSNumber`.
 
-use super::NSUInteger;
+use super::{NSInteger, NSUInteger};
 use crate::frameworks::foundation::ns_string::from_rust_string;
 use crate::objc::{
     autorelease, id, msg, msg_class, objc_classes, retain, Class, ClassExports, HostObject,
@@ -14,6 +14,7 @@ use crate::objc::{
 
 enum NSNumberHostObject {
     Bool(bool),
+    Int(i32),
     UnsignedLongLong(u64),
     LongLong(i64),
     Float(f32),
@@ -49,6 +50,22 @@ pub const CLASSES: ClassExports = objc_classes! {
 
     let new: id = msg![env; this alloc];
     let new: id = msg![env; new initWithBool:value];
+    autorelease(env, new)
+}
+
++ (id)numberWithInteger:(NSInteger)value {
+    // TODO: for greater efficiency we could return a static-lifetime value
+
+    let new: id = msg![env; this alloc];
+    let new: id = msg![env; new initWithInteger:value];
+    autorelease(env, new)
+}
+
++ (id)numberWithInt:(i32)value {
+    // TODO: for greater efficiency we could return a static-lifetime value
+
+    let new: id = msg![env; this alloc];
+    let new: id = msg![env; new initWithInt:value];
     autorelease(env, new)
 }
 
@@ -91,6 +108,16 @@ pub const CLASSES: ClassExports = objc_classes! {
     this
 }
 
+- (id)initWithInteger:(NSInteger)value {
+    *env.objc.borrow_mut::<NSNumberHostObject>(this) = NSNumberHostObject::Int(value);
+    this
+}
+
+- (id)initWithInt:(i32)value {
+    *env.objc.borrow_mut(this) = NSNumberHostObject::Int(value);
+    this
+}
+
 - (id)initWithFloat:(f32)value {
     *env.objc.borrow_mut(this) = NSNumberHostObject::Float(value);
     this
@@ -114,6 +141,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (id)description {
     match env.objc.borrow(this) {
         NSNumberHostObject::Bool(value) => from_rust_string(env, (*value as i32).to_string()),
+        NSNumberHostObject::Int(value) => from_rust_string(env, value.to_string()),
         NSNumberHostObject::UnsignedLongLong(value) => from_rust_string(env, value.to_string()),
         NSNumberHostObject::LongLong(value) => from_rust_string(env, value.to_string()),
         NSNumberHostObject::Float(value) => from_rust_string(env, value.to_string()),
@@ -144,6 +172,22 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 // TODO: accessors etc
+
+- (NSInteger)integerValue {
+    let value = if let &NSNumberHostObject::Int(value) = env.objc.borrow(this) { value } else { todo!() };
+    value
+}
+- (i32)intValue {
+    msg![env; this integerValue]
+}
+- (f32)floatValue {
+    let value = if let &NSNumberHostObject::Float(value) = env.objc.borrow(this) { value } else { todo!() };
+    value
+}
+- (bool)boolValue {
+    let value = if let &NSNumberHostObject::Bool(value) = env.objc.borrow(this) { value } else { todo!() };
+    value
+}
 
 @end
 
