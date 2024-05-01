@@ -391,7 +391,7 @@ pub fn write_next_arg<T: GuestArg>(
     // After the fourth register is used, the arguments go on the stack.
     // In some cases the argument is split over both registers and the stack.
 
-    let mut fake_regs = [0u32; 4]; // Rust doesn't allow [0u32; Trait::T] alas.
+    let mut fake_regs = [0u32; 16]; // Rust doesn't allow [0u32; Trait::T] alas.
     let fake_regs = &mut fake_regs[0..T::REG_COUNT];
     arg.to_regs(fake_regs);
 
@@ -409,7 +409,7 @@ pub fn write_next_arg<T: GuestArg>(
 /// Represents variable arguments in a [CallFromGuest] function signature,
 /// like C `...`, e.g. in the signature of `printf()`. See also [VaList].
 #[derive(Debug)]
-pub struct DotDotDot(VaList);
+pub struct DotDotDot(pub VaList);
 impl DotDotDot {
     pub fn start(&self) -> VaList {
         self.0
@@ -422,8 +422,8 @@ impl DotDotDot {
 /// See also [DotDotDot].
 #[derive(Copy, Clone, Debug)]
 pub struct VaList {
-    reg_offset: usize,
-    stack_pointer: ConstVoidPtr,
+    pub reg_offset: usize,
+    pub stack_pointer: ConstVoidPtr,
 }
 impl VaList {
     /// Get the next argument, like C's `va_arg()`. Be careful as the type may
