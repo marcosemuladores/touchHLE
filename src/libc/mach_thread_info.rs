@@ -303,27 +303,9 @@ fn thread_suspend(
     target_thread: thread_inspect_t
 ) -> kern_return_t {
     env.suspend_thread(target_thread as ThreadId);
-fn mach_host_self(_env: &mut Environment) -> i32 {
     0
 }
 
-// TODO: types
-fn thread_resume(
-fn host_statistics(env: &mut Environment, host_priv: i32, flavor: i32,
-    env: &mut Environment,
-                   host_info: MutPtr<i32>, host_info_count: MutPtr<i32>) -> i32 {
-    target_thread: thread_inspect_t
-    assert_eq!(host_priv, 0);
-) -> kern_return_t {
-    assert_eq!(flavor, 2);
-    env.resume_thread(target_thread as ThreadId);
-    // free memory
-    0
-    // TODO: count used chunks in bytes and write here
-}
-    env.mem.write(host_info, 380_818);
-
-    env.mem.write(host_info_count, 1);
 fn thread_resume(
     env: &mut Environment,
     target_thread: thread_inspect_t
@@ -389,8 +371,6 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(thread_info(_, _, _, _)),
     export_c_func!(thread_policy_set(_, _, _, _)),
     export_c_func!(mach_thread_self()),
-    export_c_func!(mach_host_self()),
-    export_c_func!(host_statistics(_, _, _, _)),
     export_c_func!(task_threads(_, _, _)),
     export_c_func!(mach_msg(_, _, _, _, _, _, _)),
     export_c_func!(mach_port_allocate(_, _, _)),
