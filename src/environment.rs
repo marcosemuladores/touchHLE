@@ -1022,7 +1022,6 @@ impl Environment {
                                 self.threads[i].blocked_by = ThreadBlock::NotBlocked;
                                 suitable_thread = Some(i);
                                 let y = self.libc_state.pthread.cond.mutexes.remove(&cond).unwrap();
-                                mutex_to_relock = Some(y.mutex_id);
                                 break;
                             }
                         },
