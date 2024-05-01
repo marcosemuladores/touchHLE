@@ -5,9 +5,11 @@
  */
 //! `UIImage`.
 
-use crate::frameworks::core_graphics::cg_context::CGContextDrawImage;
+use super::ui_graphics::UIGraphicsGetCurrentContext;
+use crate::frameworks::core_graphics::cg_affine_transform::CGRectApplyAffineTransform;
 use crate::frameworks::core_graphics::cg_image::{self, CGImageRef, CGImageRelease, CGImageRetain};
-use crate::frameworks::core_graphics::{CGRect, CGSize};
+use crate::frameworks::core_graphics::{CGFloat, CGSize, CGPoint, CGRect};
+use crate::frameworks::core_graphics::cg_context::{CGContextDrawImage, CGContextGetCTM};
 use crate::frameworks::foundation::{ns_data, ns_string, NSInteger};
 use crate::frameworks::uikit::ui_graphics::UIGraphicsGetCurrentContext;
 use crate::fs::GuestPath;
@@ -76,6 +78,9 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (id)initWithContentsOfFile:(id)path { // NSString*
+    if path == nil {
+        return nil;
+    }
     let path = ns_string::to_rust_string(env, path); // TODO: avoid copy
     let Ok(bytes) = env.fs.read(GuestPath::new(&path)) else {
         log!("Warning: couldn't read image file at {:?}, returning nil", path);
@@ -122,9 +127,29 @@ pub const CLASSES: ClassExports = objc_classes! {
     }
 }
 
-- (())drawInRect:(CGRect)rect {
+- (())drawAtPoint:(CGPoint)point {
+    msg![env; this drawAtPoint:point blendMode:0 alpha:1.0f32]
+}
+
+- (())drawAtPoint:(CGPoint)point
+        blendMode:(i32)blend_mode // CGBlendMode
+            alpha:(CGFloat)alpha {
+    log!("drawAtPoint p {} bm {} al {}", point, blend_mode, alpha);
+    //assert_eq!(alpha, 0.0);
+    if alpha == 0.0 {
+        return;
+    }
+    // TODO: respect alpha
     let context = UIGraphicsGetCurrentContext(env);
+    assert_ne!(context, nil);
     let image = env.objc.borrow::<UIImageHostObject>(this).cg_image;
+    let size = msg![env; this size];
+    let rect = CGRect {
+        origin: point,
+        size
+    };
+    let affine = CGContextGetCTM(env, context);
+    let rect = CGRectApplyAffineTransform(env, rect, affine);
     CGContextDrawImage(env, context, rect, image);
 }
 
