@@ -12,14 +12,11 @@ use crate::abi::GuestFunction;
 use crate::dyld::{export_c_func, ConstantExports, FunctionExports, HostConstant};
 use crate::frameworks::core_foundation::cf_allocator::CFAllocatorRef;
 use crate::frameworks::core_foundation::time::{CFAbsoluteTime, CFTimeInterval};
-use crate::frameworks::core_foundation::CFIndex;
 use crate::mem::MutVoidPtr;
 use crate::objc::{id, msg, msg_class, nil, Class};
 use crate::{Environment, msg};
 use crate::frameworks::core_foundation::cf_string::CFStringRef;
 use crate::frameworks::core_foundation::{CFIndex, CFTypeRef};
-use crate::frameworks::core_foundation::cf_allocator::CFAllocatorRef;
-use crate::frameworks::core_foundation::time::CFTimeInterval;
 use crate::mem::{ConstVoidPtr, Ptr};
 
 pub type CFRunLoopRef = super::CFTypeRef;
