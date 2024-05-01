@@ -126,6 +126,26 @@ pub const CLASSES: ClassExports = objc_classes! {
     }
 }
 
+- (())fire {
+    let &NSTimerHostObject {
+        ns_interval,
+        rust_interval,
+        target,
+        selector,
+        repeats,
+        due_by,
+        run_loop,
+        ..
+    } = env.objc.borrow(this);
+
+    let pool: id = msg_class![env; NSAutoreleasePool new];
+
+    // Signature should be `- (void)timerDidFire:(NSTimer *)which`.
+    let _: () = msg_send(env, (target, selector, this));
+
+    release(env, pool);
+}
+
 // TODO: more constructors
 // TODO: more accessors
 
