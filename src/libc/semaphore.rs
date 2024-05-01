@@ -51,7 +51,7 @@ fn sem_open(
     let sem_name_str = sem_name.to_string();
     let host_sem_rc =
         if let Some(existing_host_sem_rc) = State::get(env).named_semaphores.get(sem_name) {
-            if (oflag & O_EXCL) == 0 {
+            if (oflag & O_EXCL) != 0 {
                 // TODO: set errno
                 return SEM_FAILED;
             }
@@ -120,6 +120,43 @@ fn sem_unlink(env: &mut Environment, name: ConstPtr<u8>) -> i32 {
     0 // success
 }
 
+// Mach semaphores
+
+#[allow(non_camel_case_types)]
+type task_t = u32;
+#[allow(non_camel_case_types)]
+type semaphore_t = u32;
+
+fn semaphore_create(
+    env: &mut Environment,
+    task: task_t,
+    semaphore: MutPtr<semaphore_t>,
+    policy: i32,
+    value: i32) -> i32 {
+    assert_eq!(task, 0);
+    // TODO: do not use names
+    let sem_name = env.mem.alloc_and_write_cstr(b"_self");
+    let sem = sem_open(env, sem_name.cast_const(), O_CREAT, 0, value.try_into().unwrap());
+    assert_ne!(sem, SEM_FAILED);
+    log!("semaphore_create sem {:?}", sem);
+    env.mem.free(sem_name.cast());
+    // TODO: this is fragile
+    env.mem.write(semaphore, sem.to_bits());
+    0
+}
+
+fn semaphore_wait(env: &mut Environment, semaphore: semaphore_t) -> i32 {
+    let sem: MutPtr<sem_t> = MutPtr::from_bits(semaphore);
+    log!("semaphore_wait sem {:?}", sem);
+    sem_wait(env, sem)
+}
+
+fn semaphore_signal(env: &mut Environment, semaphore: semaphore_t) -> i32 {
+    let sem: MutPtr<sem_t> = MutPtr::from_bits(semaphore);
+    log!("sem_post sem {:?}", sem);
+    sem_post(env, sem)
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(sem_open(_, _, _, _)),
     export_c_func!(sem_post(_)),
@@ -127,4 +164,8 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(sem_trywait(_)),
     export_c_func!(sem_close(_)),
     export_c_func!(sem_unlink(_)),
+    //
+    export_c_func!(semaphore_create(_, _, _, _)),
+    export_c_func!(semaphore_wait(_)),
+    export_c_func!(semaphore_signal(_)),
 ];
