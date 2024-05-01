@@ -7,7 +7,7 @@
 
 use super::ui_device::*;
 use crate::dyld::{export_c_func, FunctionExports};
-use crate::frameworks::foundation::{ns_array, ns_string};
+use crate::frameworks::foundation::{ns_array, ns_string, NSInteger, NSTimeInterval};
 use crate::frameworks::uikit::ui_nib::load_main_nib_file;
 use crate::mem::MutPtr;
 use crate::objc::{
@@ -107,7 +107,22 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; this setStatusBarOrientation:orientation]
 }
 
-- (bool)idleTimerDisabled {
+- (())setStatusBarStyle:(NSInteger)statusBarStyle {
+    // TODO
+}
+
+- (())setStatusBarStyle:(NSInteger)statusBarStyle animated:(bool)_animated {
+    // TODO
+}
+
+- (NSTimeInterval)statusBarOrientationAnimationDuration {
+    0.0
+}
+- (bool)isStatusBarHidden {
+    true
+}
+
+- (bool)isIdleTimerDisabled {
     !env.window().is_screen_saver_enabled()
 }
 - (())setIdleTimerDisabled:(bool)disabled {
@@ -140,6 +155,17 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 -(())endIgnoringInteractionEvents {
     log!("TODO: ignoring endIgnoringInteractionEvents");
+}
+
+- (id)keyWindow {
+    *env
+        .framework_state
+        .uikit
+        .ui_view
+        .ui_window
+        .visible_windows
+        .last()
+        .unwrap()
 }
 
 - (id)windows {
