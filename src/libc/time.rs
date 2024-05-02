@@ -53,7 +53,8 @@ fn time(env: &mut Environment, out: MutPtr<time_t>) -> time_t {
 }
 
 fn tzset(_env: &mut Environment) {
-log!("TODO: tzset()");
+    log!("TODO: tzset()");
+}
 
 fn ftime(env: &mut Environment, tb: MutPtr<timeb>) -> i32 {
     let time = time(env, Ptr::null());
