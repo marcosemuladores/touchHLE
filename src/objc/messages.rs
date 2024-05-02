@@ -16,7 +16,6 @@ use crate::abi::{CallFromHost, GuestRet};
 use crate::mem::{ConstPtr, MutVoidPtr, SafeRead};
 use crate::Environment;
 use std::any::TypeId;
-use std::sync::atomic::Ordering;
 
 /// The core implementation of `objc_msgSend`, the main function of Objective-C.
 ///
@@ -46,19 +45,7 @@ fn objc_msgSend_inner(env: &mut Environment, receiver: id, selector: SEL, super2
     if orig_class == nil {
         return;
     }
-    assert!(orig_class != nil);
-    if !env
-        .objc
-        .get_host_object(orig_class)
-        .unwrap()
-        .as_any()
-        .downcast_ref::<super::ClassHostObject>()
-        .map(|x| x.initialized.load(Ordering::Relaxed))
-        .unwrap_or(true)
-        && selector.as_str(&env.mem) != "initialize"
-    {
-        initialize_class(env, receiver, orig_class);
-    }
+    //assert!(orig_class != nil);
 
     // Traverse the chain of superclasses to find the method implementation.
 
@@ -446,28 +433,4 @@ pub fn autorelease(env: &mut Environment, object: id) -> id {
         return nil;
     }
     msg![env; object autorelease]
-}
-
-fn initialize_class(env: &mut Environment, object: id, class: id) {
-    let class_host_object = env.objc.get_host_object(class).unwrap();
-    let &super::ClassHostObject {
-        superclass,
-        is_metaclass,
-        ref initialized,
-        ..
-    } = class_host_object.as_any().downcast_ref().unwrap();
-    if initialized.swap(true, Ordering::Relaxed) {
-        return;
-    }
-    if is_metaclass {
-        initialize_class(env, nil, object);
-    }
-    if superclass != nil {
-        initialize_class(env, object, superclass);
-    }
-    // We are sending another msg from inside msg_send, preserve the registers
-    let mut reg_copy = [0; 4];
-    reg_copy.copy_from_slice(&env.cpu.regs()[0..4]);
-    () = msg![env; class initialize];
-    env.cpu.regs_mut()[0..4].copy_from_slice(&reg_copy);
 }
