@@ -20,6 +20,7 @@ use super::{
 use crate::mach_o::MachO;
 use crate::mem::{guest_size_of, ConstPtr, ConstVoidPtr, GuestUSize, Mem, Ptr, SafeRead};
 use std::collections::HashMap;
+use std::sync::atomic::AtomicBool;
 
 /// Generic pointer to an Objective-C class or metaclass.
 ///
@@ -47,6 +48,7 @@ pub(super) struct ClassHostObject {
     /// Size of the allocated memory for instances of this class or metaclass.
     /// This is always >= the value in the superclass.
     pub(super) instance_size: GuestUSize,
+    pub(super) initialized: AtomicBool,
 }
 impl HostObject for ClassHostObject {}
 
@@ -362,6 +364,7 @@ impl ClassHostObject {
             // maybe this should be 0 for NSObject? does it matter?
             _instance_start: size,
             instance_size: size,
+            initialized: AtomicBool::new(false),
             ivars: HashMap::default(),
         }
     }
@@ -388,6 +391,7 @@ impl ClassHostObject {
             methods: HashMap::new(),
             _instance_start: instance_start,
             instance_size,
+            initialized: AtomicBool::new(false),
             ivars: HashMap::new(),
         };
 
@@ -666,6 +670,7 @@ impl ObjC {
                         methods: Default::default(),
                         _instance_start: Default::default(),
                         instance_size: Default::default(),
+                        initialized: Default::default(),
                         ivars: Default::default(),
                     },
                 );
