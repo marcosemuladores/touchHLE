@@ -16,6 +16,7 @@ use crate::abi::{CallFromHost, GuestRet};
 use crate::mem::{ConstPtr, MutVoidPtr, SafeRead};
 use crate::Environment;
 use std::any::TypeId;
+use std::sync::atomic::Ordering;
 
 /// The core implementation of `objc_msgSend`, the main function of Objective-C.
 ///
