@@ -81,6 +81,9 @@ pub trait GLES {
     unsafe fn LineWidth(&mut self, val: GLfloat);
     unsafe fn LineWidthx(&mut self, val: GLfixed);
 
+    // Clipping
+    unsafe fn ClipPlanef(&mut self, pname: GLenum, params: *const GLfloat);    
+ 
     // Points
     unsafe fn PointSize(&mut self, size: GLfloat);
     unsafe fn PointSizex(&mut self, size: GLfixed);
