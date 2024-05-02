@@ -7,7 +7,8 @@
 
 use super::ns_enumerator::{fast_enumeration_helper, NSFastEnumerationState};
 use super::ns_property_list_serialization::deserialize_plist_from_file;
-use super::ns_enumerator::NSFastEnumerationState, ns_keyed_unarchiver, ns_string, ns_url, NSOrderedAscending, NSOrderedDescending, NSOrderedSame, NSUInteger,
+use super::{ns_keyed_unarchiver, ns_string, ns_url, NSUInteger};
+use crate::fs::GuestPath;
 use crate::fs::GuestPath;
 use crate::mem::MutPtr;
 use crate::objc::{
