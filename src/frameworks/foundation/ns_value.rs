@@ -5,16 +5,12 @@
  */
 //! The `NSValue` class cluster, including `NSNumber`.
 
-use super::{
-    NSComparisonResult, NSInteger, NSOrderedAscending, NSOrderedDescending, NSOrderedSame, NSUInteger,
-};
+use super::{NSInteger, NSUInteger};
 use crate::frameworks::foundation::ns_string::from_rust_string;
-use crate::mem::ConstPtr;
 use crate::objc::{
     autorelease, id, msg, msg_class, objc_classes, retain, Class, ClassExports, HostObject,
     NSZonePtr,
 };
-use std::cmp::Ordering;
 
 #[derive(Debug)]
 pub enum NSNumberHostObject {
@@ -197,61 +193,6 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (bool)boolValue {
     let value = if let &NSNumberHostObject::Bool(value) = env.objc.borrow(this) { value } else { todo!() };
     value
-}
--(ConstPtr<u8>)objCType {
-    let ty = match env.objc.borrow::<NSNumberHostObject>(this) {
-        NSNumberHostObject::Bool(_) => "B",
-        NSNumberHostObject::UnsignedLongLong(_) => "Q",
-        NSNumberHostObject::LongLong(_) => "q",
-        NSNumberHostObject::Double(_) => "d",
-    };
-    let c_string = env.mem.alloc_and_write_cstr(ty.as_bytes());
-    let length: NSUInteger = (ty.len() + 1).try_into().unwrap();
-    // NSData will handle releasing the string (it is autoreleased)
-    let _: id = msg_class![env; NSData dataWithBytesNoCopy:(c_string.cast_void())
-                                                    length:length];
-    c_string.cast_const()
-}
-
-- (NSComparisonResult)compare:(id)other {
-    match *env.objc.borrow::<NSNumberHostObject>(this) {
-        NSNumberHostObject::Bool(v) => {
-            let other_v: bool = msg![env; other boolValue];
-            if !v && other_v {
-                NSOrderedAscending
-            } else if v == other_v {
-                NSOrderedSame
-            } else {
-                NSOrderedDescending
-            }
-        }
-        NSNumberHostObject::UnsignedLongLong(v) => {
-            let other_v: u64 = msg![env; other unsignedLongLongValue];
-            match v.cmp(&other_v) {
-                Ordering::Less => NSOrderedAscending,
-                Ordering::Equal => NSOrderedSame,
-                Ordering::Greater => NSOrderedDescending
-            }
-        },
-        NSNumberHostObject::LongLong(v) => {
-            let other_v: i64 = msg![env; other longLongValue];
-            match v.cmp(&other_v) {
-                Ordering::Less => NSOrderedAscending,
-                Ordering::Equal => NSOrderedSame,
-                Ordering::Greater => NSOrderedDescending
-            }
-        },
-        NSNumberHostObject::Double(v) => {
-            let other_v: f64 = msg![env; other doubleValue];
-            if v < other_v {
-                NSOrderedAscending
-            } else if v == other_v {
-                NSOrderedSame
-            } else {
-                NSOrderedDescending
-            }
-        },
-    }
 }
 
 @end
