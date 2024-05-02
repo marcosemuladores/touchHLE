@@ -9,6 +9,7 @@ use super::{
     NSComparisonResult, NSInteger, NSOrderedAscending, NSOrderedDescending, NSOrderedSame, NSUInteger,
 };
 use crate::frameworks::foundation::ns_string::from_rust_string;
+use crate::mem::ConstPtr;
 use crate::objc::{
     autorelease, id, msg, msg_class, objc_classes, retain, Class, ClassExports, HostObject,
     NSZonePtr,
