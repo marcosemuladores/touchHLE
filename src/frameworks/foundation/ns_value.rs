@@ -171,6 +171,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     a == b
 }
 
+- (f64)doubleValue {
+    let value = if let &NSNumberHostObject::Float(value) = env.objc.borrow(this) { value } else { todo!() };
+    value.try_into().unwrap()
+}
+    
 // TODO: accessors etc
 
 - (NSInteger)integerValue {
