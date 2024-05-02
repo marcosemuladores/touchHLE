@@ -12,7 +12,8 @@ use crate::objc::{
     NSZonePtr,
 };
 
-enum NSNumberHostObject {
+#[derive(Debug)]
+pub enum NSNumberHostObject {
     Bool(bool),
     Int(i32),
     UnsignedLongLong(u64),
