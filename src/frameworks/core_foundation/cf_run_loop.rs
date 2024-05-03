@@ -33,6 +33,11 @@ pub fn CFRunLoopGetMain(env: &mut Environment) -> CFRunLoopRef {
     msg_class![env; NSRunLoop mainRunLoop]
 }
 
+pub fn CFRunLoopTimerCreateWithHandler(env: &mut Environment, allocator: CFAllocatorRef, fireDate: CFAbsoluteTime, interval: CFTimeInterval, flags: CFOptionFlags, order: CFIndex, timer: CFRunLoopTimerRef ) -> CFRunLoopRef {
+    // TODO: Create a new CFRunLoopTimer
+    msg_class![env; NSRunLoop currentRunLoop]
+}
+
 fn CFRunLoopRunInMode(
     env: &mut Environment, mode: CFRunLoopMode, seconds: CFTimeInterval, returnSomething: bool
 ) -> i32 {
@@ -152,6 +157,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFRunLoopGetCurrent()),
     export_c_func!(CFRunLoopGetMain()),
     export_c_func!(CFRunLoopRunInMode(_, _, _)),
+    export_c_func!(CFRunLoopTimerCreateWithHandler(_, _, _, _, _, _)),
     export_c_func!(CFRunLoopTimerCreate(_, _, _, _, _, _, _)),
     export_c_func!(CFRunLoopAddTimer(_, _, _)),
     export_c_func!(CFRunLoopTimerInvalidate(_)),
