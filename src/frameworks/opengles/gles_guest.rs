@@ -28,28 +28,23 @@ use crate::gles::gles11_raw::types::{GLintptr as HostGLintptr, GLsizeiptr as Hos
 type GuestGLsizeiptr = GuestISize;
 type GuestGLintptr = GuestISize;
 
-fn with_ctx_and_mem<T: Copy, U>(env: &mut Environment, f: T) -> U
+fn with_ctx_and_mem<T, U>(env: &mut Environment, f: T) -> U
 where
     T: FnOnce(&mut dyn GLES, &mut Mem) -> U,
 {
-    let mut res: Option<U> = None;
-    super::sync_context(
+    let gles = super::sync_context(
         &mut env.framework_state.opengles,
         &mut env.objc,
         env.window
             .as_mut()
             .expect("OpenGL ES is not supported in headless mode"),
-        |gles, _, _| {
-            res = Some(f(gles, &mut env.mem));
-        }
         env.current_thread,
     );
 
     //panic_on_gl_errors(&mut **gles);
-    //let
+    let res = f(gles, &mut env.mem);
     //panic_on_gl_errors(&mut **gles);
-    //#[allow(clippy::let_and_return)]
-    res.unwrap()
+    #[allow(clippy::let_and_return)]
     res
 }
 
@@ -123,12 +118,6 @@ fn glGetFloatv(env: &mut Environment, pname: GLenum, params: MutPtr<GLfloat>) {
     });
 }
 fn glGetIntegerv(env: &mut Environment, pname: GLenum, params: MutPtr<GLint>) {
-    log!("glGetIntegerv pname {:X}, params {:?}", pname, params);
-    let current_ctx = env.framework_state.opengles.current_ctx_for_thread(env.current_thread);
-    if current_ctx.is_none() && pname == gles11::MAX_TEXTURE_UNITS {
-        env.mem.write(params, 1);
-        return;
-    }
     with_ctx_and_mem(env, |gles, mem| {
         let params = mem.ptr_at_mut(params, 16 /* upper bound */);
         unsafe { gles.GetIntegerv(pname, params) };
