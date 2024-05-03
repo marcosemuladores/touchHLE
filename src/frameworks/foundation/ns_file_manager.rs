@@ -150,6 +150,22 @@ pub const CLASSES: ClassExports = objc_classes! {
     }
 }
 
+ - (bool) changeCurrentDirectoryPath:(id)path {
+    let path_str = ns_string::to_rust_string(env, path); // TODO: avoid copy
+
+    env.fs.change_working_directory(GuestPath::new(&path_str));
+
+    return true;
+}
+
+- (id) currentDirectoryPath {
+    return nil;
+}
+
+- (id) fileAttributesAtPath:(id) path traverseLink:(bool) yorn {
+    return nil;
+}
+   
 - (id)enumeratorAtPath:(id)path { // NSString*
     let path = ns_string::to_rust_string(env, path); // TODO: avoid copy
     let Ok(paths) = env.fs.enumerate_recursive(GuestPath::new(&path)) else {
