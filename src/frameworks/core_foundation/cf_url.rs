@@ -19,7 +19,11 @@ use crate::objc::{id, msg, msg_class};
 use crate::Environment;
 
 pub type CFURLRef = super::CFTypeRef;
+pub type CFURLPathStyle = CFIndex;
 
+pub const kCFURLPOSIXPathStyle: CFURLPathStyle = 0;
+pub const kCFURLHFSPathStyle: CFURLPathStyle = 1;
+pub const kCFURLWindowsPathStyle: CFURLPathStyle = 2;
 type CFURLPathStyle = CFIndex;
 const kCFURLPOSIXPathStyle: CFURLPathStyle = 0;
 #[allow(dead_code)]
