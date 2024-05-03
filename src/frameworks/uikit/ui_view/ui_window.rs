@@ -7,7 +7,7 @@
 
 use crate::frameworks::core_graphics::CGRect;
 use crate::frameworks::uikit::ui_view::CGFloat;
-use crate::objc::{id, msg, msg_super, objc_classes, ClassExports};
+use crate::objc::{id, msg, msg_super, objc_classes, ClassExports, retain};
 
 #[derive(Default)]
 pub struct State {
@@ -15,6 +15,7 @@ pub struct State {
     ///
     /// This is public because Core Animation also uses it.
     pub visible_windows: Vec<id>,
+    pub rvc: id
 }
 
 pub const CLASSES: ClassExports = objc_classes! {
@@ -102,6 +103,18 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 }
 
+- (())setRootViewController:(id)controller {
+    let view: id = msg![env; controller view];
+    () = msg![env; this addSubview:view];
+    let frame: CGRect = msg![env; this frame];
+    env.framework_state.uikit.ui_view.ui_window.rvc = retain(env, controller);
+    msg![env; view setFrame:frame]
+}
+
+- (id)rootViewController {
+    env.framework_state.uikit.ui_view.ui_window.rvc
+}
+    
 @end
 
 };
