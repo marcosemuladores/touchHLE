@@ -15,6 +15,7 @@ use crate::fs::{BundleData, Fs, GuestPath, GuestPathBuf};
 use crate::image::Image;
 use plist::dictionary::Dictionary;
 use plist::Value;
+use std::borrow::Cow;
 use std::io::Cursor;
 
 #[derive(Debug)]
