@@ -703,4 +703,13 @@ impl GLES for GLES1Native {
     unsafe fn ClipPlanef(&mut self, pname: GLenum, params: *const GLfloat) {
         gles11::ClipPlanef(pname, params);
     }
+    unsafe fn GetBufferParameteriv(&mut self, target: GLenum, pname: GLenum, params: *mut GLint) {
+        gles11::GetBufferParameteriv(target, pname, params)
+    }
+    unsafe fn MapBufferOES(&mut self, target: GLenum, access: GLenum) -> *mut GLvoid {
+        gles11::MapBufferOES(target, access)
+    }
+    unsafe fn UnmapBufferOES(&mut self, target: GLenum) -> GLboolean {
+        gles11::UnmapBufferOES(target)
+    }
 }
