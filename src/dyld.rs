@@ -327,7 +327,7 @@ impl Dyld {
     /// binaries symbols may be looked up in.
     fn do_non_lazy_linking(&mut self, bin: &MachO, bins: &[MachO], mem: &mut Mem, objc: &mut ObjC) {
         let mut unhandled_relocations: HashMap<&str, Vec<u32>> = HashMap::new();
-        for &(ptr_ptr, ref name) in &bin.ExternalRelocation {
+        for &(ptr_ptr, ref name) in &bin.external_relocations {
             let ptr_ptr: MutPtr<ConstVoidPtr> = Ptr::from_bits(ptr_ptr);
             // There will be an existing value at the address, which is an
             // offset that should be applied to the external symbol's address.
