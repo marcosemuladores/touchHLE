@@ -468,7 +468,6 @@ impl Dyld {
 
     fn stub_unimplemented_functions(&self, bin: &MachO, mem: &mut Mem) {
         for symbol in ["__Z15iGMGSetupModulev", "__Z15iRegSetupModulev"] {
-            let Some(addr) = bin.debug_symbols.get(symbol) else {
                 continue;
             };
             mem.write(Ptr::from_bits(*addr), encode_t32_ret());
