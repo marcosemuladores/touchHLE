@@ -8,7 +8,6 @@
 use super::NSTimeInterval;
 use crate::frameworks::core_foundation::time::apple_epoch;
 use crate::frameworks::foundation::{ns_string, NSInteger};
-use crate::msg_class;
 use crate::objc::{autorelease, id, msg, msg_class, objc_classes, ClassExports, HostObject};
 
 use std::time::SystemTime;
