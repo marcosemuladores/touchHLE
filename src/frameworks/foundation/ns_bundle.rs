@@ -151,6 +151,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, exec_path)
 }
 
+- (id)executableURL {
+    let exec_path: id = msg![env; this executablePath];
+    msg_class![env; NSURL fileURLWithPath:exec_path]
+}
+    
 - (id)pathForResource:(id)name // NSString*
                ofType:(id)extension // NSString*
           inDirectory:(id)directory { // NSString*
