@@ -71,8 +71,6 @@ impl Thread {
     fn is_blocked(&self) -> bool {
         !matches!(self.blocked_by, ThreadBlock::NotBlocked)
     }
-
-    gcstack: Vec<u32>,
 }
 
 /// The struct containing the entire emulator state. Methods are provided for
@@ -258,7 +256,6 @@ impl Environment {
             in_host_function: false,
             context: None,
             stack: Some(mem::Mem::MAIN_THREAD_STACK_LOW_END..=0u32.wrapping_sub(1)),
-            gcstack: Vec::new(),
         };
 
         let mut env = Environment {
@@ -392,7 +389,6 @@ impl Environment {
             in_host_function: false,
             context: None,
             stack: Some(mem::Mem::MAIN_THREAD_STACK_LOW_END..=0u32.wrapping_sub(1)),
-            gcstack: Vec::new(),
         };
 
         let mut env = Environment {
@@ -512,14 +508,6 @@ impl Environment {
             }
             i += 1;
         }
-           echo!(
-            "GCSTACK: {:?}",
-            self.threads[self.current_thread]
-                .gcstack
-                .iter()
-                .map(|x| format!("{:#x}", x))
-                .collect::<Vec<_>>()
-        )
     }
 
     /// Create a new thread and return its ID. The `start_routine` and
@@ -543,7 +531,6 @@ impl Environment {
             in_host_function: false,
             context: Some(cpu::CpuContext::new()),
             stack: Some(stack_alloc.to_bits()..=(stack_high_addr - 1)),
-            gcstack: Vec::new(),
         });
         let new_thread_id = self.threads.len() - 1;
 
@@ -888,15 +875,8 @@ impl Environment {
                             let was_in_host_function =
                                 self.threads[self.current_thread].in_host_function;
                             self.threads[self.current_thread].in_host_function = true;
-                                             if self.threads[self.current_thread].gcstack.len() > 100 {
-                                panic!();
-                            }
-                            self.threads[self.current_thread]
-                                .gcstack
-                                .push(self.cpu.regs()[cpu::Cpu::LR]);
                             f.call_from_guest(self);
                             self.threads[self.current_thread].in_host_function =
-                            self.threads[self.current_thread].gcstack.pop();
                                 was_in_host_function;
                             // Host function might have put the thread to sleep.
                             if let ThreadBlock::NotBlocked =
