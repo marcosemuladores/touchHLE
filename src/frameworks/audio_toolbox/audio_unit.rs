@@ -13,10 +13,13 @@ use crate::abi::CallFromHost;
 use crate::dyld::FunctionExports;
 use crate::environment::Environment;
 use crate::export_c_func;
-use crate::frameworks::audio_toolbox::audio_components;
+use crate::frameworks::audio_toolbox::State;
+use crate::frameworks::audio_toolbox::audio_components::State
+use crate::frameworks::audio_toolbox::audio_file::State;
 use crate::frameworks::carbon_core::OSStatus;
 use crate::frameworks::core_audio_types::{kAudioFormatLinearPCM, AudioStreamBasicDescription};
 use crate::frameworks::core_foundation::cf_run_loop::CFRunLoopGetMain;
+use crate::frameworks::State;
 use crate::frameworks::foundation::ns_run_loop;
 use crate::mem::{ConstVoidPtr, MutPtr, MutVoidPtr, SafeRead};
 use crate::objc::nil;
