@@ -6,13 +6,19 @@
 //! `AudioComponent.h` (Audio Component Services)
 
 use std::collections::HashMap;
+use std::time::Instant;
+
+use touchHLE_openal_soft_wrapper::al_types::ALuint;
 
 use crate::abi::GuestFunction;
 use crate::dyld::FunctionExports;
 use crate::environment::Environment;
 use crate::export_c_func;
 use crate::frameworks::carbon_core::{paramErr, OSStatus};
-use crate::frameworks::core_audio_types::fourcc;
+use crate::frameworks::core_audio_types::{
+    fourcc, kAudioFormatFlagIsAlignedHigh, kAudioFormatFlagIsFloat, kAudioFormatFlagIsPacked,
+    kAudioFormatFlagIsSignedInteger, kAudioFormatLinearPCM, AudioStreamBasicDescription,
+};
 use crate::mem::{ConstPtr, ConstVoidPtr, MutPtr, SafeRead};
 use crate::objc::nil;
 
@@ -31,16 +37,60 @@ impl State {
     }
 }
 
-#[derive(Default, Clone)]
-pub struct AudioComponentInstanceHostObject {}
-
 #[derive(Clone)]
+pub struct AudioComponentInstanceHostObject {
+    pub started: bool,
+    pub global_stream_format: AudioStreamBasicDescription,
+    pub output_stream_format: Option<AudioStreamBasicDescription>,
+    pub render_callback: Option<AURenderCallbackStruct>,
+    pub last_render_time: Option<Instant>,
+    pub al_source: Option<ALuint>,
+}
+impl Default for AudioComponentInstanceHostObject {
+    fn default() -> Self {
+        AudioComponentInstanceHostObject {
+            started: false,
+            global_stream_format: AudioStreamBasicDescription {
+                sample_rate: 44100.0,
+                format_id: kAudioFormatLinearPCM,
+                format_flags: kAudioFormatFlagIsFloat
+                    | kAudioFormatFlagIsSignedInteger
+                    | kAudioFormatFlagIsPacked
+                    | kAudioFormatFlagIsAlignedHigh,
+                bytes_per_packet: 4,
+                frames_per_packet: 1,
+                bytes_per_frame: 4,
+                channels_per_frame: 2,
+                bits_per_channel: 32,
+                _reserved: 0,
+            },
+            output_stream_format: None,
+            render_callback: None,
+            last_render_time: None,
+            al_source: None,
+        }
+    }
+}
+
+#[derive(Copy, Clone)]
 #[repr(C, packed)]
 pub struct AURenderCallbackStruct {
     pub input_proc: AURenderCallback,
     pub input_proc_ref_con: ConstVoidPtr,
 }
 unsafe impl SafeRead for AURenderCallbackStruct {}
+impl std::fmt::Debug for AURenderCallbackStruct {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let &AURenderCallbackStruct {
+            input_proc,
+            input_proc_ref_con,
+        } = self;
+        f.debug_struct("AURenderCallbackStruct")
+            .field("input_proc", &input_proc)
+            .field("input_proc_ref_con", &input_proc_ref_con)
+            .finish()
+    }
+}
 
 #[repr(C, packed)]
 struct OpaqueAudioComponent {}
