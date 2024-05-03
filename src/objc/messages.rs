@@ -34,7 +34,7 @@ fn objc_msgSend_inner(env: &mut Environment, receiver: id, selector: SEL, super2
     log_dbg!("Dispatching {} for {:?}", selector.as_str(&env.mem), receiver);
     let message_type_info = env.objc.message_type_info.take();
 
-    if receiver == nil {
+    if receiver == nil || selector.as_str(&env.mem) == "FlurryStartTimedEvent" || selector.as_str(&env.mem) == "PlayHavenRequestContent" {
         // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjectiveC/Chapters/ocObjectsClasses.html#//apple_ref/doc/uid/TP30001163-CH11-SW7
         log_dbg!("[nil {}]", selector.as_str(&env.mem));
         env.cpu.regs_mut()[0..2].fill(0);
