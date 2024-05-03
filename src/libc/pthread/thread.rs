@@ -93,31 +93,6 @@ pub fn pthread_attr_setdetachstate(
     env.mem.write(attr, attr_copy);
     0 // success
 }
-fn pthread_attr_setstacksize(
-    env: &mut Environment,
-    attr: MutPtr<pthread_attr_t>,
-    stack_size: GuestUSize,
-) -> i32 {
-    check_magic!(env, attr, MAGIC_ATTR);
-    let mut attr_copy = env.mem.read(attr);
-    attr_copy.stack_size = stack_size;
-    env.mem.write(attr, attr_copy);
-    0 // success
-}
-fn pthread_attr_setschedpolicy(
-    _env: &mut Environment,
-    _attr: MutPtr<pthread_attr_t>,
-    _policy: i32,
-) -> i32 {
-    0 // success
-}
-fn pthread_attr_setschedparam(
-    _env: &mut Environment,
-    _attr: MutPtr<pthread_attr_t>,
-    _param: ConstVoidPtr,
-) -> i32 {
-    0 // success
-}
 fn pthread_attr_destroy(env: &mut Environment, attr: MutPtr<pthread_attr_t>) -> i32 {
     check_magic!(env, attr, MAGIC_ATTR);
     env.mem.write(
@@ -125,7 +100,6 @@ fn pthread_attr_destroy(env: &mut Environment, attr: MutPtr<pthread_attr_t>) -> 
         pthread_attr_t {
             magic: 0,
             detachstate: 0,
-            stack_size: 0,
             _unused: Default::default(),
         },
     );
@@ -146,7 +120,7 @@ pub fn pthread_create(
         DEFAULT_ATTR
     };
 
-    let thread_id = env.new_thread(start_routine, user_data, attr.stack_size);
+    let thread_id = env.new_thread(start_routine, user_data);
 
     let opaque = env.mem.alloc_and_write(OpaqueThread {
         magic: MAGIC_THREAD,
@@ -282,9 +256,6 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_attr_init(_)),
     export_c_func!(pthread_attr_getstacksize(_, _)),
     export_c_func!(pthread_attr_setdetachstate(_, _)),
-    export_c_func!(pthread_attr_setstacksize(_, _)),
-    export_c_func!(pthread_attr_setschedpolicy(_, _)),
-    export_c_func!(pthread_attr_setschedparam(_, _)),
     export_c_func!(pthread_attr_destroy(_)),
     export_c_func!(pthread_create(_, _, _, _)),
     export_c_func!(pthread_self()),
