@@ -330,14 +330,3 @@ pub(super) fn exit(env: &mut Environment) {
 }
 
 pub const FUNCTIONS: FunctionExports = &[export_c_func!(UIApplicationMain(_, _, _, _))];
-
-pub const CONSTANTS: ConstantExports = &[
-    (
-        "_UIApplicationLaunchOptionsURLKey",
-        HostConstant::NSString("UIApplicationLaunchOptionsURLKey"),
-    ),
-    (
-        "_UIApplicationDidBecomeActiveNotification",
-        HostConstant::NSString("UIApplicationDidBecomeActiveNotification"),
-    )
-];
