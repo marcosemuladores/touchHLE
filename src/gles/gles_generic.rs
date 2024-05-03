@@ -367,4 +367,7 @@ pub trait GLES {
     unsafe fn GenerateMipmapOES(&mut self, target: GLenum);
 
     unsafe fn IsTexture(&mut self, texture: GLuint) -> GLboolean;
+    unsafe fn GetBufferParameteriv(&mut self, target: GLenum, pname: GLenum, params: *mut GLint);
+    unsafe fn MapBufferOES(&mut self, target: GLenum, access: GLenum) -> *mut GLvoid;
+    unsafe fn UnmapBufferOES(&mut self, target: GLenum) -> GLboolean;
 }
