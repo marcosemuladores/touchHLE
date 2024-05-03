@@ -64,7 +64,7 @@ pub const CLASS_LISTS: &[super::ClassExports] = &[
     opengles::eagl::CLASSES,
     store_kit::sk_payment_queue::CLASSES,
     store_kit::sk_product::CLASSES,
-    store_kit::sk_request::CLASSES
+    store_kit::sk_request::CLASSES,
     uikit::ui_accelerometer::CLASSES,
     uikit::ui_activity_indicator_view::CLASSES,
     uikit::ui_application::CLASSES,
