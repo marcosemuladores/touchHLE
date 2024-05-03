@@ -21,6 +21,9 @@ use crate::objc::{
     id, msg, msg_class, msg_send, objc_classes, Class, ClassExports, NSZonePtr, ObjC,
     TrivialHostObject, SEL,
 };
+use crate::frameworks::foundation::ns_string;
+use crate::frameworks::foundation::ns_dictionary::dict_from_keys_and_objects;
+use crate::frameworks::foundation::ns_run_loop::NSDefaultRunLoopMode;
 
 pub const CLASSES: ClassExports = objc_classes! {
 
@@ -29,13 +32,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 @implementation NSObject
 
 + (id)alloc {
-    let obj = msg![env; this allocWithZone:(MutVoidPtr::null())];
-    if let Some(cxx_construct_sel) = env.objc.lookup_selector(".cxx_construct") {
-        if msg![env; obj respondsToSelector:cxx_construct_sel] {
-            let _: id = msg![env; obj performSelector:cxx_construct_sel];
-        }
-    }
-    obj
+    msg![env; this allocWithZone:(MutVoidPtr::null())]
 }
 + (id)allocWithZone:(NSZonePtr)_zone { // struct _NSZone*
     log_dbg!("[{:?} allocWithZone:]", this);
@@ -62,10 +59,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     // classes are not refcounted
 }
 
-+(())initialize {
-
-}
-    
 + (bool)instancesRespondToSelector:(SEL)selector {
     env.objc.class_has_method(this, selector)
 }
@@ -94,11 +87,6 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())dealloc {
     log_dbg!("[{:?} dealloc]", this);
     env.objc.dealloc_object(this, &mut env.mem)
-    if let Some(cxx_destruct_sel) = env.objc.lookup_selector(".cxx_destruct") {
-        if msg![env; this respondsToSelector:cxx_destruct_sel] {
-            let _: () = msg![env; this performSelector:cxx_destruct_sel];
-        }
-    }
 }
 
 - (Class)class {
@@ -167,48 +155,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     unimplemented!("TODO: object {:?} does not have simple setter method for {}, use fallback", this, key);
 }
 
-- (id)valueForKey:(id)forKey {
-
-    if forKey.is_null() {
-        return id::null();
-    }
-
-    let key = to_rust_string(env, forKey); // TODO: avoid copy?
-    assert!(key.is_ascii()); // TODO: do we have to handle non-ASCII keys?
-    let class = msg![env; this class];
-
-    if let Some(sel) = env.objc.lookup_selector(&format!(
-        "get{}{}:",
-        key.as_bytes()[0].to_ascii_uppercase() as char,
-        &key[1..],
-    )) {
-
-        if env.objc.class_has_method(class, sel) {
-            return msg_send(env, (this, sel));
-        }
-    }
-
-    if let Some(sel) = env.objc.lookup_selector(&format!(
-        "_get{}{}:",
-        key.as_bytes()[0].to_ascii_uppercase() as char,
-        &key[1..],
-    )) {
-        if env.objc.class_has_method(class, sel) {
-            return msg_send(env, (this, sel));
-        }
-    }
-
-    /*FIXME: Property
-    if let Some(sel) = env.objc.lookup_selector(key.as_ref()) {
-        if env.objc.class_has_property(class, sel) {
-            unimplemented!();
-        }
-    }*/
-
-    id::null()
-}
-
-
 - (bool)respondsToSelector:(SEL)selector {
     let class = msg![env; this class];
     env.objc.class_has_method(class, selector)
@@ -232,6 +178,46 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg_send(env, (this, sel, o1, o2))
 }
 
+- (())performSelectorOnMainThread:(SEL)sel withObject:(id)arg waitUntilDone:(bool)wait {
+    log!("performSelectorOnMainThread:{} withObject:{:?} waitUntilDone:{}", sel.as_str(&env.mem), arg, wait);
+    if env.current_thread == 0 && wait {
+        () = msg![env; this performSelector:sel withObject:arg];
+        return;
+    }
+    assert!(!wait);
+
+    let sel_key: id = ns_string::get_static_str(env, "SEL");
+    let sel_str = ns_string::from_rust_string(env, sel.as_str(&env.mem).to_string());
+    let arg_key: id = ns_string::get_static_str(env, "arg");
+    let dict = dict_from_keys_and_objects(env, &[(sel_key, sel_str), (arg_key, arg)]);
+
+    let selector = env.objc.lookup_selector("_touchHLE_timerFireMethod:").unwrap();
+    let timer:id = msg_class![env; NSTimer timerWithTimeInterval:0.0
+                                              target:this
+                                            selector:selector
+                                            userInfo:dict
+                                             repeats:false];
+
+    let run_loop: id = msg_class![env; NSRunLoop mainRunLoop];
+    let mode: id = ns_string::get_static_str(env, NSDefaultRunLoopMode);
+    let _: () = msg![env; run_loop addTimer:timer forMode:mode];
+}
+
+- (())_touchHLE_timerFireMethod:(id)which { // NSTimer *
+    let dict: id = msg![env; which userInfo];
+
+    let sel_key: id = ns_string::get_static_str(env, "SEL");
+    let sel_str_id: id = msg![env; dict objectForKey:sel_key];
+    let sel_str = ns_string::to_rust_string(env, sel_str_id);
+    let sel = env.objc.lookup_selector(&sel_str).unwrap();
+
+    let arg_key: id = ns_string::get_static_str(env, "arg");
+    let arg: id = msg![env; dict objectForKey:arg_key];
+
+    () = msg_send(env, (this, sel, arg));
+}
+
+    
 @end
 
 };
