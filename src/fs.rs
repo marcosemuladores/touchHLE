@@ -525,6 +525,12 @@ impl Fs {
                 FsNode::from_host_dir(&documents_host_path, /* writeable: */ true),
             );
         }
+        if let Some(library_host_path) = library_host_path {
+            app_dir_children.insert(
+                "Library".to_string(),
+                FsNode::from_host_dir(&library_host_path, /* writeable: */ true),
+            );
+        }
 
         let root = FsNode::dir()
             .with_child(
