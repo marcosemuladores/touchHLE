@@ -275,7 +275,9 @@ pub trait GLES {
     unsafe fn TexEnvfv(&mut self, target: GLenum, pname: GLenum, params: *const GLfloat);
     unsafe fn TexEnvxv(&mut self, target: GLenum, pname: GLenum, params: *const GLfixed);
     unsafe fn TexEnviv(&mut self, target: GLenum, pname: GLenum, params: *const GLint);
-
+    unsafe fn LogicOp(&mut self, opcode: GLenum);
+    unsafe fn StencilFunc(&mut self, func: GLenum, ref_: GLint, mask: GLuint);
+    
     // Matrix stack operations
     unsafe fn MatrixMode(&mut self, mode: GLenum);
     unsafe fn LoadIdentity(&mut self);
