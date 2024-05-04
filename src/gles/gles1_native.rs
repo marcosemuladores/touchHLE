@@ -702,7 +702,8 @@ impl GLES for GLES1Native {
 
     unsafe fn PolygonOffset(&mut self, factor: GLfloat, units: GLfloat) {
         gles11::PolygonOffset(factor, units)    
- 
+    }
+
     unsafe fn IsTexture(&mut self, texture: GLuint) -> GLboolean {
         gles11::IsTexture(texture)
     }
