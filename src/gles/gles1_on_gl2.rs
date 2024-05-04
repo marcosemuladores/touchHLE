@@ -1766,6 +1766,15 @@ impl GLES for GLES1OnGL2 {
     ) {
         gl21::GetRenderbufferParameterivEXT(target, pname, params)
     }
+    unsafe fn GetFramebufferAttachmentParameterivOES(
+        &mut self,
+        target: GLenum,
+        attachment: GLenum,
+        pname: GLenum,
+        params: *mut GLint,
+    ) {
+        gl21::GetFramebufferAttachmentParameterivEXT(target, attachment, pname, params)
+    }
     unsafe fn CheckFramebufferStatusOES(&mut self, target: GLenum) -> GLenum {
         gl21::CheckFramebufferStatusEXT(target)
     }
@@ -1779,6 +1788,9 @@ impl GLES for GLES1OnGL2 {
         gl21::GenerateMipmapEXT(target)
     }
 
+    unsafe fn PolygonOffset(&mut self, factor: GLfloat, units: GLfloat) {
+        gl21::PolygonOffset(factor, units)
+    }    
     unsafe fn IsTexture(&mut self, texture: GLuint) -> GLboolean {
         gl21::IsTexture(texture)
     }
