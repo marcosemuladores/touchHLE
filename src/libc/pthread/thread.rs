@@ -244,6 +244,18 @@ fn pthread_setschedparam(env: &mut Environment, thread: pthread_t, policy: i32, 
     0
 }
 
+fn pthread_get_stacksize_np(env: &mut Environment, thread: pthread_t) -> GuestUSize {
+    env.mem
+        .secondary_thread_stack_size_override
+        .or_else(|| Some(Mem::SECONDARY_THREAD_STACK_SIZE))
+        .unwrap()
+}
+
+fn pthread_detach(env: &mut Environment, thread: pthread_t) -> i32 {
+    0
+}
+
+
 fn sched_get_priority_min(env: &mut Environment, policy: i32) -> i32 {
     1
 }
@@ -264,6 +276,8 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_mach_thread_np(_)),
     export_c_func!(pthread_getschedparam(_, _, _)),
     export_c_func!(pthread_setschedparam(_, _, _)),
+    export_c_func!(pthread_get_stacksize_np(_)),
+    export_c_func!(pthread_detach(_)),
     export_c_func!(sched_get_priority_min(_)),
     export_c_func!(sched_get_priority_max(_)),
 ];
