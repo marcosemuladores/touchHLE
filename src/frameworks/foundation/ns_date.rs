@@ -63,19 +63,36 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; now timeIntervalSinceReferenceDate]
 }
 
+- (id)init {
+    this
+}
+
+- (id)initWithTimeIntervalSinceNow:(NSTimeInterval)secs {
+    let host_object = env.objc.borrow_mut::<NSDateHostObject>(this);
+    host_object.instant = SystemTime::now() + Duration::from_secs_f64(secs);
+    this
+}
+
 - (NSTimeInterval)timeIntervalSinceDate:(id)anotherDate {
-    assert!(!anotherDate.is_null());
+    if anotherDate.is_null() {
+        return 0.0;
+    }
     let host_object = env.objc.borrow::<NSDateHostObject>(this);
     let another_date_host_object = env.objc.borrow::<NSDateHostObject>(anotherDate);
-    let result =  host_object.time_interval-another_date_host_object.time_interval;
+    let result = if another_date_host_object.instant < host_object.instant {
+        host_object.instant.duration_since(another_date_host_object.instant).unwrap().as_secs_f64()
+    } else {
+        another_date_host_object.instant.duration_since(host_object.instant).unwrap().as_secs_f64()
+    };
     log_dbg!("[(NSDate*){:?} ({:?}s) timeIntervalSinceDate:{:?} ({:?}s)] => {}", this, host_object.time_interval, anotherDate, another_date_host_object.time_interval, result);
     result
 }
 
-- (NSTimeInterval)timeIntervalSinceReferenceDate {
-    env.objc.borrow::<NSDateHostObject>(this).time_interval
+- (NSTimeInterval)timeIntervalSince1970 {
+    let host_object = env.objc.borrow::<NSDateHostObject>(this);
+    host_object.instant.duration_since(time::UNIX_EPOCH).unwrap().as_secs_f64()
 }
-
+    
 - (NSTimeInterval)timeIntervalSinceNow {
 
     let host_object = env.objc.borrow::<NSDateHostObject>(this);
@@ -122,3 +139,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 @end
 
 };
+
+pub fn to_date(env: &mut Environment, date: id) -> SystemTime {
+    env.objc.borrow::<NSDateHostObject>(date).instant
+}
