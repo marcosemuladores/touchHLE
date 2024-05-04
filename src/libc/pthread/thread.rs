@@ -9,7 +9,7 @@ use crate::abi::GuestFunction;
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::libc::errno::{EDEADLK, EINVAL};
 use crate::mem::{ConstPtr, ConstVoidPtr, GuestUSize, Mem, MutPtr, MutVoidPtr, SafeRead};
-use crate::{Environment, ThreadId};
+use crate::{Environment, mem, ThreadId};
 use std::collections::HashMap;
 
 #[derive(Default)]
@@ -72,6 +72,15 @@ pub fn pthread_attr_init(env: &mut Environment, attr: MutPtr<pthread_attr_t>) ->
     env.mem.write(attr, DEFAULT_ATTR);
     0 // success
 }
+fn pthread_attr_getdetachstate(
+    env: &mut Environment,
+    attr: ConstPtr<pthread_attr_t>,
+    detachstate: MutPtr<DetachState>
+) -> i32 {
+    let attr_val = env.mem.read(attr);
+    env.mem.write(detachstate, attr_val.detachstate);
+    0 // success
+}
 pub fn pthread_attr_setdetachstate(
     env: &mut Environment,
     attr: MutPtr<pthread_attr_t>,
@@ -97,6 +106,19 @@ fn pthread_attr_destroy(env: &mut Environment, attr: MutPtr<pthread_attr_t>) -> 
     0 // success
 }
 
+pub fn pthread_attr_getstacksize(
+    env: &mut Environment,
+    attr: MutPtr<pthread_attr_t>,
+    stacksize: MutPtr<GuestUSize>,
+) -> i32 {
+    check_magic!(env, attr, MAGIC_ATTR);
+    let stack_size = env.mem
+        .secondary_thread_stack_size_override
+        .or_else(|| Some(Mem::SECONDARY_THREAD_STACK_SIZE))
+        .unwrap();
+    env.mem.write(stacksize, stack_size);
+    0 // success
+}
 fn pthread_attr_setstacksize(
     env: &mut Environment,
     attr: MutPtr<pthread_attr_t>,
@@ -143,6 +165,15 @@ pub fn pthread_create(
     log_dbg!("pthread_create({:?}, {:?}, {:?}, {:?}) => 0 (success), created new pthread_t {:?} (thread ID: {})", thread, attr, start_routine, user_data, opaque, thread_id);
 
     0 // success
+}
+
+fn pthread_equal(env: &mut Environment, thread1: pthread_t, thread2: pthread_t) -> i32 {
+    if State::get(env).threads.get_mut(&thread1).unwrap().thread_id ==
+       State::get(env).threads.get_mut(&thread2).unwrap().thread_id {
+        1
+    } else {
+        0
+    }
 }
 
 fn pthread_self(env: &mut Environment) -> pthread_t {
@@ -243,14 +274,57 @@ fn pthread_mach_thread_np(env: &mut Environment, thread: pthread_t) -> mach_port
     host_object.thread_id.try_into().unwrap()
 }
 
+fn pthread_getschedparam(env: &mut Environment, thread: pthread_t, policy: i32, param: MutVoidPtr) -> i32 {
+    0
+}
+
+fn pthread_setschedparam(env: &mut Environment, thread: pthread_t, policy: i32, param: ConstVoidPtr) -> i32 {
+    0
+}
+
+fn pthread_get_stackaddr_np(env: &mut Environment, thread: pthread_t) -> MutVoidPtr {
+    let x = env.libc_state.pthread.thread.threads.get_mut(&thread).unwrap();
+    let y = *env.threads.get(x.thread_id).unwrap().stack.clone().unwrap().end();// + 1;
+    MutVoidPtr::from_bits(y)
+}
+
+fn pthread_get_stacksize_np(env: &mut Environment, thread: pthread_t) -> GuestUSize {
+    env.mem
+        .secondary_thread_stack_size_override
+        .or_else(|| Some(Mem::SECONDARY_THREAD_STACK_SIZE))
+        .unwrap()
+}
+
+fn pthread_detach(env: &mut Environment, thread: pthread_t) -> i32 {
+    0
+}
+
+fn sched_get_priority_min(env: &mut Environment, policy: i32) -> i32 {
+    1
+}
+
+fn sched_get_priority_max(env: &mut Environment, policy: i32) -> i32 {
+    99
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_attr_init(_)),
+    export_c_func!(pthread_attr_getdetachstate(_, _)),
     export_c_func!(pthread_attr_setdetachstate(_, _)),
     export_c_func!(pthread_attr_destroy(_)),
-    export_c_func!(pthread_attr_setstacksize(_, _)),
     export_c_func!(pthread_create(_, _, _, _)),
+    export_c_func!(pthread_equal(_, _)),
     export_c_func!(pthread_self()),
     export_c_func!(pthread_join(_, _)),
     export_c_func!(pthread_setcanceltype(_, _)),
     export_c_func!(pthread_mach_thread_np(_)),
+    export_c_func!(pthread_getschedparam(_, _, _)),
+    export_c_func!(pthread_setschedparam(_, _, _)),
+    export_c_func!(pthread_get_stackaddr_np(_)),
+    export_c_func!(pthread_attr_getstacksize(_, _)),
+    export_c_func!(pthread_attr_setstacksize(_, _)),
+    export_c_func!(pthread_get_stacksize_np(_)),
+    export_c_func!(pthread_detach(_)),
+    export_c_func!(sched_get_priority_min(_)),
+    export_c_func!(sched_get_priority_max(_)),
 ];
