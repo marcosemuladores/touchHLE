@@ -8,8 +8,8 @@
 use crate::abi::GuestFunction;
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::libc::errno::{EDEADLK, EINVAL};
-use crate::mem::{ConstPtr, ConstVoidPtr, GuestUSize, Mem, MutPtr, MutVoidPtr, SafeRead};
-use crate::{Environment, mem, ThreadId};
+use crate::mem::{ConstPtr, MutPtr, MutVoidPtr, SafeRead};
+use crate::{Environment, ThreadId};
 use std::collections::HashMap;
 
 #[derive(Default)]
@@ -70,15 +70,6 @@ pub const PTHREAD_CREATE_DETACHED: DetachState = 2;
 
 pub fn pthread_attr_init(env: &mut Environment, attr: MutPtr<pthread_attr_t>) -> i32 {
     env.mem.write(attr, DEFAULT_ATTR);
-    0 // success
-}
-pub fn pthread_attr_getstacksize(
-    env: &mut Environment,
-    attr: MutPtr<pthread_attr_t>,
-    stacksize: MutPtr<GuestUSize>,
-) -> i32 {
-    check_magic!(env, attr, MAGIC_ATTR);
-    env.mem.write(stacksize, Mem::SECONDARY_THREAD_STACK_SIZE);
     0 // success
 }
 pub fn pthread_attr_setdetachstate(
@@ -183,9 +174,10 @@ fn pthread_join(env: &mut Environment, thread: pthread_t, retval: MutPtr<MutVoid
     // The joinee is the thread that is being waited on.
     let joinee_thread = State::get(env).threads.get_mut(&thread).unwrap().thread_id;
 
-    // FIXME?: Blocking on the main thread is technically allowed, but effectively useless (as the
-    // main thread exiting means the whole application exits). It complicates some handling and is
-    // probably safe to ignore here.
+    // FIXME?: Blocking on the main thread is technically allowed, but
+    // effectively useless (as the main thread exiting means the whole
+    // application exits). It complicates some handling and is probably safe to
+    // ignore here.
     assert!(joinee_thread != 0);
 
     // Can't join thread with itself!
@@ -194,14 +186,16 @@ fn pthread_join(env: &mut Environment, thread: pthread_t, retval: MutPtr<MutVoid
         return EDEADLK;
     }
 
-    // Check that the current thread is not being waited on by the joinee, to prevent deadlocks.
-    // This only prevents 2-long cycles (matching aspen simulator), which is to say:
-    //             joining                            joining              joining
-    // [Thread 1] --------> [Thread 2]    [Thread 1] --------> [Thread 2] --------> [Thread 3]
-    //     ^                    |             ^                                         |
-    //     |       joining      |             |                 joining                 |
-    //     '--------------------'             '-----------------------------------------'
-    //       This is prevented,                             but this is not.
+    // Check that the current thread is not being waited on by the joinee, to
+    // prevent deadlocks.
+    // This only prevents 2-long cycles (matching aspen simulator), which is
+    // to say:
+    //       joining                joining        joining
+    // [T1] --------> [T2]    [T1] --------> [T2] --------> [T3]
+    //   ^              |       ^                             |
+    //   |    joining   |       |           joining           |
+    //   '--------------'       '-----------------------------'
+    //  This is prevented,               but this is not.
     let host_obj_curr = State::get(env).threads.get(&curr_pthread_t).unwrap();
     if let Some(thread) = host_obj_curr.joined_by {
         if thread == joinee_thread {
@@ -218,7 +212,8 @@ fn pthread_join(env: &mut Environment, thread: pthread_t, retval: MutPtr<MutVoid
     }
 
     host_obj_joinee.joined_by = Some(current_thread);
-    // The executor will write the return value (void*) to *retval after the join occurs.
+    // The executor will write the return value (void*) to *retval after the
+    // join occurs.
     env.join_with_thread(joinee_thread, retval);
     0
 }
@@ -236,36 +231,8 @@ fn pthread_mach_thread_np(env: &mut Environment, thread: pthread_t) -> mach_port
     host_object.thread_id.try_into().unwrap()
 }
 
-fn pthread_getschedparam(env: &mut Environment, thread: pthread_t, policy: i32, param: MutVoidPtr) -> i32 {
-    0
-}
-
-fn pthread_setschedparam(env: &mut Environment, thread: pthread_t, policy: i32, param: ConstVoidPtr) -> i32 {
-    0
-}
-
-fn pthread_get_stacksize_np(env: &mut Environment, thread: pthread_t) -> GuestUSize {
-    env.mem
-        .secondary_thread_stack_size_override
-        .or_else(|| Some(Mem::SECONDARY_THREAD_STACK_SIZE))
-        .unwrap()
-}
-
-fn pthread_detach(env: &mut Environment, thread: pthread_t) -> i32 {
-    0
-}
-
-fn sched_get_priority_min(env: &mut Environment, policy: i32) -> i32 {
-    1
-}
-
-fn sched_get_priority_max(env: &mut Environment, policy: i32) -> i32 {
-    99
-}
-
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_attr_init(_)),
-    export_c_func!(pthread_attr_getstacksize(_, _)),
     export_c_func!(pthread_attr_setdetachstate(_, _)),
     export_c_func!(pthread_attr_destroy(_)),
     export_c_func!(pthread_create(_, _, _, _)),
@@ -273,10 +240,4 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_join(_, _)),
     export_c_func!(pthread_setcanceltype(_, _)),
     export_c_func!(pthread_mach_thread_np(_)),
-    export_c_func!(pthread_getschedparam(_, _, _)),
-    export_c_func!(pthread_setschedparam(_, _, _)),
-    export_c_func!(pthread_get_stacksize_np(_)),
-    export_c_func!(pthread_detach(_)),
-    export_c_func!(sched_get_priority_min(_)),
-    export_c_func!(sched_get_priority_max(_)),
 ];
