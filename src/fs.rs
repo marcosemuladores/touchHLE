@@ -467,7 +467,8 @@ impl Fs {
 
         let bundle_guest_path = home_directory.join(&bundle_dir_name);
 
-        let documents_host_path = if !read_only_mode {
+        let mut documents_host_path = if !read_only_mode {
+        let mut library_host_path = None;
             let path = paths::user_data_base_path()
                 .join(paths::SANDBOX_DIR)
                 .join(bundle_id)
@@ -477,6 +478,22 @@ impl Fs {
                     "Could not create documents directory for app at {:?}: {:?}",
                     path, e
                 );
+            }
+            let libs_host_path = base_path.join("Library");
+            if let Err(e) = std::fs::create_dir_all(&libs_host_path) {
+                panic!(
+                    "Could not create library directory for app at {:?}: {:?}",
+                    libs_host_path, e
+                );
+            }
+            let app_support_host_path = libs_host_path.join("Application Support");
+            if let Err(e) = std::fs::create_dir_all(&app_support_host_path) {
+                panic!(
+                    "Could not create application support directory for app at {:?}: {:?}",
+                    app_support_host_path, e
+                );
+            }
+            library_host_path = Some(libs_host_path)
             }
             Some(path)
         } else {
