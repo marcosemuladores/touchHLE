@@ -255,7 +255,6 @@ fn pthread_detach(env: &mut Environment, thread: pthread_t) -> i32 {
     0
 }
 
-
 fn sched_get_priority_min(env: &mut Environment, policy: i32) -> i32 {
     1
 }
