@@ -246,7 +246,6 @@ fn pthread_setschedparam(env: &mut Environment, thread: pthread_t, policy: i32, 
 
 fn pthread_get_stacksize_np(env: &mut Environment, thread: pthread_t) -> GuestUSize {
     env.mem
-        .secondary_thread_stack_size_override
         .or_else(|| Some(Mem::SECONDARY_THREAD_STACK_SIZE))
         .unwrap()
 }
