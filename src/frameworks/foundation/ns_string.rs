@@ -623,6 +623,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, res)
 }
 
+- (id)substringWithRange:(NSRange)range {
+    let tmp: id = msg![env; this substringFromIndex:(range.location)];
+    msg![env; tmp substringToIndex:(range.length)]
+}
+    
 - (id)stringByTrimmingCharactersInSet:(id)set { // NSCharacterSet*
     let initial_length: NSUInteger = msg![env; this length];
 
@@ -931,6 +936,20 @@ pub const CLASSES: ClassExports = objc_classes! {
     st[..cutoff].parse().unwrap_or(0)
 }
 
+// FIXME: this should be a NSMutableString method
+-(())setString:(id)aString { // NSString*
+    let str = to_rust_string(env, aString);
+    let host_object = StringHostObject::Utf8(str);
+    *env.objc.borrow_mut(this) = host_object;
+}
+
+// FIXME: this should be a NSMutableString method
+- (())appendString:(id)aString { // NSString*
+    // TODO: this is inefficient? append in place instead
+    let new: id = msg![env; this stringByAppendingString:aString];
+    () = msg![env; this setString:new];
+}
+    
 @end
 
 // NSMutableString is an abstract class. A subclass must provide:
