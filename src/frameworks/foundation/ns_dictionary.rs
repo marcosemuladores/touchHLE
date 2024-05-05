@@ -401,6 +401,14 @@ pub const CLASSES: ClassExports = objc_classes! {
     ns_array::from_vec(env, keys)
 }
 
+- (NSInteger)fileSize {
+    let file_size_key = ns_string::get_static_str(env, "fileSize");
+    let host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+    let res = host_obj.lookup(env, file_size_key);
+    *env.objc.borrow_mut(this) = host_obj;
+    msg![env; res intValue]
+}
+    
 @end
 
 };
