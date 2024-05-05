@@ -335,6 +335,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     utf16[index as usize]
 }
 
+- (NSRange)rangeOfString:(id)search_string {
+    msg![env; this rangeOfString:search_string options:0u32]
+}
+    
 - (NSRange)rangeOfString:(id)search_string
                  options:(NSStringCompareOptions)options { // NSString *
     log_dbg!(
