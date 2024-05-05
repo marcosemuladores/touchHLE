@@ -82,6 +82,20 @@ pub const CLASSES: ClassExports = objc_classes! {
    }
 }
 
++(id)bundleWithPath:(id)bundle_path {
+    let host_object = NSBundleHostObject {
+        bundle: None,
+        bundle_path,
+        bundle_url: None,
+        info_dictionary: None,
+    };
+    env.objc.alloc_object(
+        this,
+        Box::new(host_object),
+        &mut env.mem
+    )
+}
+    
 + (id)preferredLocalizationsFromArray:(id)localizations_array { // NSArray<NSString *> *
     let preferredLocalizations = CFBundleCopyPreferredLocalizationsFromArray(env, localizations_array);
     autorelease(env, preferredLocalizations)
