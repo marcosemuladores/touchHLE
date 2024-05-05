@@ -177,6 +177,19 @@ impl Environment {
         Ok(1)
     }
 
+    pub fn trylock_mutex(&mut self, mutex_id: MutexId) -> Result<u32, i32> {
+        let current_thread = self.current_thread;
+        let mutex: &mut _ = self.mutex_state.mutexes.get_mut(&mutex_id).unwrap();
+
+        let Some((locking_thread, lock_count)) = mutex.locked else {
+            log_dbg!("Locked mutex #{} for thread {}.", mutex_id, current_thread);
+            mutex.locked = Some((current_thread, NonZeroU32::new(1).unwrap()));
+            return Ok(1);
+        };
+
+        Err(EBUSY)
+    }
+
     /// Unlocks a mutex and returns the lock count or an error (as errno).
     /// Similar to `pthread_mutex_unlock`, but for host code.
     pub fn unlock_mutex(&mut self, mutex_id: MutexId) -> Result<u32, i32> {
@@ -187,10 +200,11 @@ impl Environment {
             match mutex.type_ {
                 MutexType::PTHREAD_MUTEX_NORMAL => {
                     // This case is undefined, we may as well panic.
-                    panic!(
+                    log!(
                         "Attempted to unlock non-error-checking mutex #{} for thread {}, already unlocked!",
                         mutex_id, current_thread,
                     );
+                    return Err(EPERM);
                 }
                 MutexType::PTHREAD_MUTEX_ERRORCHECK | MutexType::PTHREAD_MUTEX_RECURSIVE => {
                     log_dbg!(
