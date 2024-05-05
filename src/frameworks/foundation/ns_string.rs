@@ -577,6 +577,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, array)
 }
 
+- (ConstPtr<u8>)cString {
+    msg![env; this cStringUsingEncoding:NSASCIIStringEncoding]
+}
+
 - (ConstPtr<u8>)cStringUsingEncoding:(NSStringEncoding)encoding {
     // TODO: other encodings
     assert!(encoding == NSUTF8StringEncoding || encoding == NSASCIIStringEncoding);
