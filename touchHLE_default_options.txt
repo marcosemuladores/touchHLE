@@ -90,3 +90,6 @@ jp.co.capcom.res4: --landscape-left --stabilize-virtual-cursor=0.1,10 --button-t
 
 # Resident Evil Degeneration
 jp.co.capcom.residentevil.en: --landscape-left
+
+# Star Frog / Gero Blaster
+amaya.starfrog: --preferred-languages=ja --landscape-right --button-to-touch=DPadLeft,60,290 --button-to-touch=DPadRight,170,290 --button-to-touch=A,450,290 --button-to-touch=B,380,290
