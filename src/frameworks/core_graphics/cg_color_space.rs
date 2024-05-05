@@ -13,7 +13,7 @@ use crate::frameworks::foundation::ns_string;
 use crate::frameworks::uikit::ui_color;
 use crate::mem::{guest_size_of, MutPtr};
 use crate::objc::{msg, objc_classes, ClassExports, HostObject};
-use crate::Environment;
+use crate::{Environment, msg_class};
 
 
 pub const CLASSES: ClassExports = objc_classes! {
@@ -50,7 +50,6 @@ pub(super) struct CGColorSpaceHostObject {
 impl HostObject for CGColorSpaceHostObject {}
 
 pub type CGColorSpaceRef = CFTypeRef;
-pub type CGColorRef = CFTypeRef;
 
 pub fn CGColorSpaceCreateWithName(env: &mut Environment, name: CFStringRef) -> CGColorSpaceRef {
     let generic_rgb = ns_string::get_static_str(env, kCGColorSpaceGenericRGB);
