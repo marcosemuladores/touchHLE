@@ -14,10 +14,10 @@ use crate::frameworks::foundation::ns_string::{from_rust_string, get_static_str,
 use crate::frameworks::uikit::ui_nib::load_nib_file;
 use crate::fs::GuestPathBuf;
 use crate::objc::{
-    autorelease, id, msg, msg_class, nil, objc_classes, release, ClassExports, HostObject,
+    autorelease, id, msg, msg_class, nil, objc_classes, release, retain, ClassExports, HostObject,
 };
 use crate::Environment;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 // Should be ISO 639-1 (or ISO 639-2) compliant
 // TODO: complete this list or use some crate for mapping
@@ -38,6 +38,7 @@ const LANG_ID_TO_LANG_PROJ: &[(&str, &str)] = &[
 #[derive(Default)]
 pub struct State {
     main_bundle: Option<id>,
+    localization_tables: HashMap<id, id>, // NSString* to NSDictionary*
 }
 
 pub struct NSBundleHostObject {
