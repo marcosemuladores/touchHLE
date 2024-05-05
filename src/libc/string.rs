@@ -112,7 +112,7 @@ fn __strcpy_chk(
 ) -> MutPtr<u8> {
     GenericChar::<u8>::strcpy(env, dest, src, size)
 }
-fn strcat(env: &mut Environment, dest: MutPtr<u8>, src: ConstPtr<u8>) -> MutPtr<u8> {
+pub fn strcat(env: &mut Environment, dest: MutPtr<u8>, src: ConstPtr<u8>) -> MutPtr<u8> {
     GenericChar::<u8>::strcat(env, dest, src, GuestUSize::MAX)
 }
 fn __strcat_chk(
