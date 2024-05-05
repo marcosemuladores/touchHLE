@@ -50,6 +50,7 @@ pub(super) struct CGColorSpaceHostObject {
 impl HostObject for CGColorSpaceHostObject {}
 
 pub type CGColorSpaceRef = CFTypeRef;
+pub type CGColorRef = CFTypeRef;
 
 pub fn CGColorSpaceCreateWithName(env: &mut Environment, name: CFStringRef) -> CGColorSpaceRef {
     let generic_rgb = ns_string::get_static_str(env, kCGColorSpaceGenericRGB);
@@ -136,6 +137,16 @@ pub fn CGColorGetColorSpace(env: &mut Environment, _color: CGColorRef) -> CGColo
     CGColorSpaceCreateWithName(env, srgb_name)
 }
 
+fn CGColorCreate(env: &mut Environment, cs: CGColorSpaceRef, components: MutPtr<CGFloat>) -> CGColorRef {
+    let color_space = env.objc.borrow::<CGColorSpaceHostObject>(cs).name;
+    assert_eq!(color_space, kCGColorSpaceGenericRGB);
+    let r = env.mem.read(components);
+    let g = env.mem.read(components + 1);
+    let b = env.mem.read(components + 2);
+    let a = env.mem.read(components + 3);
+    msg_class![env; UIColor colorWithRed:r green:g blue:b alpha:a]
+}
+
 pub const kCGColorSpaceGenericRGB: &str = "kCGColorSpaceGenericRGB";
 pub const kCGColorSpaceGenericGray: &str = "kCGColorSpaceGenericGray";
 
@@ -161,4 +172,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGColorGetColorSpace(_)),
     export_c_func!(CGColorGetComponents(_)),
     export_c_func!(CGColorGetColorSpace(_)),
+    export_c_func!(CGColorCreate(_, _)),
 ];
