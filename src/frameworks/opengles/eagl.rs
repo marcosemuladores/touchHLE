@@ -112,6 +112,23 @@ pub const CLASSES: ClassExports = objc_classes! {
     true
 }
 
+- (id)initWithAPI:(EAGLRenderingAPI)api sharegroup:(id)group {
+    assert!(api == kEAGLRenderingAPIOpenGLES1);
+
+    if (group == nil) {
+        return msg![env; this initWithAPI:api];
+    }
+
+    let prev_context = &env.objc.borrow::<EAGLContextHostObject>(group).gles_ctx;
+    assert!(prev_context.is_some());
+    env.objc.borrow_mut::<EAGLContextHostObject>(this).gles_ctx = prev_context.clone();
+    // TODO: share via Rc refcell as well??
+    env.objc.borrow_mut::<EAGLContextHostObject>(this).renderbuffer_drawable_bindings
+        = env.objc.borrow::<EAGLContextHostObject>(group).renderbuffer_drawable_bindings.clone();
+
+    this
+}
+    
 - (id)initWithAPI:(EAGLRenderingAPI)api {
     assert!(api == kEAGLRenderingAPIOpenGLES1);
 
