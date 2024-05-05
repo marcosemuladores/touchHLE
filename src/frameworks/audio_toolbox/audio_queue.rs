@@ -12,6 +12,7 @@ use crate::abi::{CallFromHost, GuestFunction};
 use crate::audio::decode_ima4;
 use crate::audio::openal as al;
 use crate::audio::openal::al_types::*;
+use crate::audio::openal::alc_types::*;
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::frameworks::audio_toolbox::ContextManager;
 use crate::frameworks::carbon_core::OSStatus;
@@ -35,10 +36,46 @@ use std::collections::{HashMap, VecDeque};
 #[derive(Default)]
 pub struct State {
     audio_queues: HashMap<AudioQueueRef, AudioQueueHostObject>,
+    al_device_and_context: Option<(*mut ALCdevice, *mut ALCcontext)>,
 }
 impl State {
     fn get(framework_state: &mut crate::frameworks::State) -> &mut Self {
         &mut framework_state.audio_toolbox.audio_queue
+    }
+    fn make_al_context_current(&mut self) -> ContextManager {
+        if self.al_device_and_context.is_none() {
+            let device = unsafe { al::alcOpenDevice(std::ptr::null()) };
+            assert!(!device.is_null());
+            let context = unsafe { al::alcCreateContext(device, std::ptr::null()) };
+            assert!(!context.is_null());
+            log_dbg!(
+                "New internal OpenAL device ({:?}) and context ({:?})",
+                device,
+                context
+            );
+            self.al_device_and_context = Some((device, context));
+        }
+        let (device, context) = self.al_device_and_context.unwrap();
+        assert!(!device.is_null() && !context.is_null());
+
+        // This object will make sure the existing context, which will belong
+        // to the guest app, is restored once we're done.
+        ContextManager::make_active(context)
+    }
+}
+
+#[must_use]
+struct ContextManager(*mut ALCcontext);
+impl ContextManager {
+    pub fn make_active(new_context: *mut ALCcontext) -> ContextManager {
+        let old_context = unsafe { al::alcGetCurrentContext() };
+        assert!(unsafe { al::alcMakeContextCurrent(new_context) } == al::ALC_TRUE);
+        ContextManager(old_context)
+    }
+}
+impl Drop for ContextManager {
+    fn drop(&mut self) {
+        assert!(unsafe { al::alcMakeContextCurrent(self.0) } == al::ALC_TRUE)
     }
 }
 
@@ -779,6 +816,7 @@ fn finish_stopping_audio_queue(env: &mut Environment, in_aq: AudioQueueRef) {
 }
 
 pub fn AudioQueueStop(env: &mut Environment, in_aq: AudioQueueRef, in_immediate: bool) -> OSStatus {
+    let state = State::get(&mut env.framework_state);
     return_if_null!(in_aq);
 
     if in_immediate {
