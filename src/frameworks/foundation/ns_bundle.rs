@@ -279,6 +279,15 @@ pub const CLASSES: ClassExports = objc_classes! {
     dict
 }
 
+- (id)objectForInfoDictionaryKey:(id)key {
+    if key.is_null() {
+        return id::null();
+    }
+
+    let info_dict = msg![env; this infoDictionary];
+    msg![env; info_dict objectForKey:key]
+}
+
 - (id)localizations {
     let localizations = CFBundleCopyBundleLocalizations(env, this);
     autorelease(env, localizations)
