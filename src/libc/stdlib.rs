@@ -8,7 +8,7 @@
 use crate::abi::{CallFromHost, GuestFunction};
 use crate::dyld::{export_c_func, export_c_func_aliased, FunctionExports};
 use crate::fs::{resolve_path, GuestPath};
-use crate::libc::clocale::{setlocale, LC_CTYPE};
+use crate::libc::clocale::{setlocale as other_setlocale, LC_CTYPE};
 use crate::libc::string::strlen;
 use crate::libc::wchar::{wchar_t, wmemcpy};
 use crate::mem::{ConstPtr, ConstVoidPtr, GuestUSize, MutPtr, MutVoidPtr, Ptr};
