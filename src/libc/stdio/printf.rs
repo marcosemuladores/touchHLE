@@ -14,6 +14,7 @@ use crate::libc::stdio::FILE;
 use crate::libc::stdlib::atoi_inner;
 use crate::libc::wchar::wchar_t;
 use crate::mem::{ConstPtr, GuestUSize, Mem, MutPtr, MutVoidPtr, Ptr};
+use crate::mem::guest_size_of;
 use crate::objc::{id, msg, nil};
 use crate::Environment;
 use std::collections::HashSet;
