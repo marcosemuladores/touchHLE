@@ -7,7 +7,7 @@
 //!
 //! Implemented using Audio Queue Services based on [the PlayingAudio example](https://developer.apple.com/library/archive/documentation/MusicAudio/Conceptual/AudioQueueProgrammingGuide/AQPlayback/PlayingAudio.html)
 
-use crate::abi::GuestFunction;
+
 use crate::dyld::HostFunction;
 use crate::frameworks::audio_toolbox::audio_file::{
     kAudioFilePropertyDataFormat, kAudioFilePropertyPacketSizeUpperBound, kAudioFileReadPermission,
@@ -26,7 +26,7 @@ use crate::mem::{guest_size_of, GuestUSize, MutPtr, MutVoidPtr, Ptr};
 use crate::msg;
 use crate::objc::{id, nil, release, retain, Class, ClassExports, HostObject, NSZonePtr};
 use crate::objc_classes;
-use crate::{export_c_func, Environment};
+use crate::Environment;
 
 const kNumberBuffers: usize = 3;
 
@@ -374,11 +374,4 @@ fn _touchHLE_AVAudioPlayerOutputBufferHelper(
             _touchHLE_AVAudioPlayerOutputBufferHelper(env, in_user_data, in_aq, in_buf);
         }
     }
-
-    env.mem.free(num_packets_ptr.cast());
-    env.mem.free(num_bytes_ptr.cast());
 }
-
-pub const PRIVATE_FUNCTIONS: FunctionExports = &[export_c_func!(
-    _av_audio_player_handle_output_buffer(_, _, _)
-)]
