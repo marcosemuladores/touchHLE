@@ -205,6 +205,19 @@ pub const CLASSES: ClassExports = objc_classes! {
     *env.objc.borrow_mut(this) = host_obj;
 }
 
+- (())setFloat:(f32)value forKey:(id)defaultName {
+    todo!();
+}
+
+- (id)stringForKey:(id)defaultName {
+    msg![env; this objectForKey:defaultName]
+}
+
+- (NSInteger)integerForKey:(id)defaultName {
+    let val: id = msg![env; this objectForKey:defaultName];
+    msg![env; val integerValue]
+}
+    
 @end
 
 // NSMutableDictionary is an abstract class. A subclass must provide everything
