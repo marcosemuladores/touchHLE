@@ -5,6 +5,7 @@
  */
 //! Miscellaneous parts of `unistd.h`
 
+use std::io::Write;
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::fs::GuestPath;
 use crate::libc::posix_io::{FileDescriptor, O_RDONLY, STDERR_FILENO, STDIN_FILENO, STDOUT_FILENO};
@@ -76,6 +77,15 @@ fn access(env: &mut Environment, path: ConstPtr<u8>, mode: i32) -> i32 {
         }
         _ => unimplemented!("{}", mode),
     }
+}
+
+fn fsync(env: &mut Environment, fd: FileDescriptor) -> i32 {
+    let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
+    match file.file {
+        File(_) => _ = file.file.flush(),
+        _ => {}
+    }
+    0
 }
 
 fn uname(_env: &mut Environment, name: MutVoidPtr) -> i32 {
@@ -163,6 +173,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(getppid()),
     export_c_func!(isatty(_)),
     export_c_func!(access(_, _)),
+    export_c_func!(fsync(_)),
     export_c_func!(uname(_)),
     export_c_func!(sigaction(_, _, _)),
     export_c_func!(sigprocmask(_, _, _)),
