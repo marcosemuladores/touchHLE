@@ -12,7 +12,7 @@ use crate::libc::pthread::thread::{
     pthread_attr_init, pthread_attr_setdetachstate, pthread_attr_t, pthread_create, pthread_t,
     PTHREAD_CREATE_DETACHED,
 };
-use crate::mem::{guest_size_of, ConstPtr, MutPtr};
+use crate::mem::{guest_size_of, MutPtr};
 use crate::msg;
 use crate::objc::{
     id, msg_send, nil, objc_classes, release, retain, Class, ClassExports, HostObject, NSZonePtr,
@@ -65,10 +65,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.sleep(Duration::from_secs_f64(ti), /* tail_call: */ true);
 }
 
-+ (bool)isCancelled {
-    false
-}
-
 + (())detachNewThreadSelector:(SEL)selector
                        toTarget:(id)target
                      withObject:(id)object {
@@ -106,14 +102,6 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 }
 
-- (id)initWithTarget:(id)target selector:(SEL)selector object:(id)object {
-    let host_object: &mut NSThreadHostObject = env.objc.borrow_mut(this);
-    host_object.target = target;
-    host_object.selector = Some(selector);
-    host_object.object = object;
-    this
-}
-    
 @end
 
 };
