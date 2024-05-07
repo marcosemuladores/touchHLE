@@ -5,9 +5,10 @@
  */
 //! `UIWindow`.
 
+use super::CGPoint;
 use crate::frameworks::core_graphics::CGRect;
 use crate::frameworks::uikit::ui_view::CGFloat;
-use crate::objc::{id, msg, msg_super, objc_classes, ClassExports, retain};
+use crate::objc::{id, msg, msg_super, nil, objc_classes, ClassExports, retain};
 
 #[derive(Default)]
 pub struct State {
@@ -99,6 +100,13 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; this setHidden:false]
 }
 
+- (CGPoint)convertPoint:(CGPoint)point fromWindow:(id)window {
+    if window == nil {
+        return point
+    }
+    msg![env; this convertPoint:point fromView:window]
+}
+    
 -(())setWindowLevel:(CGFloat)_level {
 
 }
