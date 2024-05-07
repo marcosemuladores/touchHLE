@@ -5,12 +5,17 @@
  */
 //! POSIX `sys/stat.h`
 
+use std::any::Any;
 use super::{off_t, FileDescriptor};
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::fs::GuestPath;
 use crate::mem::{ConstPtr, MutVoidPtr};
 use crate::Environment;
 use std::io::{Seek, SeekFrom};
+use sdl2::libc::fclose;
+use crate::fs::GuestFile::File;
+use crate::libc::posix_io;
+use crate::libc::posix_io::O_RDONLY;
 
 #[allow(non_camel_case_types)]
 pub type mode_t = u16;
@@ -37,7 +42,6 @@ fn mkdir(env: &mut Environment, path: ConstPtr<u8>, mode: mode_t) -> i32 {
     }
 }
 
-
 fn stat(env: &mut Environment, path: ConstPtr<u8>, buf: MutVoidPtr) -> i32 {
     //log!("stat {}", env.mem.cstr_at_utf8(path).unwrap());
 
@@ -53,6 +57,17 @@ fn stat(env: &mut Environment, path: ConstPtr<u8>, buf: MutVoidPtr) -> i32 {
     };
     env.mem.write(st_mode_ptr, mode.try_into().unwrap());
     0
+}
+
+fn lstat(env: &mut Environment, path: ConstPtr<u8>, buf: MutVoidPtr) -> i32 {
+    let path_string = env.mem.cstr_at_utf8(path).unwrap().to_owned();
+    //log!("lstat {}", path_string);
+    let guest_path = GuestPath::new(&path_string);
+    if env.fs.exists(guest_path) {
+        0
+    } else {
+        -1
+    }
 }
 
 fn fstat(env: &mut Environment, fd: FileDescriptor, buf: MutVoidPtr) -> i32 {
@@ -72,11 +87,26 @@ fn fstat(env: &mut Environment, fd: FileDescriptor, buf: MutVoidPtr) -> i32 {
 
     env.mem.write(st_size_ptr, full_size.try_into().unwrap());
 
+    // let is_dir = match &file.file {
+    //     File(file_) => {
+    //         file_.metadata().unwrap().is_dir()
+    //     },
+    //     _ => unimplemented!()
+    // };
+    // let st_mode_ptr = (buf + 0x4).cast::<mode_t>();
+    // let mode: mode_t = if is_dir {
+    //     0x4000
+    // } else {
+    //     0x8000
+    // };
+    // env.mem.write(st_mode_ptr, mode.try_into().unwrap());
+
     0 // success
 }
 
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(mkdir(_, _)),
     export_c_func!(stat(_, _)),
+    export_c_func!(lstat(_, _)),
     export_c_func!(fstat(_, _))
 ];
