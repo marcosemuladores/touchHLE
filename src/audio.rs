@@ -44,12 +44,11 @@ pub struct AudioDescription {
     pub bits_per_channel: u32,
 }
 
-pub struct AudioFile(pub AudioFileInner);
-pub enum AudioFileInner {
+pub struct AudioFile(AudioFileInner);
+enum AudioFileInner {
     Wave(hound::WavReader<Cursor<Vec<u8>>>),
     Caf(caf::CafPacketReader<Cursor<Vec<u8>>>),
     Mp3(dr_mp3::Mp3DecodedToPcm),
-    InMemory()
     Aac(aac::AacDecodedToPcm),
 }
 
@@ -176,17 +175,6 @@ impl AudioFile {
                 channels_per_frame: channels,
                 bits_per_channel: 16,
             },
-            AudioFileInner::InMemory() => AudioDescription {
-                sample_rate: 0.0,
-                format: AudioFormat::LinearPcm {
-                    is_float: false,
-                    is_little_endian: true,
-                },
-                bytes_per_packet: 1,
-                frames_per_packet: 1,
-                channels_per_frame: 0,
-                bits_per_channel: 0,
-            },
         }
     }
 
@@ -215,8 +203,7 @@ impl AudioFile {
                 u64::from(self.packet_size_fixed()) * self.packet_count()
             }
             AudioFileInner::Mp3(dr_mp3::Mp3DecodedToPcm { ref bytes, .. })
-            AudioFileInner::InMemory() => todo!()
-                | AudioFileInner::Aac(aac::AacDecodedToPcm { ref bytes, .. }) => bytes.len() as u64,
+            | AudioFileInner::Aac(aac::AacDecodedToPcm { ref bytes, .. }) => bytes.len() as u64,
         }
     }
 
@@ -230,7 +217,6 @@ impl AudioFile {
             }
             AudioFileInner::Caf(ref caf_reader) => {
                 caf_reader.get_packet_count().unwrap().try_into().unwrap()
-            AudioFileInner::InMemory() => 0
             }
         }
     }
@@ -326,7 +312,6 @@ impl AudioFile {
                 buffer[..bytes_to_read].copy_from_slice(bytes);
                 Ok(bytes_to_read)
             }
-            AudioFileInner::InMemory() => Ok(0)
         }
     }
 }
