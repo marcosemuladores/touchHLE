@@ -8,6 +8,7 @@
 use std::io::Write;
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::fs::GuestPath;
+use crate::fs::GuestFile::File;
 use crate::libc::posix_io::{FileDescriptor, O_RDONLY, STDERR_FILENO, STDIN_FILENO, STDOUT_FILENO};
 use crate::mem::{ConstPtr, ConstVoidPtr, GuestISize, GuestUSize, MutPtr, MutVoidPtr, Ptr};
 use crate::Environment;
