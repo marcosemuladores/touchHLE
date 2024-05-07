@@ -113,13 +113,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     host_object.object = object;
     this
 }
-
-- (())start {
-    let symb = "__ns_thread_invocation";
-    let gf = env
-    let thread_ptr: MutPtr<pthread_t> = env.mem.alloc(guest_size_of::<pthread_t>()).cast();
-    pthread_create(env, thread_ptr, ConstPtr::null(), gf, this.cast());
-}
     
 @end
 
