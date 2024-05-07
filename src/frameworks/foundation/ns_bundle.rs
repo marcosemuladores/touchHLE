@@ -6,6 +6,7 @@
 //! `NSBundle`.
 
 use super::{ns_string, NSUInteger};
+use super::ns_array;
 use crate::bundle::Bundle;
 use crate::frameworks::core_foundation::cf_bundle::{
     CFBundleCopyBundleLocalizations, CFBundleCopyPreferredLocalizationsFromArray,
