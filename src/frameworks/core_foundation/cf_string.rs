@@ -66,6 +66,22 @@ fn CFStringCreateWithCString(
     msg![env; ns_string initWithCString:c_string encoding:encoding]
 }
 
+fn CFStringCreateWithBytes(
+    env: &mut Environment,
+    allocator: CFAllocatorRef,
+    bytes: ConstPtr<u8>,
+    num_bytes: CFIndex,
+    encoding: CFStringEncoding,
+    is_external_repr: bool,
+) -> CFStringRef {
+    assert!(allocator == kCFAllocatorDefault); // unimplemented
+    assert!(!is_external_repr);
+    let len: u32 = num_bytes.try_into().unwrap();
+    let encoding = CFStringConvertEncodingToNSStringEncoding(env, encoding);
+    let ns_string: id = msg_class![env; NSString alloc];
+    msg![env; ns_string initWithBytes:bytes length:len encoding:encoding]
+}
+
 fn CFStringCreateWithFormat(
     env: &mut Environment,
     allocator: CFAllocatorRef,
@@ -136,6 +152,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFStringConvertEncodingToNSStringEncoding(_)),
     export_c_func!(CFStringConvertNSStringEncodingToEncoding(_)),
     export_c_func!(CFStringCreateWithCString(_, _, _)),
+    export_c_func!(CFStringCreateWithBytes(_, _, _, _, _)),
     export_c_func!(CFStringCreateWithFormat(_, _, _, _)),
     export_c_func!(CFStringCreateWithFormatAndArguments(_, _, _, _)),
     export_c_func!(CFStringCompare(_, _, _)),
