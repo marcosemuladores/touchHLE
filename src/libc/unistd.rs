@@ -81,7 +81,7 @@ fn access(env: &mut Environment, path: ConstPtr<u8>, mode: i32) -> i32 {
 }
 
 fn fsync(env: &mut Environment, fd: FileDescriptor) -> i32 {
-    let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
+    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
     match file.file {
         File(_) => _ = file.file.flush(),
         _ => {}
