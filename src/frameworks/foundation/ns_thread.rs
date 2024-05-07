@@ -117,8 +117,6 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())start {
     let symb = "__ns_thread_invocation";
     let gf = env
-        .dyld
-        .create_private_proc_address(&mut env.mem, &mut env.cpu, symb)
         .unwrap_or_else(|_| panic!("create_private_proc_address failed {}", symb));
 
     let thread_ptr: MutPtr<pthread_t> = env.mem.alloc(guest_size_of::<pthread_t>()).cast();
