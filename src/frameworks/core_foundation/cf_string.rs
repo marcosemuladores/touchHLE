@@ -32,6 +32,7 @@ fn CFStringConvertEncodingToNSStringEncoding(
     encoding: CFStringEncoding,
 ) -> ns_string::NSStringEncoding {
     match encoding {
+        0 => ns_string::NSASCIIStringEncoding, // TODO: kCFStringEncodingMacRoman
         kCFStringEncodingASCII => ns_string::NSASCIIStringEncoding,
         kCFStringEncodingUTF8 => ns_string::NSUTF8StringEncoding,
         kCFStringEncodingUTF16 => ns_string::NSUTF16StringEncoding,
