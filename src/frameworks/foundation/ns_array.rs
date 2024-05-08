@@ -241,6 +241,12 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.alloc_object(this, host_object, &mut env.mem)
 }
 
++ (id)arrayWithCapacity:(NSUInteger)cap {
+    let new = msg![env; this alloc];
+    let new = msg![env; new initWithCapacity:cap];
+    autorelease(env, new)
+}
+    
 // NSCoding implementation
 - (id)initWithCoder:(id)coder {
     let objects = ns_keyed_unarchiver::decode_current_array(env, coder);
