@@ -31,6 +31,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 // implemented here yet (TODO).
 @implementation NSValue: NSObject
 
++ (id)valueWithPointer:(ConstVoidPtr)ptr {
+    nil
+}
+
 // NSCopying implementation
 - (id)copyWithZone:(NSZonePtr)_zone {
     retain(env, this)
