@@ -213,8 +213,14 @@ pub const CLASSES: ClassExports = objc_classes! {
     contents
 }
 
-- (id)contentsAtPath:(id)path { // NSString *
-    msg_class![env; NSData dataWithContentsOfFile:path]
+- (id)contentsAtPath:(id)path {
+    let path = ns_string::to_rust_string(env, path); // TODO: avoid copy
+    let Ok(content) = env.fs.read(GuestPath::new(&path)) else {
+        return nil;
+    };
+    let length = content.len() as NSUInteger;
+    let content = env.mem.alloc_and_write_cstr(&content);
+    msg_class![env; NSData dataWithBytesNoCopy:(content.cast_void()) length: length]
 }
 
 - (bool)copyItemAtPath:(id)src // NSString*
