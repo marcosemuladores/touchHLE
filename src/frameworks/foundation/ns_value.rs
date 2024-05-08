@@ -7,10 +7,8 @@
 
 use super::{NSInteger, NSUInteger};
 use crate::frameworks::foundation::ns_string::from_rust_string;
-use crate::objc::{
-    autorelease, id, msg, msg_class, objc_classes, retain, Class, ClassExports, HostObject,
-    NSZonePtr,
-};
+use crate::mem::ConstVoidPtr;
+use crate::objc::{autorelease, id, msg, msg_class, objc_classes, retain, Class, ClassExports, HostObject, NSZonePtr, nil};
 
 #[derive(Debug)]
 pub enum NSNumberHostObject {
