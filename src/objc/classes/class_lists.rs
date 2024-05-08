@@ -7,8 +7,7 @@
 //! very long and frequently-updated list.
 
 use crate::frameworks::{
-    av_audio, avf_audio, core_animation, core_foundation, core_graphics, foundation, media_player, opengles,
-    store_kit, uikit,
+    av_audio, avf_audio, core_animation, core_foundation, core_graphics, foundation, media_player, opengles, store_kit, uikit,
 };
 
 /// All the lists of classes that the runtime should search through.
