@@ -7,7 +7,7 @@
 
 use super::ns_enumerator::{fast_enumeration_helper, NSFastEnumerationState};
 use super::ns_property_list_serialization::deserialize_plist_from_file;
-use super::{ns_keyed_unarchiver, ns_string, ns_url, NSUInteger};
+use super::{ns_keyed_unarchiver, ns_string, ns_url, NSNotFound, NSUInteger};
 use crate::frameworks::foundation::{NSComparisonResult, NSNotFound, NSOrderedSame};
 use crate::fs::GuestPath;
 use crate::mem::MutPtr;
@@ -23,6 +23,7 @@ struct ObjectEnumeratorHostObject {
 impl HostObject for ObjectEnumeratorHostObject {}
 
 /// Belongs to _touchHLE_NSArray
+#[derive(Default)]
 struct ArrayHostObject {
     array: Vec<id>,
 }
@@ -139,6 +140,12 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg_class![env; _touchHLE_NSMutableArray allocWithZone:zone]
 }
 
++ (id)array {
+    assert!(this == env.objc.get_known_class("NSMutableArray", &mut env.mem));
+    let null: NSZonePtr = MutPtr::null();
+    msg_class![env; _touchHLE_NSMutableArray allocWithZone:null]
+}
+    
 // NSCopying implementation
 - (id)copyWithZone:(NSZonePtr)_zone {
     todo!(); // TODO: this should produce an immutable copy
@@ -281,6 +288,17 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.dealloc_object(this, &mut env.mem)
 }
 
+- (id)objectEnumerator { // NSEnumerator*
+    let array_host_object: &mut ArrayHostObject = env.objc.borrow_mut(this);
+    let vec = array_host_object.array.to_vec();
+    let host_object = Box::new(ObjectEnumeratorHostObject {
+        iterator: vec.into_iter(),
+    });
+    let class = env.objc.get_known_class("_touchHLE_NSArray_ObjectEnumerator", &mut env.mem);
+    let enumerator = env.objc.alloc_object(class, host_object, &mut env.mem);
+    autorelease(env, enumerator)
+}
+    
 - (id)initWithCapacity:(NSUInteger)_capacity {
     this
 }
@@ -317,6 +335,17 @@ pub const CLASSES: ClassExports = objc_classes! {
     release(env, object)
 }
 
+- (id)componentsJoinedByString:(id)sep { // NSString *
+    let array_host_object: &mut ArrayHostObject = env.objc.borrow_mut(this);
+    let arr = array_host_object.array.to_vec();
+    for obj in arr {
+        let desc = msg![env; obj description];
+        log!("desc {}", ns_string::to_rust_string(env, desc));
+        todo!()
+    }
+    ns_string::get_static_str(env, "")
+}
+    
 @end
 
 // Special variant for use by CFArray with NULL callbacks: objects aren't
