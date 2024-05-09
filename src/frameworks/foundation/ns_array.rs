@@ -219,6 +219,20 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.borrow::<ArrayHostObject>(this).array[index as usize]
 }
 
+- (bool)containsObject:(id)object {
+    let enumer = msg![env; this objectEnumerator];
+    loop {
+        let next = msg![env; enumer nextObject];
+        if next == nil {
+            break;
+        }
+        if msg![env; next isEqual:object] {
+            return true;
+        }
+    }
+    false
+}
+    
 @end
 
 @implementation _touchHLE_NSArray_ObjectEnumerator: NSEnumerator
