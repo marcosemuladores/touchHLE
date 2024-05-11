@@ -160,6 +160,8 @@ extern "C" {
     pub fn alSource3i(source: ALuint, param: ALenum, value1: ALint, value2: ALint, value3: ALint);
     pub fn alSourceiv(source: ALuint, param: ALenum, values: *const ALint);
 
+    pub fn alEnable(capability: ALenum);
+
     pub fn alGetSourcef(source: ALuint, param: ALenum, value: *mut ALfloat);
     pub fn alGetSource3f(
         source: ALuint,
@@ -178,6 +180,7 @@ extern "C" {
         value3: *mut ALint,
     );
     pub fn alGetSourceiv(source: ALuint, param: ALenum, values: *mut ALint);
+    pub fn alGetString(param: ALenum) -> *const ALchar;
 
     pub fn alSourcePlay(source: ALuint);
     pub fn alSourcePause(source: ALuint);
