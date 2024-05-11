@@ -5,7 +5,7 @@
  */
 //! `CGImage.h`
 
-use super::cg_color_space::{kCGColorSpaceModelRGB, kCGColorSpaceGenericRGB, CGColorSpaceCreateWithName, CGColorSpaceGetModel, CGColorSpaceRef};
+use super::cg_color_space::{kCGColorSpaceGenericRGB, CGColorSpaceCreateWithName, CGColorSpaceRef};
 use super::cg_data_provider::{self, CGDataProviderRef};
 use super::CGFloat;
 use crate::dyld::{export_c_func, FunctionExports};
@@ -15,6 +15,7 @@ use crate::image::Image;
 use crate::mem::{ConstPtr, GuestISize, GuestUSize};
 use crate::objc::{autorelease, nil, objc_classes, ClassExports, HostObject, ObjC};
 use crate::Environment;
+use crate::frameworks::core_graphics::cg_color_space::{CGColorSpaceGetModel, kCGColorSpaceModelRGB};
 
 pub type CGImageAlphaInfo = u32;
 pub const kCGImageAlphaNone: CGImageAlphaInfo = 0;
@@ -110,7 +111,7 @@ fn CGImageCreate(
     _intent: i32,              // TODO (should be CGColorRenderingIntent)
 ) -> CGImageRef {
     assert!(decode.is_null()); // TODO
-    assert_eq!(CGColorSpaceGetModel(env, colorspace), kCGColorSpaceGenericRGB);
+    assert_eq!(CGColorSpaceGetModel(env, colorspace), kCGColorSpaceModelRGB);
     assert_eq!(bits_per_component, 8);
     assert_eq!(width * 4, bytes_per_row);
     log!("CGImageCreate w {}, h {}, bpc {}, bpp {}, bpr {}, bi {}", width, height, bits_per_component, bits_per_pixel, bytes_per_row, bitmap_info);
@@ -174,15 +175,6 @@ fn CGImageGetBitsPerPixel(_env: &mut Environment, _image: CGImageRef) -> GuestUS
     32
 }
 
-fn CGImageGetBytesPerRow(env: &mut Environment, image: CGImageRef) -> GuestUSize {
-    let (width, _height) = env
-        .objc
-        .borrow::<CGImageHostObject>(image)
-        .image
-        .dimensions();
-    width * 4
-}
-
 fn CGImageGetDataProvider(env: &mut Environment, image: CGImageRef) -> CGDataProviderRef {
     // CGImageGetDataProvider() seems to be intended to return the underlying
     // data provider that is retained by the CGImage. That's not how CGImage is
@@ -199,6 +191,15 @@ fn CGImageGetBitsPerComponent(_: &mut Environment, _: CGImageRef) -> GuestUSize 
     8 // Fix this when we support anything else
 }
 
+fn CGImageGetBytesPerRow(env: &mut Environment, image: CGImageRef) -> GuestUSize {
+    let (width, _) = env
+        .objc
+        .borrow::<CGImageHostObject>(image)
+        .image
+        .dimensions();
+    width * 4
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGImageRelease(_)),
     export_c_func!(CGImageRetain(_)),
@@ -209,7 +210,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGImageGetWidth(_)),
     export_c_func!(CGImageGetHeight(_)),
     export_c_func!(CGImageGetBitsPerPixel(_)),
-    export_c_func!(CGImageGetBytesPerRow(_)),
     export_c_func!(CGImageGetDataProvider(_)),
     export_c_func!(CGImageGetBitsPerComponent(_)),
+    export_c_func!(CGImageGetBytesPerRow(_)),
 ];
