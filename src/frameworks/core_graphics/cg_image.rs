@@ -12,7 +12,7 @@ use crate::dyld::{export_c_func, FunctionExports};
 use crate::frameworks::core_foundation::{CFRelease, CFRetain, CFTypeRef};
 use crate::frameworks::foundation::ns_string;
 use crate::image::Image;
-use crate::mem::{ConstPtr, GuestUSize};
+use crate::mem::{ConstPtr, GuestISize, GuestUSize};
 use crate::objc::{autorelease, nil, objc_classes, ClassExports, HostObject, ObjC};
 use crate::Environment;
 
@@ -95,6 +95,32 @@ pub fn borrow_image_mut(objc: &mut ObjC, image: CGImageRef) -> &mut Image {
 
 // TODO: More create methods.
 
+fn CGImageCreate(
+    env: &mut Environment,
+    width: GuestUSize,
+    height: GuestUSize,
+    bits_per_component: GuestUSize,
+    bits_per_pixel: GuestUSize,
+    bytes_per_row: GuestUSize,
+    colorspace: CGColorSpaceRef,
+    bitmap_info: CGBitmapInfo,
+    provider: CGDataProviderRef,
+    decode: ConstPtr<CGFloat>,
+    _should_interpolate: bool, // TODO
+    _intent: i32,              // TODO (should be CGColorRenderingIntent)
+) -> CGImageRef {
+    assert!(decode.is_null()); // TODO
+    assert_eq!(CGColorSpaceGetModel(env, colorspace), kCGColorSpaceModelRGB);
+    assert_eq!(bits_per_component, 8);
+    assert_eq!(width * 4, bytes_per_row);
+    log!("CGImageCreate w {}, h {}, bpc {}, bpp {}, bpr {}, bi {}", width, height, bits_per_component, bits_per_pixel, bytes_per_row, bitmap_info);
+
+    let pixels = cg_data_provider::borrow_bytes(env, provider).to_vec();
+    let image = Image::from_pixel_vec(pixels, (width, height));
+
+    from_image(env, image)
+}
+
 fn CGImageCreateWithPNGDataProvider(
     env: &mut Environment,
     source: CGDataProviderRef,
@@ -176,6 +202,7 @@ fn CGImageGetBitsPerComponent(_: &mut Environment, _: CGImageRef) -> GuestUSize 
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGImageRelease(_)),
     export_c_func!(CGImageRetain(_)),
+    export_c_func!(CGImageCreate(_, _, _, _, _, _, _, _, _, _, _)),
     export_c_func!(CGImageCreateWithPNGDataProvider(_, _, _, _)),
     export_c_func!(CGImageGetAlphaInfo(_)),
     export_c_func!(CGImageGetColorSpace(_)),
