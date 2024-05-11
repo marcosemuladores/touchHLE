@@ -5,7 +5,7 @@
  */
 //! `CGImage.h`
 
-use super::cg_color_space::{kCGColorSpaceGenericRGB, CGColorSpaceCreateWithName, CGColorSpaceRef};
+use super::cg_color_space::{kCGColorSpaceGenericRGB, CGColorSpaceCreateWithName, CGColorSpaceGetModel, CGColorSpaceRef};
 use super::cg_data_provider::{self, CGDataProviderRef};
 use super::CGFloat;
 use crate::dyld::{export_c_func, FunctionExports};
