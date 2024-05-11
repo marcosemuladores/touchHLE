@@ -179,7 +179,7 @@ pub const CLASSES: ClassExports = objc_classes! {
                 &key_string[1..],
             ))
         ) {
-            if env.objc.class_has_method(class, sel) || env.objc.class_has_ivar(class, sel) {
+            if env.objc.class_has_method(class, sel) || env.objc.class_has_ivar(class, sel).is_some() {
                 return msg_send(env, (this, sel, value));
             }
         }
