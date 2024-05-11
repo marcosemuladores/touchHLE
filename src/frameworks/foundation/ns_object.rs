@@ -270,12 +270,12 @@ forUndefinedKey:(id)key { // NSString*
 }
 
 - (())performSelectorOnMainThread:(SEL)sel withObject:(id)arg waitUntilDone:(bool)wait {
+    // // FIXME: main thread...
+    // () = msg_send(env, (this, sel, arg));
+
+    assert!(env.current_thread != 0);
     log!("performSelectorOnMainThread:{} withObject:{:?} waitUntilDone:{}", sel.as_str(&env.mem), arg, wait);
-    if env.current_thread == 0 && wait {
-        () = msg![env; this performSelector:sel withObject:arg];
-        return;
-    }
-    assertion!(!wait);
+    assert!(!wait);
 
     let sel_key: id = ns_string::get_static_str(env, "SEL");
     let sel_str = ns_string::from_rust_string(env, sel.as_str(&env.mem).to_string());
