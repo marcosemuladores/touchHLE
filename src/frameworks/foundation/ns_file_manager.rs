@@ -277,13 +277,13 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (id)attributesOfItemAtPath:(id)path // NSString*
                        error:(MutPtr<id>)error { // NSError**
     let path = if !path.is_null() { ns_string::to_rust_string(env, path) } else { "".into() };
-    let (file_size) = match env.fs.open(GuestPath::new(path.as_ref())) {
+    let file_size = match env.fs.open(GuestPath::new(path.as_ref())) {
         Ok(mut f) => {
             let file_size = f.seek(SeekFrom::End(0)).unwrap();
 
-            (file_size)
+            file_size
         },
-        Err(_) => (0),
+        Err(_) => 0,
     };
     let file_size_key: id = ns_string::get_static_str(env, "fileSize");
     let file_size_value: id = msg_class![env; NSNumber numberWithUnsignedLongLong:file_size];
