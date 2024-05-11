@@ -7,6 +7,8 @@
 
 use super::NSTimeInterval;
 use crate::dyld::HostFunction;
+use crate::dyld::FunctionExports;
+use crate::environment::Environment;
 use crate::frameworks::core_foundation::CFTypeRef;
 use crate::libc::pthread::thread::{
     pthread_attr_init, pthread_attr_setdetachstate, pthread_attr_t, pthread_create, pthread_t,
