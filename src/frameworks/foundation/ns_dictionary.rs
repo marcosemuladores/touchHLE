@@ -146,7 +146,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     let new_dict = dict_from_keys_and_objects(env, &[(key, object)]);
     autorelease(env, new_dict)
 }
-
     
 + (id)dictionaryWithObjectsAndKeys:(id)first_object, ...dots {
     let new_dict: id = msg![env; this alloc];
