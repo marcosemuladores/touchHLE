@@ -275,7 +275,7 @@ forUndefinedKey:(id)key { // NSString*
 
     assert!(env.current_thread != 0);
     log!("performSelectorOnMainThread:{} withObject:{:?} waitUntilDone:{}", sel.as_str(&env.mem), arg, wait);
-    assert!(!wait);
+    assert!(wait);
 
     let sel_key: id = ns_string::get_static_str(env, "SEL");
     let sel_str = ns_string::from_rust_string(env, sel.as_str(&env.mem).to_string());
