@@ -220,6 +220,11 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (())performSelectorOnMainThread:(SEL)sel withObject:(id)arg waitUntilDone:(bool)wait {
+    // FIXME: main thread...
+    () = msg_send(env, (this, sel, arg));
+}
+
+- (())performSelectorOnMainThread:(SEL)sel withObject:(id)arg waitUntilDone:(bool)wait {
     log!("performSelectorOnMainThread:{} withObject:{:?} waitUntilDone:{}", sel.as_str(&env.mem), arg, wait);
     if env.current_thread == 0 && wait {
         () = msg![env; this performSelector:sel withObject:arg];
