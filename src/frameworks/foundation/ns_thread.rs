@@ -8,7 +8,6 @@
 use super::NSTimeInterval;
 use crate::dyld::HostFunction;
 use crate::dyld::FunctionExports;
-use crate::environment::Environment;
 use crate::frameworks::core_foundation::CFTypeRef;
 use crate::libc::pthread::thread::{
     pthread_attr_init, pthread_attr_setdetachstate, pthread_attr_t, pthread_create, pthread_t,
@@ -20,6 +19,7 @@ use crate::objc::{
     id, msg_send, nil, objc_classes, release, retain, Class, ClassExports, HostObject, NSZonePtr,
     SEL,
 };
+use crate::{export_c_func, msg};
 use crate::Environment;
 use std::time::Duration;
 
