@@ -81,6 +81,18 @@ fn CFStringCreateMutable(
     msg![env; str init]
 }
 
+fn CFStringCreateMutableCopy(
+    env: &mut Environment,
+    allocator: CFAllocatorRef,
+    max_length: CFIndex,
+    the_string: CFStringRef
+) -> CFMutableStringRef {
+    assert!(allocator.is_null());
+    assert_eq!(max_length, 0);
+    let ns_mut_string: id = msg_class![env; NSMutableString alloc];
+    msg![env; ns_mut_string initWithString:the_string]
+}
+
 fn CFStringCreateWithCString(
     env: &mut Environment,
     allocator: CFAllocatorRef,
@@ -175,11 +187,18 @@ fn CFStringFind(
     }
 }
 
+fn CFStringNormalize(
+    env: &mut Environment, the_string: CFMutableStringRef, the_form: NSInteger
+) {
+    // TODO
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFStringAppendFormat(_, _, _, _)),
     export_c_func!(CFStringConvertEncodingToNSStringEncoding(_)),
     export_c_func!(CFStringConvertNSStringEncodingToEncoding(_)),
     export_c_func!(CFStringCreateMutable(_, _)),
+    export_c_func!(CFStringCreateMutableCopy(_, _, _)),
     export_c_func!(CFStringCreateWithCString(_, _, _)),
     export_c_func!(CFStringCreateWithBytes(_, _, _, _, _)),
     export_c_func!(CFStringCreateWithFormat(_, _, _, _)),
@@ -187,4 +206,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFStringCompare(_, _, _)),
     export_c_func!(CFStringGetCString(_, _, _, _)),
     export_c_func!(CFStringFind(_, _, _)),
+    export_c_func!(CFStringNormalize(_, _)),
 ];
