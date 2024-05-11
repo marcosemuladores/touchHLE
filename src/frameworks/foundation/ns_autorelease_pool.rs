@@ -42,6 +42,9 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 + (())addObject:(id)obj {
     let current_thread = env.current_thread;
+    let pool_stack = State::get(env).pool_stacks
+        .entry(current_thread)
+        .or_insert_with(Vec::new);
     if let Some(current_pool) = State::get(env)
         .pool_stacks
         .get(&current_thread)
