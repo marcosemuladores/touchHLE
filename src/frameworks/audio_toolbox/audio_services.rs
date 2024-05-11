@@ -8,6 +8,7 @@
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::frameworks::carbon_core::OSStatus;
 use crate::frameworks::core_audio_types::fourcc;
+use crate::frameworks::core_foundation::cf_url::CFURLRef;
 use crate::mem::{MutPtr, MutVoidPtr, Ptr};
 use crate::Environment;
 
