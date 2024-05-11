@@ -5,7 +5,7 @@
  */
 //! `CGImage.h`
 
-use super::cg_color_space::{kCGColorSpaceGenericRGB, CGColorSpaceCreateWithName, CGColorSpaceGetModel, CGColorSpaceRef};
+use super::cg_color_space::{kCGColorSpaceModelRGB, kCGColorSpaceGenericRGB, CGColorSpaceCreateWithName, CGColorSpaceGetModel, CGColorSpaceRef};
 use super::cg_data_provider::{self, CGDataProviderRef};
 use super::CGFloat;
 use crate::dyld::{export_c_func, FunctionExports};
@@ -110,7 +110,7 @@ fn CGImageCreate(
     _intent: i32,              // TODO (should be CGColorRenderingIntent)
 ) -> CGImageRef {
     assert!(decode.is_null()); // TODO
-    assert_eq!(CGColorSpaceGetModel(env, colorspace), kCGColorSpaceModelRGB);
+    assert_eq!(CGColorSpaceGetModel(env, colorspace), kCGColorSpaceGenericRGB);
     assert_eq!(bits_per_component, 8);
     assert_eq!(width * 4, bytes_per_row);
     log!("CGImageCreate w {}, h {}, bpc {}, bpp {}, bpr {}, bi {}", width, height, bits_per_component, bits_per_pixel, bytes_per_row, bitmap_info);
