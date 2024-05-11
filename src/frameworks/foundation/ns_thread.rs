@@ -19,7 +19,7 @@ use crate::objc::{
     id, msg_send, nil, objc_classes, release, retain, Class, ClassExports, HostObject, NSZonePtr,
     SEL,
 };
-use crate::{export_c_func, msg};
+use crate::{export_c_func};
 use crate::Environment;
 use std::time::Duration;
 
