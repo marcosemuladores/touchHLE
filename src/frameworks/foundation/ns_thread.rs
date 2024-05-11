@@ -60,6 +60,37 @@ pub const CLASSES: ClassExports = objc_classes! {
     this
 }
 
++ (())detachNewThreadSelector:(SEL)selector
+                       toTarget:(id)target
+                     withObject:(id)object {
+    let host_object = Box::new(NSThreadHostObject {
+        target,
+        selector: Some(selector),
+        object,
+    });
+    let this = env.objc.alloc_object(this, host_object, &mut env.mem);
+    retain(env, this);
+
+    retain(env, target);
+    retain(env, object);
+
+    let symb = "__ns_thread_invocation";
+    let gf = env
+        .dyld
+        .create_private_proc_address(&mut env.mem, &mut env.cpu, symb)
+        .unwrap_or_else(|_| panic!("create_private_proc_address failed {}", symb));
+
+    let attr: MutPtr<pthread_attr_t> = env.mem.alloc(guest_size_of::<pthread_attr_t>()).cast();
+    pthread_attr_init(env, attr);
+
+    pthread_attr_setdetachstate(env, attr, PTHREAD_CREATE_DETACHED);
+    let thread_ptr: MutPtr<pthread_t> = env.mem.alloc(guest_size_of::<pthread_t>()).cast();
+
+    pthread_create(env, thread_ptr, attr.cast_const(), gf, this.cast());
+
+    // TODO: post NSWillBecomeMultiThreadedNotification
+}
+    
 + (())sleepForTimeInterval:(NSTimeInterval)ti {
     log_dbg!("[NSThread sleepForTimeInterval:{:?}]", ti);
     env.sleep(Duration::from_secs_f64(ti), /* tail_call: */ true);
@@ -153,3 +184,5 @@ pub fn _touchHLE_NSThreadInvocationHelper(env: &mut Environment, ns_thread_obj: 
 
     // TODO: NSThread exit
 }
+
+pub const PRIVATE_FUNCTIONS: FunctionExports = &[export_c_func!(_ns_thread_invocation(_))];
