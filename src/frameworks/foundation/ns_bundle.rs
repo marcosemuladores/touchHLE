@@ -32,6 +32,7 @@ const LANG_ID_TO_LANG_PROJ: &[(&str, &str)] = &[
     ("it", "Italian.lproj"),
     ("ja", "Japanese.lproj"),
     ("no", "Norwegian.lproj"),
+    ("pl", "Polish.lproj"),
     ("es", "Spanish.lproj"),
     ("sv", "Swedish.lproj"),
 ];
