@@ -16,9 +16,11 @@ use crate::frameworks::core_graphics::cg_context::{
 use crate::frameworks::core_graphics::cg_image::{
     kCGImageAlphaPremultipliedLast, kCGImageByteOrder32Big,
 };
-use crate::frameworks::core_graphics::{CGPoint, CGRect, CGSize};
+use crate::frameworks::core_graphics::{CGFloat, CGPoint, CGRect, CGSize};
+use crate::frameworks::foundation::NSInteger;
 use crate::mem::{GuestUSize, Ptr};
-use crate::objc::{id, msg, nil, objc_classes, release, retain, ClassExports, HostObject, ObjC};
+use crate::msg_class;
+use crate::objc::{autorelease, id, msg, nil, objc_classes, release, retain, ClassExports, HostObject, ObjC};
 use std::collections::HashMap;
 use crate::frameworks::core_graphics::cg_affine_transform::{CGAffineTransform, CGAffineTransformIdentity};
 
@@ -481,6 +483,48 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 // TODO: more
 
+ - (())addAnimation:(id)anim forKey:(id)key {
+
+}
+
+@end
+
+@implementation CAAnimation : NSObject
+
++ (id)animation {
+    let new_anim: id = msg![env; this alloc];
+    let new_anim: id = msg![env; new_anim init];
+    autorelease(env, new_anim)
+}
+
+- (())setDelegate:(id)delegate {
+}
+
+@end
+
+@implementation CATransition : CAAnimation
+
+- (())setType:(id)type_ {
+}
+- (())setSubtype:(id)subType {
+}
+
+- (())setDuration:(CGFloat)duration {
+}
+
+- (())setTimingFunction:(id)func {
+}
+
+@end
+
+@implementation CAMediaTimingFunction : NSObject
+
++ (id)functionWithName:(id)name { // NSString *
+    let new_func: id = msg![env; this alloc];
+    let new_func: id = msg![env; new_func init];
+    autorelease(env, new_func)
+}
+   
 @end
 
 };
