@@ -164,10 +164,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 type NSThreadRef = CFTypeRef;
 
-pub fn _touchHLE_NSThreadInvocationHelper(env: &mut Environment, ns_thread_obj: NSThreadRef) {
+pub fn _ns_thread_invocation(env: &mut Environment, ns_thread_obj: NSThreadRef) {
     let class: Class = msg![env; ns_thread_obj class];
     log_dbg!(
-        "_touchHLE_NSThreadInvocationHelper on object of class: {}",
+        "_ns_thread_invocation on object of class: {}",
         env.objc.get_class_name(class)
     );
     assert_eq!(class, env.objc.get_known_class("NSThread", &mut env.mem));
