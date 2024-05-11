@@ -134,6 +134,10 @@ fn CFNumberCreate(
     msg_class![env; NSNumber numberWithInt:val]
 }
 
+fn sched_yield(env: &mut Environment) -> i32 {
+    0
+}
+
 pub const kCFRunLoopCommonModes: &str = "kCFRunLoopCommonModes";
 pub const kCFRunLoopDefaultMode: &str = "kCFRunLoopDefaultMode";
 pub const kCFPreferencesCurrentApplication: &str = "kCFPreferencesCurrentApplication";
@@ -165,4 +169,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFPreferencesSetAppValue(_, _, _)),
     export_c_func!(CFPreferencesAppSynchronize(_)),
     export_c_func!(CFNumberCreate(_, _, _)),
+    export_c_func!(sched_yield()),
 ];
