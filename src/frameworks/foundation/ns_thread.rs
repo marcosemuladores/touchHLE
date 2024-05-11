@@ -116,8 +116,8 @@ pub const CLASSES: ClassExports = objc_classes! {
     retain(env, target);
     retain(env, object);
 
-    let symb = "__touchHLE_NSThreadInvocationHelper";
-    let hf: HostFunction = &(_touchHLE_NSThreadInvocationHelper as fn(&mut Environment, _) -> _);
+    let symb = "__ns_thread_invocation";
+    let hf: HostFunction = &(_ns_thread_invocation as fn(&mut Environment, _) -> _);
     let gf = env
         .dyld
         .create_guest_function(&mut env.mem, symb, hf);
