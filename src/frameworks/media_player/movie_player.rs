@@ -117,6 +117,9 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())setBackgroundColor:(id)_color {
     // TODO
 }
+- (())setBackgroundColor:(id)_mode {
+    // TODO
+}
 - (())setOrientation:(NSInteger)_orient
             animated:(bool)_animated {
     // TODO why this is even called here?
