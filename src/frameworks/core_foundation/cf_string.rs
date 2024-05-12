@@ -12,7 +12,7 @@ use super::cf_allocator::{kCFAllocatorDefault, CFAllocatorRef};
 use super::cf_dictionary::CFDictionaryRef;
 use crate::abi::{DotDotDot, VaList};
 use crate::dyld::{export_c_func, FunctionExports};
-use crate::frameworks::core_foundation::{kCFNotFound, CFIndex, CFOptionFlags, CFRange};
+use crate::frameworks::core_foundation::{kCFNotFound, CFArrayRef, CFIndex, CFOptionFlags, CFRange};
 use crate::frameworks::foundation::{ns_string, NSNotFound, NSRange, NSInteger, NSUInteger};
 use crate::mem::{ConstPtr, MutPtr};
 use crate::objc::{id, msg, msg_class};
@@ -68,6 +68,16 @@ fn CFStringConvertNSStringEncodingToEncoding(
         ns_string::NSUTF16LittleEndianStringEncoding => kCFStringEncodingUTF16LE,
         _ => unimplemented!("Unhandled: NSStringEncoding {:#x}", encoding),
     }
+}
+
+fn CFStringCreateArrayBySeparatingStrings(
+    env: &mut Environment,
+    allocator: CFAllocatorRef,
+    string: CFStringRef,
+    separator: CFStringRef
+) -> CFArrayRef {
+    assert!(allocator == kCFAllocatorDefault); // unimplemented
+    msg![env; string componentsSeparatedByString:separator]
 }
 
 fn CFStringCreateMutable(
@@ -168,6 +178,10 @@ fn CFStringGetCString(
     msg![env; a getCString:buffer maxLength:buffer_size encoding:encoding]
 }
 
+fn CFStringGetSystemEncoding(_env: &mut Environment) -> CFStringEncoding {
+    kCFStringEncodingASCII
+}
+
 fn CFStringFind(
     env: &mut Environment,
     string: CFStringRef,
@@ -197,6 +211,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFStringAppendFormat(_, _, _, _)),
     export_c_func!(CFStringConvertEncodingToNSStringEncoding(_)),
     export_c_func!(CFStringConvertNSStringEncodingToEncoding(_)),
+    export_c_func!(CFStringCreateArrayBySeparatingStrings(_, _, _))
     export_c_func!(CFStringCreateMutable(_, _)),
     export_c_func!(CFStringCreateMutableCopy(_, _, _)),
     export_c_func!(CFStringCreateWithCString(_, _, _)),
@@ -205,6 +220,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFStringCreateWithFormatAndArguments(_, _, _, _)),
     export_c_func!(CFStringCompare(_, _, _)),
     export_c_func!(CFStringGetCString(_, _, _, _)),
+    export_c_func!(CFStringGetSystemEncoding()),
     export_c_func!(CFStringFind(_, _, _)),
     export_c_func!(CFStringNormalize(_, _)),
 ];
