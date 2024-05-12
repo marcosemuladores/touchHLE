@@ -347,9 +347,9 @@ type suseconds_t = i32;
 
 #[allow(non_camel_case_types)]
 #[repr(C, packed)]
-struct timeval {
-    tv_sec: time_t,
-    tv_usec: suseconds_t,
+pub struct timeval {
+    pub tv_sec: time_t,
+    pub tv_usec: suseconds_t,
 }
 unsafe impl SafeRead for timeval {}
 
