@@ -1,4 +1,4 @@
- /*
+/*
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
@@ -6,13 +6,11 @@
 //! `NSDate`.
 
 use super::NSTimeInterval;
-use crate::environment::Environment;
 use crate::frameworks::core_foundation::time::apple_epoch;
 use crate::frameworks::foundation::{ns_string, NSInteger};
-use crate::objc::{autorelease, id, msg, msg_class, objc_classes, ClassExports, HostObject, NSZonePtr};
+use crate::objc::{autorelease, id, msg, msg_class, objc_classes, ClassExports, HostObject};
 
-use std::time;
-use std::time::{Duration, SystemTime};
+use std::time::SystemTime;
 
 struct NSTimeZoneHostObject {
     _time_zone: String,
@@ -20,7 +18,6 @@ struct NSTimeZoneHostObject {
 impl HostObject for NSTimeZoneHostObject {}
 
 struct NSDateHostObject {
-    instant: SystemTime,
     time_interval: NSTimeInterval,
 }
 impl HostObject for NSDateHostObject {}
@@ -31,19 +28,19 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 @implementation NSDate: NSObject
 
-+ (id)allocWithZone:(NSZonePtr)_zone {
++ (id)date {
+    // "Date objects are immutable, representing an invariant time interval
+    // relative to an absolute reference date (00:00:00 UTC on 1 January 2001)."
+    let time_interval = SystemTime::now()
+        .duration_since(apple_epoch())
+        .unwrap()
+        .as_secs_f64();
     let host_object = Box::new(NSDateHostObject {
-        instant: SystemTime::now()
+        time_interval
     });
-    env.objc.alloc_object(this, host_object, &mut env.mem)
-}
-
-+ (id)date }
-    let new = msg![env; this alloc];
-
-log_dbg!("[(NSDate*){:?} date]: New date {:?}", this, new);
-
-autorelease(env, new)
+    let new = env.objc.alloc_object(this, host_object, &mut env.mem);
+    log_dbg!("[NSDate date] => {:?} ({:?}s)", new, time_interval);
+    autorelease(env, new)
 }
 
 + (id)distantFuture {
@@ -66,36 +63,19 @@ autorelease(env, new)
     msg![env; now timeIntervalSinceReferenceDate]
 }
 
-- (id)init {
-    this
-}
-
-- (id)initWithTimeIntervalSinceNow:(NSTimeInterval)secs {
-    let host_object = env.objc.borrow_mut::<NSDateHostObject>(this);
-    host_object.instant = SystemTime::now() + Duration::from_secs_f64(secs);
-    this
-}
-
 - (NSTimeInterval)timeIntervalSinceDate:(id)anotherDate {
-    if anotherDate.is_null() {
-        return 0.0;
-    }
+    assert!(!anotherDate.is_null());
     let host_object = env.objc.borrow::<NSDateHostObject>(this);
     let another_date_host_object = env.objc.borrow::<NSDateHostObject>(anotherDate);
-    let result = if another_date_host_object.instant < host_object.instant {
-        host_object.instant.duration_since(another_date_host_object.instant).unwrap().as_secs_f64()
-    } else {
-        another_date_host_object.instant.duration_since(host_object.instant).unwrap().as_secs_f64()
-    };
+    let result =  host_object.time_interval-another_date_host_object.time_interval;
     log_dbg!("[(NSDate*){:?} ({:?}s) timeIntervalSinceDate:{:?} ({:?}s)] => {}", this, host_object.time_interval, anotherDate, another_date_host_object.time_interval, result);
     result
 }
 
-- (NSTimeInterval)timeIntervalSince1970 {
-    let host_object = env.objc.borrow::<NSDateHostObject>(this);
-    host_object.instant.duration_since(time::UNIX_EPOCH).unwrap().as_secs_f64()
+- (NSTimeInterval)timeIntervalSinceReferenceDate {
+    env.objc.borrow::<NSDateHostObject>(this).time_interval
 }
-    
+
 - (NSTimeInterval)timeIntervalSinceNow {
 
     let host_object = env.objc.borrow::<NSDateHostObject>(this);
@@ -142,7 +122,3 @@ autorelease(env, new)
 @end
 
 };
-
-pub fn to_date(env: &mut Environment, date: id) -> SystemTime {
-    env.objc.borrow::<NSDateHostObject>(date).instant
-        }   
