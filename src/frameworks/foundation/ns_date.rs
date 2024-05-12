@@ -34,6 +34,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 + (id)allocWithZone:(NSZonePtr)_zone {
     let host_object = Box::new(NSDateHostObject {
         instant: SystemTime::now()
+        time_interval
     });
     env.objc.alloc_object(this, host_object, &mut env.mem)
 }
