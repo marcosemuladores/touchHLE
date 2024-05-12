@@ -19,7 +19,7 @@ struct NSTimeZoneHostObject {
 impl HostObject for NSTimeZoneHostObject {}
 
 struct NSDateHostObject {
-    time_interval: NSTimeInterval,
+    instant: SystemTime,
 }
 impl HostObject for NSDateHostObject {}
 
@@ -37,7 +37,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         .unwrap()
         .as_secs_f64();
     let host_object = Box::new(NSDateHostObject {
-        time_interval
+        instant: SystemTime::now()
     });
     let new = env.objc.alloc_object(this, host_object, &mut env.mem);
     log_dbg!("[NSDate date] => {:?} ({:?}s)", new, time_interval);
