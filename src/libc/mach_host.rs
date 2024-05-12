@@ -6,8 +6,10 @@
 #![allow(non_camel_case_types)]
 
 use crate::dyld::{export_c_func, FunctionExports};
+use crate::libc::time::{time_t, timespec};
 use crate::mem::{guest_size_of, MutPtr, SafeRead};
 use crate::Environment;
+use std::time::Instant;
 
 type mach_port_t = u32;
 type host_t = mach_port_t;
@@ -17,6 +19,10 @@ type host_info_t = MutPtr<integer_t>;
 type natural_t = u32;
 type mach_msg_type_number_t = natural_t;
 type kern_return_t = i32;
+type clock_id_t = i32;
+type clock_serv_t = mach_port_t;
+
+type mach_timespec_t = timespec;
 
 type vm_size_t = natural_t;
 
@@ -45,7 +51,7 @@ unsafe impl SafeRead for vm_statistics {}
 /// Since we do not have real mach port management
 /// let's just hope that the fake value is good enough
 fn mach_host_self(_: &mut Environment) -> host_t {
-    HOST_SELF
+    return HOST_SELF;
 }
 
 /// Returns various kinds of host statistics
@@ -98,8 +104,32 @@ fn host_page_size(
     0 // Success
 }
 
+fn host_get_clock_service(
+    env: &mut Environment,
+    host_priv: host_t,
+    clock_id: clock_id_t,
+    clock_name: MutPtr<clock_serv_t>,
+) -> kern_return_t {
+    assert_eq!(clock_id, 0);
+    0 // Success
+}
+
+fn clock_get_time(
+    env: &mut Environment,
+    clock_name: clock_serv_t,
+    cur_time: MutPtr<mach_timespec_t>,
+) -> kern_return_t {
+    let dur = Instant::now().duration_since(env.startup_time);
+    let tv_sec: time_t = dur.as_secs().try_into().unwrap();
+    let tv_nsec: i32 = dur.subsec_nanos().try_into().unwrap();
+    env.mem.write(cur_time, mach_timespec_t { tv_sec, tv_nsec });
+    0 // Success
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(mach_host_self()),
     export_c_func!(host_statistics(_, _, _, _)),
     export_c_func!(host_page_size(_, _)),
+    export_c_func!(host_get_clock_service(_, _, _)),
+    export_c_func!(clock_get_time(_, _)),
 ];
