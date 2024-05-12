@@ -6,11 +6,13 @@
 //! `NSDate`.
 
 use super::NSTimeInterval;
+use crate::environment::Environment;
 use crate::frameworks::core_foundation::time::apple_epoch;
 use crate::frameworks::foundation::{ns_string, NSInteger};
 use crate::objc::{autorelease, id, msg, msg_class, objc_classes, ClassExports, HostObject};
 
-use std::time::SystemTime;
+use std::time;
+use std::time::{Duration, SystemTime};
 
 struct NSTimeZoneHostObject {
     _time_zone: String,
@@ -18,7 +20,7 @@ struct NSTimeZoneHostObject {
 impl HostObject for NSTimeZoneHostObject {}
 
 struct NSDateHostObject {
-    time_interval: NSTimeInterval,
+    instant: SystemTime,
 }
 impl HostObject for NSDateHostObject {}
 
@@ -28,6 +30,13 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 @implementation NSDate: NSObject
 
++ (id)allocWithZone:(NSZonePtr)_zone {
+    let host_object = Box::new(NSDateHostObject {
+        instant: SystemTime::now()
+    });
+    env.objc.alloc_object(this, host_object, &mut env.mem)
+}
+ 
 + (id)date {
     // "Date objects are immutable, representing an invariant time interval
     // relative to an absolute reference date (00:00:00 UTC on 1 January 2001)."
