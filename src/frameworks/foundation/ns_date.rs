@@ -5,6 +5,7 @@
  */
 //! `NSDate`.
 
+use std::time;
 use super::NSTimeInterval;
 use crate::frameworks::core_foundation::time::apple_epoch;
 use crate::frameworks::foundation::{ns_string, NSInteger};
