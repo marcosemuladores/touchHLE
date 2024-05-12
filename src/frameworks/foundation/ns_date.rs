@@ -34,24 +34,16 @@ pub const CLASSES: ClassExports = objc_classes! {
 + (id)allocWithZone:(NSZonePtr)_zone {
     let host_object = Box::new(NSDateHostObject {
         instant: SystemTime::now()
-        time_interval
     });
     env.objc.alloc_object(this, host_object, &mut env.mem)
 }
- 
-+ (id)date {
-    // "Date objects are immutable, representing an invariant time interval
-    // relative to an absolute reference date (00:00:00 UTC on 1 January 2001)."
-    let time_interval = SystemTime::now()
-        .duration_since(apple_epoch())
-        .unwrap()
-        .as_secs_f64();
-    let host_object = Box::new(NSDateHostObject {
-        time_interval
-    });
-    let new = env.objc.alloc_object(this, host_object, &mut env.mem);
-    log_dbg!("[NSDate date] => {:?} ({:?}s)", new, time_interval);
-    autorelease(env, new)
+
++ (id)date }
+    let new = msg![env; this alloc];
+
+log_dbg!("[(NSDate*){:?} date]: New date {:?}", this, new);
+
+autorelease(env, new)
 }
 
 + (id)distantFuture {
