@@ -211,7 +211,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFStringAppendFormat(_, _, _, _)),
     export_c_func!(CFStringConvertEncodingToNSStringEncoding(_)),
     export_c_func!(CFStringConvertNSStringEncodingToEncoding(_)),
-    export_c_func!(CFStringCreateArrayBySeparatingStrings(_, _, _))
+    export_c_func!(CFStringCreateArrayBySeparatingStrings(_, _, _)),
     export_c_func!(CFStringCreateMutable(_, _)),
     export_c_func!(CFStringCreateMutableCopy(_, _, _)),
     export_c_func!(CFStringCreateWithCString(_, _, _)),
