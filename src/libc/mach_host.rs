@@ -19,12 +19,13 @@ type host_info_t = MutPtr<integer_t>;
 type natural_t = u32;
 type mach_msg_type_number_t = natural_t;
 type kern_return_t = i32;
+
+type vm_size_t = natural_t;
+
 type clock_id_t = i32;
 type clock_serv_t = mach_port_t;
 
 type mach_timespec_t = timespec;
-
-type vm_size_t = natural_t;
 
 const HOST_SELF: host_t = 0x484F5354; // HOST
 const HOST_VM_INFO: host_flavor_t = 2;
@@ -92,7 +93,7 @@ fn host_statistics(
         }
         _ => unimplemented!("TODO: flavor {:?}", flavor),
     }
-    KERN_SUCCESS
+    0 // Success
 }
 
 fn host_page_size(
