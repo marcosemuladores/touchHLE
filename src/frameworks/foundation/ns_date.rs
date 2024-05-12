@@ -9,7 +9,7 @@ use super::NSTimeInterval;
 use crate::environment::Environment;
 use crate::frameworks::core_foundation::time::apple_epoch;
 use crate::frameworks::foundation::{ns_string, NSInteger};
-use crate::objc::{autorelease, id, msg, msg_class, objc_classes, ClassExports, HostObject};
+use crate::objc::{autorelease, id, msg, msg_class, objc_classes, ClassExports, HostObject, NSZonePtr};
 
 use std::time;
 use std::time::{Duration, SystemTime};
@@ -21,6 +21,7 @@ impl HostObject for NSTimeZoneHostObject {}
 
 struct NSDateHostObject {
     instant: SystemTime,
+    time_interval: NSTimeInterval,
 }
 impl HostObject for NSDateHostObject {}
 
