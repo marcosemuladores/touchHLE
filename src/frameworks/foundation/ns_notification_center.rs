@@ -92,11 +92,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         object,
     });
 }
-
-- (())removeObserver:(id)observer {
-
-}
-
+    
 - (())removeObserver:(id)observer
                 name:(NSNotificationName)name
               object:(id)object {
@@ -171,8 +167,14 @@ pub const CLASSES: ClassExports = objc_classes! {
             observer
         );
 
+        // In some cases, observer could be removed during the
+        // processing of the notification, effectively releasing it.
+        // (This is happening with Spore Origins)
+        // We need to retain it for correctness.
+        retain(env, observer);
         // Signature should be `- (void)notification:(NSNotification *)notif`.
         let _: () = msg_send(env, (observer, selector, notification));
+        release(env, observer);
     }
 }
 - (())postNotificationName:(NSNotificationName)name
