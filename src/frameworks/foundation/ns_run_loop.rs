@@ -123,7 +123,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     let distant_future: id = msg_class![env; NSDate distantFuture];
     let delta: NSTimeInterval = msg![env; limit_date timeIntervalSinceDate:distant_future];
     assert!(delta < 10.0);
-    run_run_loop(env, this, /* single_iteration: */ false);
+    run_run_loop(env, this, false, /* SystemTime */);
 }
     
 - (())runUntilDate:(id)date {
