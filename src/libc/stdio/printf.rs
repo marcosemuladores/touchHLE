@@ -12,7 +12,7 @@ use crate::libc::clocale::{setlocale, LC_CTYPE};
 use crate::libc::posix_io::{STDERR_FILENO, STDOUT_FILENO};
 use crate::libc::stdio::{EOF, fgetc, FILE, fputc, fwrite, ungetc};
 use crate::libc::stdlib::atoi_inner;
-use crate::libc::wchar::wchar_t;
+use crate::libc::wchar::{wchar_t, wmemcpy};
 use crate::mem::{ConstPtr, guest_size_of, GuestUSize, Mem, MutPtr, MutVoidPtr, Ptr};
 use crate::objc::{id, msg, nil};
 use crate::Environment;
@@ -432,6 +432,25 @@ fn vsprintf(env: &mut Environment, dest: MutPtr<u8>, format: ConstPtr<u8>, arg: 
     res.len().try_into().unwrap()
 }
 
+// int
+//      vswprintf(wchar_t * restrict ws, size_t n, const wchar_t *restrict format, va_list ap);
+fn vswprintf(
+    env: &mut Environment,
+    ws: MutPtr<wchar_t>,
+    n: GuestUSize,
+    format: ConstPtr<wchar_t>,
+    arg: VaList
+) -> i32 {
+    let y = env.mem.wcstr_at_utf16(format);
+    log!("vswprintf: format {}", y);
+    let to_write = n.min(y.len() as GuestUSize);
+    wmemcpy(env, ws, format, to_write);
+    if to_write < n {
+        env.mem.write(ws + to_write, wchar_t::default());
+    }
+    to_write as i32
+}
+
 fn sprintf(env: &mut Environment, dest: MutPtr<u8>, format: ConstPtr<u8>, args: DotDotDot) -> i32 {
     log_dbg!(
         "sprintf({:?}, {:?} ({:?}), ...)",
@@ -830,6 +849,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(vprintf(_, _)),
     export_c_func!(vsnprintf(_, _, _, _)),
     export_c_func!(vsprintf(_, _, _)),
+    export_c_func!(vswprintf(_, _, _, _)),
     export_c_func!(sprintf(_, _, _)),
     export_c_func!(vasprintf(_, _, _)),
     export_c_func!(swprintf(_, _, _, _)),
