@@ -34,11 +34,6 @@ pub const CONSTANTS: ConstantExports = &[
         "_NSDefaultRunLoopMode",
         HostConstant::NSString(NSDefaultRunLoopMode),
     ),
-    ("_NSFileType", HostConstant::NSString("NSFileType")),
-    (
-        "_NSFileTypeRegular",
-        HostConstant::NSString("NSFileTypeRegular"),
-    ),
 ];
 
 #[derive(Default)]
@@ -125,7 +120,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     let delta: NSTimeInterval = msg![env; limit_date timeIntervalSinceDate:distant_future];
     assert!(delta < 10.0);
     run_run_loop(env, this, /* single_iteration: */ false);
-}    
+}
 // TODO: other run methods
 
 @end
