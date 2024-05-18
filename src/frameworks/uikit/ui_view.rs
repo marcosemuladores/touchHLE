@@ -243,6 +243,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 }
 
+- (())setAutoresizesSubviews:(bool)enabled {
+
+}
+
 - (())setClipsToBounds:(bool)_clip {
 
 }
@@ -581,6 +585,11 @@ pub const CLASSES: ClassExports = objc_classes! {
 @end
 
 @implementation UINavigationBar : UIView
+- (())setDataSource:(id)dataSource {
+}
+- (())setDelegate:(id)delegate {
+}
+
 @end
 
 @implementation UINavigationItem : NSObject
