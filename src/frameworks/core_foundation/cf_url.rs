@@ -15,7 +15,7 @@ use crate::frameworks::core_foundation::cf_string::CFStringRef;
 use crate::frameworks::foundation::ns_string::{to_rust_string, NSUTF8StringEncoding};
 use crate::frameworks::foundation::NSUInteger;
 use crate::mem::{ConstPtr, MutPtr};
-use crate::objc::{id, msg, msg_class, nil};
+use crate::objc::{id, msg, msg_class, nil, retain};
 use crate::Environment;
 
 pub type CFURLRef = super::CFTypeRef;
