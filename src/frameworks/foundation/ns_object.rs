@@ -15,7 +15,7 @@
 //! See also: [crate::objc], especially the `objects` module.
 
 use super::ns_string::to_rust_string;
-use super::NSUInteger;
+use super::{ns_run_loop, ns_thread, NSUInteger};
 use crate::mem::MutVoidPtr;
 use crate::objc::{
     id, msg, msg_class, msg_send, objc_classes, Class, ClassExports, NSZonePtr, ObjC,
@@ -277,6 +277,17 @@ forUndefinedKey:(id)key { // NSString*
     msg_send(env, (this, sel, o1, o2))
 }
 
+- (())performSelector:(SEL)selector
+               onThread:(id)thread
+             withObject:(id)arg
+          waitUntilDone:(bool)wait {
+    if wait {
+        log!("performSelector with true waitUntilDone, let's hope it wasn't actually needed");
+    }
+    let run_loop = ns_thread::get_run_loop(env, thread);
+    ns_run_loop::schedule_invocation(env, run_loop, this, selector, arg);
+}
+    
 - (())performSelector:(SEL)aSelector 
            withObject:(id)anArgument 
            afterDelay:(NSTimeInterval)delay {
