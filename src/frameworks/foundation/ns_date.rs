@@ -79,7 +79,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 - (NSTimeInterval)timeIntervalSince1970 {
     let host_object = env.objc.borrow::<NSDateHostObject>(this);
-    let result = host_object.instant + 978_307_200.0;
+    let result = host_object.time_interval + 978_307_200.0;
     result
 }
     
