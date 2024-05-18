@@ -281,6 +281,21 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, subs)
 }
 
+- (id)window {
+    let mut window: id = env.objc.borrow::<UIViewHostObject>(this).superview;
+    let window_class = env.objc.get_known_class("UIWindow", &mut env.mem);
+    while (window != nil) {
+        let current_class: Class = msg![env; window class];
+        log!("window {:?} curr class {}", window, env.objc.get_class_name(current_class));
+        if current_class == window_class {
+            break;
+        }
+        window = env.objc.borrow::<UIViewHostObject>(window).superview;
+    }
+    log!("view {:?} has window {:?}", this, window);
+    window
+}
+    
 - (())addSubview:(id)view {
     log_dbg!("[(UIView*){:?} addSubview:{:?}] => ()", this, view);
 
