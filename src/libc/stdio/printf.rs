@@ -11,7 +11,7 @@ use crate::frameworks::foundation::{ns_string, unichar};
 use crate::libc::clocale::{setlocale, LC_CTYPE};
 use crate::libc::posix_io::{STDERR_FILENO, STDOUT_FILENO};
 use crate::libc::stdio::{EOF, fgetc, FILE, fputc, fwrite, ungetc};
-use crate::libc::stdlib::{atof_inner, strtoul};
+use crate::libc::stdlib::atoi_inner;
 use crate::libc::wchar::wchar_t;
 use crate::mem::{ConstPtr, guest_size_of, GuestUSize, Mem, MutPtr, MutVoidPtr, Ptr};
 use crate::objc::{id, msg, nil};
