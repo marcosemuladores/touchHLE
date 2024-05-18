@@ -45,6 +45,7 @@ pub mod ns_operation;
 pub mod ns_operation_queue;
 pub mod ns_process_info;
 pub mod ns_property_list_serialization;
+pub mod ns_range;
 pub mod ns_run_loop;
 pub mod ns_set;
 pub mod ns_string;
