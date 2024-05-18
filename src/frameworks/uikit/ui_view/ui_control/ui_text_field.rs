@@ -165,6 +165,9 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())setKeyboardType:(UIKeyboardType)type_ {
     log!("TODO: setKeyboardType:{}", type_);
 }
+- (())setEnablesReturnKeyAutomatically:(bool)auto {
+    // TODO
+}
 - (())setPlaceholder:(id)_text {
     // TODO
 }
