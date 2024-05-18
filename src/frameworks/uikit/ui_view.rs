@@ -37,6 +37,8 @@ pub struct State {
     pub ui_window: ui_window::State,
     anim_delegate: id,
     anim_selector: Option<SEL>,
+    anim_id: id,
+    anim_context: id,
 }
 
 pub(super) struct UIViewHostObject {
@@ -105,7 +107,17 @@ pub const CLASSES: ClassExports = objc_classes! {
 + (())beginAnimations:(id)animId
               context:(MutVoidPtr)context {
     assert!(context.is_null());
-    log!("WARNING: Ignoring beginAnimations:context:");
+    log!("WARNING: Ignoring beginAnimations:{:?} context:{:?}", animId, context);
+    env
+        .framework_state
+        .uikit
+        .ui_view
+        .anim_id = animId;
+    env
+        .framework_state
+        .uikit
+        .ui_view
+        .anim_context = context.cast();
 }
 + (())setAnimationDelegate:(id)delegate {
     log!("WARNING: Ignoring setAnimationDelegate:");
