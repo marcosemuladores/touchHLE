@@ -441,7 +441,7 @@ fn vswprintf(
     format: ConstPtr<wchar_t>,
     arg: VaList
 ) -> i32 {
-    let y = env.mem.wcstr_at_utf16(format);
+    let y = env.mem.wcstr_at(format);
     log!("vswprintf: format {}", y);
     let to_write = n.min(y.len() as GuestUSize);
     wmemcpy(env, ws, format, to_write);
