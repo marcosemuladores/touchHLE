@@ -569,11 +569,6 @@ impl Mem {
         String::from_iter(iter)
     }
 
-    pub fn wcstr_at_utf16<const MUT: bool>(&self, ptr: Ptr<wchar_t, MUT>) -> String {
-        let (wchars, _) = self.wcstr_at(ptr);
-        String::from_utf16(&wchars.collect::<Vec<u16>>()).unwrap()
-    }
-    
     /// Permanently mark a region of address space as being unusable to the
     /// memory allocator.
     pub fn reserve(&mut self, base: VAddr, size: GuestUSize) {
