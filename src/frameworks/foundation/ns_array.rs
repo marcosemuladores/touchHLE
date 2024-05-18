@@ -62,6 +62,13 @@ pub const CLASSES: ClassExports = objc_classes! {
     let res = deserialize_plist_from_file(env, &path, /* array_expected: */ true);
     autorelease(env, res)
 }
++ (id)arrayWithObject:(id)object {
+    retain(env, object);
+    let v = vec![object];
+    let new = from_vec(env, v);
+    autorelease(env, new)
+}
+
 + (id)arrayWithObjects:(id)firstObj, ...args {
     retain(env, firstObj);
     let mut objects = vec![firstObj];
