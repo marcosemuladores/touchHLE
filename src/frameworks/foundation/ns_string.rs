@@ -16,9 +16,8 @@ use super::{
     NSRange, NSUInteger,
 };
 use crate::abi::VaList;
-use crate::frameworks::core_foundation::{CFIndex, CFRange};
+use crate::frameworks::core_foundation::CFRange;
 use crate::frameworks::core_graphics::{CGFloat, CGPoint, CGRect, CGSize};
-use crate::frameworks::foundation::ns_range::{NSNotFound, NSRange};
 use crate::frameworks::uikit::ui_font::{
     self, UILineBreakMode, UILineBreakModeWordWrap, UITextAlignment, UITextAlignmentLeft,
 };
@@ -974,15 +973,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     }
     // TODO: handle over/underflow properly
     st[..cutoff].parse().unwrap_or(0)
-}
-
--(NSRange)rangeOfString:(id)other {
-    let haystack = to_rust_string(env, this);
-    let needle = to_rust_string(env, other);
-    match haystack.find(needle.as_ref()) {
-        Some(start) => NSRange{location: start as CFIndex, length: needle.len() as CFIndex},
-        None => NSRange{location: NSNotFound as CFIndex, length: 0}
-    }
 }
 
 // FIXME: this should be a NSMutableString method
