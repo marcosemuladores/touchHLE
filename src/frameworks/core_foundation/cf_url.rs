@@ -9,11 +9,13 @@
 //! the same type.
 
 use super::cf_allocator::{kCFAllocatorDefault, CFAllocatorRef};
+use super::cf_string::CFStringRef;
 use super::CFIndex;
 use crate::dyld::{export_c_func, FunctionExports};
-use crate::frameworks::core_foundation::cf_string::CFStringRef;
-use crate::frameworks::foundation::ns_string::{to_rust_string, NSUTF8StringEncoding};
-use crate::frameworks::foundation::NSUInteger;
+use crate::frameworks::foundation::ns_string::{
+    from_rust_string, to_rust_string, NSUTF8StringEncoding,
+};
+use crate::frameworks::foundation::{ns_string, NSUInteger};
 use crate::mem::{ConstPtr, MutPtr};
 use crate::objc::{id, msg, msg_class, nil, retain};
 use crate::Environment;
@@ -105,9 +107,8 @@ fn CFURLCopyFileSystemPath(
     url: CFURLRef,
     style: CFURLPathStyle,
 ) -> CFStringRef {
-    assert_eq!(style, kCFURLPOSIXPathStyle);
-    let path: CFStringRef = msg![env; url path];
-    msg![env; path copy]
+    let res = msg![env; url path];
+    retain(env, res)
 }
 
 fn CFURLCreateCopyAppendingPathComponent(
