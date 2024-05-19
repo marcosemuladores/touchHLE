@@ -16,7 +16,7 @@ use crate::frameworks::foundation::ns_string::{
     from_rust_string, to_rust_string, NSUTF8StringEncoding,
 };
 use crate::frameworks::foundation::{ns_string, NSUInteger};
-use crate::mem::{ConstPtr, MutPtr};
+use crate::mem::{ConstPtr, ConstVoidPtr, MutPtr, MutVoidPtr};
 use crate::objc::{id, msg, msg_class, nil, retain};
 use crate::Environment;
 
@@ -123,6 +123,14 @@ fn CFURLCreateCopyAppendingPathComponent(
     msg![env; new_url copy]
 }
 
+fn SCNetworkReachabilityCreateWithAddress(_env: &mut Environment, _allocator: CFAllocatorRef, _addr: ConstVoidPtr) -> MutVoidPtr {
+    MutVoidPtr::null()
+}
+
+fn SCNetworkReachabilityGetFlags(_env: &mut Environment, _target: MutVoidPtr, _flags: MutVoidPtr) -> bool {
+    false
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFURLGetFileSystemRepresentation(_, _, _, _)),
     export_c_func!(CFURLCreateFromFileSystemRepresentation(_, _, _, _)),
@@ -130,4 +138,6 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFURLCopyPathExtension(_)),
     export_c_func!(CFURLCopyFileSystemPath(_, _)),
     export_c_func!(CFURLCreateCopyAppendingPathComponent(_, _, _, _)),
+    export_c_func!(SCNetworkReachabilityCreateWithAddress(_, _)),
+    export_c_func!(SCNetworkReachabilityGetFlags(_, _)),
 ];
