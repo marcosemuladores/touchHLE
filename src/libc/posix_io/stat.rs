@@ -66,6 +66,7 @@ pub const S_IWUSR: mode_t = 0o0000200; /* write permission, owner */
 pub const S_IXUSR: mode_t = 0o0000100; /* execute/search permission, owner */
 
 #[allow(non_camel_case_types)]
+#[derive(Default)]
 #[repr(C, packed)]
 pub struct stat {
     st_dev: dev_t,
@@ -111,21 +112,46 @@ fn mkdir(env: &mut Environment, path: ConstPtr<u8>, mode: mode_t) -> i32 {
     }
 }
 
-fn stat(env: &mut Environment, path: ConstPtr<u8>, buf: MutVoidPtr) -> i32 {
-    //log!("stat {}", env.mem.cstr_at_utf8(path).unwrap());
+fn stat(env: &mut Environment, path: ConstPtr<u8>, buf: MutPtr<stat>) -> i32 {
+    log!("Warning: stat() call, this function is mostly unimplemented");
 
-    let path_string = env.mem.cstr_at_utf8(path).unwrap().to_owned();
-    let guest_path = GuestPath::new(&path_string);
-    let is_dir = env.fs.is_dir(guest_path);
+    fn do_stat(env: &mut Environment, path: ConstPtr<u8>, buf: MutPtr<stat>) -> i32 {
+        if path.is_null() {
+            return -1; // TODO: Set errno
+        }
 
-    let st_mode_ptr = (buf + 0x4).cast::<mode_t>();
-    let mode: mode_t = if is_dir {
-        0x4000
-    } else {
-        0x8000
-    };
-    env.mem.write(st_mode_ptr, mode.try_into().unwrap());
-    0
+        let Ok(path_string) = env.mem.cstr_at_utf8(path) else {
+            return -1; // TODO: Set errno
+        };
+
+        // Path is that of a directory:
+        if env.fs.is_dir(GuestPath::new(path_string)) {
+            let mut stat = env.mem.read(buf);
+            stat.st_mode |= S_IFDIR;
+            env.mem.write(buf, stat);
+            return 0;
+        }
+
+        // Path is that of a regular file: open and reuse fstat implementation
+        let fd = open_direct(env, path, 0);
+        if fd == -1 {
+            return -1; // TODO: Set errno
+        }
+
+        let result = fstat_inner(env, fd, buf);
+        assert!(close(env, fd) == 0);
+        result
+    }
+    let result = do_stat(env, path, buf);
+
+    log_dbg!(
+        "stat({:?} {:?}, {:?}) -> {}",
+        path,
+        env.mem.cstr_at_utf8(path),
+        buf,
+        result
+    );
+    result
 }
 
 fn lstat(env: &mut Environment, path: ConstPtr<u8>, buf: MutVoidPtr) -> i32 {
@@ -139,16 +165,15 @@ fn lstat(env: &mut Environment, path: ConstPtr<u8>, buf: MutVoidPtr) -> i32 {
     }
 }
 
-fn fstat(env: &mut Environment, fd: FileDescriptor, buf: MutPtr<stat>) -> i32 {
+fn fstat_inner (env: &mut Environment, fd: FileDescriptor, buf: MutPtr<stat>) -> i32 {
     // TODO: error handling for unknown fd?
     let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
 
-    log!("Warning: fstat() call, this function is mostly unimplemented");
     // FIXME: This implementation is highly incomplete. fstat() returns a huge
     // struct with many kinds of data in it. This code is assuming the caller
     // only wants a small part of it.
 
-    let mut stat = env.mem.read(buf);
+    let mut stat = stat::default();
 
     stat.st_mode |= S_IFREG;
 
@@ -180,6 +205,13 @@ fn fstat(env: &mut Environment, fd: FileDescriptor, buf: MutPtr<stat>) -> i32 {
     // env.mem.write(st_mode_ptr, mode.try_into().unwrap());
 
     0 // success
+}
+
+fn fstat(env: &mut Environment, fd: FileDescriptor, buf: MutPtr<stat>) -> i32 {
+    log!("Warning: fstat() call, this function is mostly unimplemented");
+    let result = fstat_inner(env, fd, buf);
+    log_dbg!("fstat({:?}, {:?}) -> {}", fd, buf, result);
+    result
 }
 
 pub const FUNCTIONS: FunctionExports = &[
