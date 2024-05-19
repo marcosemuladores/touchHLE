@@ -24,8 +24,8 @@ impl HostObject for ObjectEnumeratorHostObject {}
 
 /// Belongs to _touchHLE_NSArray
 #[derive(Default)]
-struct ArrayHostObject {
-    array: Vec<id>,
+pub(super) struct ArrayHostObject {
+    pub(super) array: Vec<id>,
 }
 impl HostObject for ArrayHostObject {}
 
@@ -335,6 +335,17 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())removeObjectAtIndex:(NSUInteger)index {
     let object = env.objc.borrow_mut::<ArrayHostObject>(this).array.remove(index as usize);
     release(env, object)
+}
+
+- (())removeObject:(id)object {
+    let count: NSUInteger = msg![env; this count];
+    for i in 0..count {
+        let next: id = msg![env; this objectAtIndex:i];
+        if msg![env; next isEqual:object] {
+            () = msg![env; this removeObjectAtIndex:i];
+            return;
+        }
+    }
 }
 
 - (())removeLastObject {
