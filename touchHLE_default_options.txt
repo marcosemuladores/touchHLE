@@ -93,3 +93,6 @@ jp.co.capcom.residentevil.en: --landscape-left
 
 # Star Frog / Gero Blaster
 amaya.starfrog: --preferred-languages=ja --landscape-right --button-to-touch=DPadLeft,60,290 --button-to-touch=DPadRight,170,290 --button-to-touch=A,450,290 --button-to-touch=B,380,290
+
+# Spore Origins
+com.ea.spore.naj.efigsj: --landscape-left --y-tilt-offset=35
