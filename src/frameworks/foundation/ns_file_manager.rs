@@ -168,7 +168,7 @@ pub const CLASSES: ClassExports = objc_classes! {
  - (bool) changeCurrentDirectoryPath:(id)path {
     let path_str = ns_string::to_rust_string(env, path); // TODO: avoid copy
 
-    env.fs.change_working_directory(GuestPath::new(&path_str));
+    let _ = env.fs.change_working_directory(GuestPath::new(&path_str));
 
     return true;
 }
