@@ -50,6 +50,12 @@ fn AudioServicesCreateSystemSoundID(
     -1
 }
 
+fn AudioServicesDisposeSystemSoundID(
+    _env: &mut Environment, in_system_sound_id: SystemSoundID
+) -> OSStatus {
+    0
+}
+
 fn AudioOutputUnitStop(_env: &mut Environment, ci: MutVoidPtr) -> OSStatus {
     -1
 }
@@ -62,6 +68,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(AudioServicesGetProperty(_, _, _, _, _)),
     export_c_func!(AudioServicesPlaySystemSound(_)),
     export_c_func!(AudioServicesCreateSystemSoundID(_, _)),
+    export_c_func!(AudioServicesDisposeSystemSoundID(_)),
     // export_c_func!(AudioOutputUnitStop(_)),
     // export_c_func!(AudioComponentFindNext(_, _)),
 ];
