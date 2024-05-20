@@ -164,10 +164,6 @@ fn CGContextClipToRect(env: &mut Environment, context: CGContextRef, rect: CGRec
     log!("CGContextClipToRect {}", rect);
 }
 
-fn CGContextSetBlendMode(env: &mut Environment, context: CGContextRef, blend_mode: i32) {
-
-}
-
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGContextRetain(_)),
     export_c_func!(CGContextRelease(_)),
@@ -184,5 +180,4 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGContextSaveGState(_)),
     export_c_func!(CGContextRestoreGState(_)),
     export_c_func!(CGContextClipToRect(_, _)),
-    export_c_func!(CGContextSetBlendMode(_, _)),
 ];
