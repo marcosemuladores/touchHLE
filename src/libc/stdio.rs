@@ -354,6 +354,13 @@ fn _ZNK4Body18isIslandGeneratingEv(env: &mut Environment, ptr: MutVoidPtr) {
     func.call_from_host(env, (ptr,))
 }
 
+fn _ZN6b2Vec29NormalizeEv(env: &mut Environment, ptr: MutVoidPtr) {
+    // TODO: figure out why this function is not auto-linked
+    assert_eq!(env.bundle.bundle_identifier(), "com.gameloft.Earthworm");
+    let func = GuestFunction::from_addr_with_thumb_bit(0x0012c86c);
+    func.call_from_host(env, (ptr,))
+}
+
 pub const CONSTANTS: ConstantExports = &[
     (
         "___stdinp",
@@ -405,4 +412,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(fileno(_)),
     export_c_func!(_ZNK3irr17IReferenceCounted4dropEv(_)),
     export_c_func!(_ZNK4Body18isIslandGeneratingEv(_)),
+    export_c_func!(_ZN6b2Vec29NormalizeEv(_)),
 ];
