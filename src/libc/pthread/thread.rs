@@ -52,7 +52,7 @@ unsafe impl SafeRead for OpaqueThread {}
 
 pub type pthread_t = MutPtr<OpaqueThread>;
 
-struct ThreadHostObject {
+pub struct ThreadHostObject {
     thread_id: ThreadId,
     joined_by: Option<ThreadId>,
     _attr: pthread_attr_t,
@@ -246,3 +246,18 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_testcancel()),
     export_c_func!(pthread_mach_thread_np(_)),
 ];
+
+pub fn _get_thread_id(env: &mut Environment, pthread: pthread_t) -> Option<ThreadId> {
+    State::get(env)
+        .threads
+        .get(&pthread)
+        .map(|thread| thread.thread_id)
+}
+
+pub fn _get_thread_by_id(env: &mut Environment, thread_id: ThreadId) -> Option<pthread_t> {
+    State::get(env)
+        .threads
+        .iter()
+        .find(|pair| pair.1.thread_id == thread_id)
+        .map(|pair| *pair.0)
+}
