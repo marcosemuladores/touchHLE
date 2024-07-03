@@ -11,5 +11,5 @@ pub mod sk_request;
 
 #[derive(Default)]
 pub struct State {
-    sk_payment_queue: sk_payment_queue::State
+    sk_payment_queue: sk_payment_queue::State,
 }
