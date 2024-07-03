@@ -89,7 +89,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.borrow_mut::<ArrayHostObject>(new).array.push(obj);
     autorelease(env, new)
 }
-    
+
 // These probably comes from some category related to plists.
 - (id)initWithContentsOfFile:(id)path { // NSString*
     release(env, this);
@@ -200,7 +200,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     let idx: NSUInteger = msg![env; this indexOfObject: needle];
     idx != NSNotFound.try_into().unwrap()
 }
-    
+
 - (id)objectEnumerator { // NSEnumerator*
     let array_host_object: &mut ArrayHostObject = env.objc.borrow_mut(this);
     let vec = array_host_object.array.to_vec();
