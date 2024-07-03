@@ -509,6 +509,14 @@ impl Fs {
             .with_child(
                 "libstdc++.6.0.9.dylib",
                 FsNode::resource_file(format!("{}/libstdc++.6.0.9.dylib", DYLIBS_DIR)),
+              )
+            .with_child(
+                "libxml2.2.dylib",
+                FsNode::resource_file(format!("{}/libxml2.2.dylib", DYLIBS_DIR)),
+            )
+            .with_child(
+                "libxml2.dylib",
+                FsNode::resource_file(format!("{}/libxml2.2.dylib", DYLIBS_DIR)),
             );
 
         let mut app_dir_children = HashMap::new();
