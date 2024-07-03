@@ -7,7 +7,9 @@
 
 use super::ns_enumerator::{fast_enumeration_helper, NSFastEnumerationState};
 use super::ns_property_list_serialization::deserialize_plist_from_file;
-use super::{ns_keyed_unarchiver, ns_string, ns_url, NSNotFound, NSUInteger};
+use super::{
+    ns_enumerator::NSFastEnumerationState, ns_keyed_unarchiver, ns_string, ns_url, NSNotFound, NSUInteger,
+};
 use crate::fs::GuestPath;
 use crate::mem::MutPtr;
 use crate::objc::{
@@ -15,6 +17,8 @@ use crate::objc::{
     NSZonePtr,
 };
 use crate::Environment;
+use std::cmp::min;
+use std::ops::Add;
 
 struct ObjectEnumeratorHostObject {
     iterator: std::vec::IntoIter<id>,
@@ -234,6 +238,36 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.borrow::<ArrayHostObject>(this).array[index as usize]
 }
 
+ - (NSUInteger)countByEnumeratingWithState:(MutPtr<NSFastEnumerationState>)state
+                                  objects:(MutPtr<id>)stackbuf
+                                    count:(NSUInteger)len {
+    let host_object = env.objc.borrow::<ArrayHostObject>(this);
+
+    if host_object.array.is_empty() {
+        return 0;
+    }
+
+    let NSFastEnumerationState {
+        state: cur_idx,
+        ..
+    } = env.mem.read(state);
+
+    let this_round = min(host_object.array.len() as u32 - cur_idx, len);
+    if cur_idx == 0 {
+        env.mem.write(state, NSFastEnumerationState {
+            state: 0,
+            items_ptr: stackbuf,
+            mutations_ptr: stackbuf.cast(),
+            extra: Default::default(),
+        });
+    }
+    env.mem.write(state.cast(), (cur_idx + this_round) as NSUInteger);
+    for i in 0..this_round {
+        env.mem.write(stackbuf.add(i), host_object.array[(cur_idx + i) as usize]);
+    }
+    this_round
+}
+   
 @end
 
 @implementation _touchHLE_NSArray_ObjectEnumerator: NSEnumerator
