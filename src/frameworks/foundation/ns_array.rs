@@ -76,6 +76,12 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, array)
 }
 
++(id)arrayWithArray:(id)other {
+    let new = msg![env; this alloc];
+    let new = msg![env; new initWithArray: other];
+    autorelease(env, new)
+}
+    
 // These probably comes from some category related to plists.
 - (id)initWithContentsOfFile:(id)path { // NSString*
     release(env, this);
@@ -117,6 +123,17 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; this objectAtIndex: (size - 1)]
 }
 
+- (id)initWithArray:(id)other {
+    let size: NSUInteger = msg![env; other count];
+    let mut v = Vec::with_capacity(size as usize);
+    for i in 0..size {
+        let obj = msg![env; other objectAtIndex: i];
+        v.push(retain(env, obj));
+    }
+    env.objc.borrow_mut::<ArrayHostObject>(this).array = v;
+    this
+}
+    
 @end
 
 // NSMutableArray is an abstract class. A subclass must provide everything
