@@ -211,6 +211,12 @@ pub const CLASSES: ClassExports = objc_classes! {
     let enumerator = env.objc.alloc_object(class, host_object, &mut env.mem);
     autorelease(env, enumerator)
 }
+
+-(id)sortedArrayUsingDescriptors:(id)desc {
+    let new = msg![env; this mutableCopy];
+    () = msg![env; this sortUsingDescriptors: desc];
+    autorelease(env, new)
+}
     
 @end
 
