@@ -8,8 +8,10 @@
 use super::ns_property_list_serialization::deserialize_plist_from_file;
 use super::{ns_string, ns_url, NSUInteger};
 use crate::abi::VaList;
+use crate::frameworks::foundation::ns_property_list_serialization::NSPropertyListXMLFormat_v1_0;
 use crate::frameworks::foundation::ns_string::{from_rust_string, to_rust_string};
 use crate::fs::GuestPath;
+use crate::mem::MutPtr;
 use crate::objc::{
     autorelease, id, msg, msg_class, nil, objc_classes, release, retain, ClassExports, HostObject,
     NSZonePtr,
@@ -227,6 +229,19 @@ pub const CLASSES: ClassExports = objc_classes! {
     dict_from_keys_and_objects(env, &entries)
 }
 
+- (bool)writeToFile:(id)path
+         atomically:(bool)atomic {
+    let data = msg_class![env;
+        NSPropertyListSerialization dataFromPropertyList: this
+                                                  format: NSPropertyListXMLFormat_v1_0
+                                        errorDescription: (MutPtr::<id>::null())
+    ];
+    if data == nil {
+        return false;
+    }
+    msg![env; data writeToFile: path atomically: atomic]
+}
+    
 @end
 
 // Our private subclass that is the single implementation of NSDictionary for
@@ -357,4 +372,15 @@ pub fn dict_from_keys_and_objects(env: &mut Environment, keys_and_objects: &[(id
     *env.objc.borrow_mut(dict) = host_object;
 
     dict
+}
+
+pub fn dict_to_keys_and_objects(env: &mut Environment, dict: id) -> Vec<(id, id)> {
+    let host = env.objc.borrow::<DictionaryHostObject>(dict);
+    let mut ret = Vec::with_capacity(host.count as usize);
+    for collisions in host.map.values() {
+        for &(key, value) in collisions {
+            ret.push((key, value));
+        }
+    }
+    ret
 }
