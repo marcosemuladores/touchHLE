@@ -131,7 +131,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         NSNumberHostObject::UnsignedLongLong(value) => from_rust_string(env, value.to_string()),
         NSNumberHostObject::LongLong(value) => from_rust_string(env, value.to_string()),
         NSNumberHostObject::Double(value) => from_rust_string(env, value.to_string())
-    }
+    };
     autorelease(env, desc)
 }
 - (NSUInteger)hash {
