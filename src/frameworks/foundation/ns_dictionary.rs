@@ -241,7 +241,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     }
     msg![env; data writeToFile: path atomically: atomic]
 }
-    
+
 @end
 
 // Our private subclass that is the single implementation of NSDictionary for
