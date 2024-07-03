@@ -20,8 +20,8 @@ use super::ns_string::{from_rust_string, get_static_str, to_rust_string};
 use super::NSUInteger;
 use crate::mem::MutVoidPtr;
 use crate::objc::{
-    id, msg, msg_class, msg_send, nil, objc_classes, retain, Class, ClassExports, NSZonePtr, ObjC,
-    TrivialHostObject, SEL,
+    class_conformsToProtocol, id, msg, msg_class, msg_send, nil, objc_classes, retain, Class, ClassExports,
+    NSZonePtr, ObjC, TrivialHostObject, SEL,
 };
 
 pub const CLASSES: ClassExports = objc_classes! {
@@ -232,6 +232,11 @@ forUndefinedKey:(id)key { // NSString*
     msg_send(env, (this, sel, o1, o2))
 }
 
+- (bool)conformsToProtocol:(id)protocol {
+    let class = msg![env; this class];
+    class_conformsToProtocol(env, class, protocol)
+}
+    
 - (())performSelectorOnMainThread:(SEL)sel withObject:(id)arg waitUntilDone:(bool)wait {
     log!("performSelectorOnMainThread:{} withObject:{:?} waitUntilDone:{}", sel.as_str(&env.mem), arg, wait);
     if wait {
