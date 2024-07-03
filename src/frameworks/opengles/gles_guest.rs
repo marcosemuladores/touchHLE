@@ -155,6 +155,9 @@ fn glHint(env: &mut Environment, target: GLenum, mode: GLenum) {
 fn glFlush(env: &mut Environment) {
     with_ctx_and_mem(env, |gles, _mem| unsafe { gles.Flush() })
 }
+fn glFinish(env: &mut Environment) {
+    with_ctx_and_mem(env, |gles, _mem| unsafe { gles.Finish() })
+}
 fn glGetString(env: &mut Environment, name: GLenum) -> ConstPtr<GLubyte> {
     let res = if let Some(&str) = env.framework_state.opengles.strings_cache.get(&name) {
         str
@@ -1254,6 +1257,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glGetTexEnviv(_, _, _)),
     export_c_func!(glHint(_, _)),
     export_c_func!(glFlush()),
+    export_c_func!(glFinish()),
     export_c_func!(glGetString(_)),
     // Other state manipulation
     export_c_func!(glAlphaFunc(_, _)),
