@@ -486,6 +486,10 @@ pub fn from_vec(env: &mut Environment, objects: Vec<id>) -> id {
     array
 }
 
+pub fn to_vec(env: &mut Environment, array: id) -> Vec<id> {
+    env.objc.borrow::<ArrayHostObject>(array).array.clone()
+}
+
 fn from_va_args(env: &mut Environment, array: id, first: id, rest: DotDotDot) {
     let mut va_args = rest.start();
     let mut v = vec![retain(env, first)];
