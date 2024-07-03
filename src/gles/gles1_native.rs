@@ -98,6 +98,9 @@ impl GLES for GLES1Native {
     unsafe fn Flush(&mut self) {
         gles11::Flush()
     }
+    unsafe fn Finish(&mut self) {
+        gles11::Finish()
+    }
     unsafe fn GetString(&mut self, name: GLenum) -> *const GLubyte {
         gles11::GetString(name)
     }
