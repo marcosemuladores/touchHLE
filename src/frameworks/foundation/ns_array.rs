@@ -243,7 +243,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     let new = msg![env; new initWithCapacity:cap];
     autorelease(env, new)
 }
-    
+
 // NSCopying implementation
 - (id)copyWithZone:(NSZonePtr)_zone {
     let new = msg_class![env; NSArray alloc];
@@ -257,7 +257,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         () = msg![env; this addObject: obj];
     }
 }
-   
+
 @end
 
 // Our private subclass that is the single implementation of NSArray for the
@@ -454,7 +454,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     });
     env.objc.borrow_mut::<ArrayHostObject>(this).array = v;
 }
-    
+
 @end
 
 // Special variant for use by CFArray with NULL callbacks: objects aren't
