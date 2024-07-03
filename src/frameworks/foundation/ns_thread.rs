@@ -5,27 +5,28 @@
  */
 //! `NSThread`.
 
-use super::NSTimeInterval;
-use crate::dyld::HostFunction;
+use super::NSTimeInterval
+use crate::abi::GuestFunction;
+use crate::dyld::{FunctionExports, HostFunction};
+use crate::environment::{Environment, ThreadId};
 use crate::frameworks::core_foundation::CFTypeRef;
 use crate::libc::pthread::thread::{
     _get_thread_by_id, _get_thread_id, pthread_attr_init, pthread_attr_setdetachstate,
     pthread_attr_t, pthread_create, pthread_t, PTHREAD_CREATE_DETACHED,
 };
-use crate::mem::{guest_size_of, ConstPtr, MutPtr};
+use crate::mem::{guest_size_of, ConstPtr, Men, MutPtr};
 use crate::objc::{
     id, msg_send, nil, objc_classes, release, retain, Class, ClassExports, HostObject, NSZonePtr,
     SEL,
 };
-use crate::Environment;
-use crate::{msg, msg_class};
+use crate::{export_c_func, msg, msg_class};
 use std::collections::HashSet;
 use std::time::Duration;
 
 #[derive(Default)]
 pub struct State {
     /// `NSThread*`
-    ns_threads: HashSet<id>,
+    ns_threads: HashSet<id>ThreadId, id>,
 }
 impl State {
     fn get(env: &mut Environment) -> &mut State {
@@ -37,6 +38,10 @@ struct NSThreadHostObject {
     thread: Option<pthread_t>,
     target: id,
     selector: Option<SEL>,
+    argument: id,
+    stack_size: NSUInteger,
+    run_loop: id,
+    is_cancelled: bool,
     object: id,
     /// `NSMutableDictionary*`
     thread_dictionary: id,
@@ -67,22 +72,37 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; current_thread setThreadPriority:priority]
 }
 
-+ (id)currentThread {
-    log_dbg!("[NSThread currentThread] (env.current_thread == {:?})",env.current_thread);
-    State::get(env).ns_threads.clone().iter().find(|ns_thread| {
-        let host_object = env.objc.borrow::<NSThreadHostObject>(**ns_thread);
-        match host_object.thread {
-            Some(thread) => _get_thread_id(env, thread).unwrap() == env.current_thread,
-            None => false
-        }
-    }).copied().unwrap_or_else(|| {
-        // Handles the case the thread was created with pthread_create but has
-        // no corresponding NSThread instance yet.
-        let current_ns_thread = msg_class![env; NSThread alloc];
-        env.objc.borrow_mut::<NSThreadHostObject>(current_ns_thread).thread = _get_thread_by_id(env, env.current_thread);
-        current_ns_thread
-    })
+
++ (id)mainThread {
+    #[allow(clippy::map_entry)]
+    if !env.framework_state.foundation.ns_thread.thread_map.contains_key(&0) {
+        let thread = msg![env; this alloc];
+        let r_loop = env.objc.borrow_mut::<ThreadHostObject>(thread).run_loop;
+        () = msg![env; r_loop _setMainThread];
+        env.framework_state.foundation.ns_thread.thread_map.insert(0, thread);
+    }
+    *env.framework_state.foundation.ns_thread.thread_map.get(&0).unwrap()
 }
+    
++ (id)currentThread {
+    if env.current_thread == 0 {
+        msg![env; this mainThread]
+    } else {
+        *env.framework_state.foundation.ns_thread.thread_map.get(&env.current_thread).unwrap()
+    }
+}
+
++ (id)allocWithZone:(NSZonePtr)_zone {
+    let r_loop = msg_class![env; NSRunLoop alloc];
+    let host_object = Box::new(ThreadHostObject {
+        target: nil,
+        argument: nil,
+        selector: SEL::null(),
+        stack_size: Mem::SECONDARY_THREAD_STACK_SIZE,
+        run_loop: r_loop,
+        is_cancelled: false
+    });
+    env.objc.alloc_object(this, host_object, &mut env.mem)
 
 + (())sleepForTimeInterval:(NSTimeInterval)ti {
     log_dbg!("[NSThread sleepForTimeInterval:{:?}]", ti);
@@ -153,6 +173,11 @@ object:(id)object {
     log_dbg!("[(NSThread*){:?} start] Started new thread with pthread {:?} and ThreadId {:?}", this, thread, _get_thread_id(env, thread));
 }
 
+- (())main {
+    let host = env.objc.borrow::<ThreadHostObject>(this);
+    () = msg_send(env, (host.target, host.selector, host.argument));
+}
+
 - (id)threadDictionary {
     // Initialize lazily in case the thread is started with pthread_create
     let thread_dictionary = env.objc.borrow::<NSThreadHostObject>(this).thread_dictionary;
@@ -168,13 +193,6 @@ object:(id)object {
     }
 }
 
-- (())dealloc {
-    log_dbg!("[(NSThread*){:?} dealloc]", this);
-    let host_object = env.objc.borrow::<NSThreadHostObject>(this);
-    release(env, host_object.thread_dictionary);
-    env.objc.dealloc_object(this, &mut env.mem)
-}
-
 - (f64)threadPriority {
     log!("TODO: [(NSThread*){:?} threadPriority] (not implemented yet)", this);
     1.0
@@ -183,6 +201,18 @@ object:(id)object {
 - (bool)setThreadPriority:(f64)priority {
     log!("TODO: [(NSThread*){:?} setThreadPriority:{:?}] (ignored)", this, priority);
     true
+}
+
+- (NSUInteger)stackSize {
+    env.objc.borrow::<ThreadHostObject>(this).stack_size
+}
+
+-(())setStackSize:(NSUInteger)size {
+    env.objc.borrow_mut::<ThreadHostObject>(this).stack_size = size;
+}
+
+- (bool) isCancelled {
+    env.objc.borrow::<ThreadHostObject>(this).is_cancelled
 }
 
 - (())dealloc {
@@ -196,6 +226,18 @@ object:(id)object {
 
 };
 
+
+pub fn get_run_loop(env: &mut Environment, thread: id) -> id {
+    env.objc.borrow::<ThreadHostObject>(thread).run_loop
+}
+
+fn _NSThreadStart(env: &mut Environment, thread: id) {
+    () = msg![env; thread main];
+    release(env, thread);
+}
+
+pub const FUNCTIONS: FunctionExports = &[export_c_func!(_NSThreadStart(_))];
+    
 type NSThreadRef = CFTypeRef;
 
 pub fn _touchHLE_NSThreadInvocationHelper(env: &mut Environment, ns_thread_obj: NSThreadRef) {
