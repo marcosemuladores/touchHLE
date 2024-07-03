@@ -25,7 +25,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     let host_object = Box::new(SortDescriptorObject {
         key: nil,
         ascending: false,
-        selector: SEL::is_null(),
+        selector: SEL::is_null(/* SEL */),
     });
     env.objc.alloc_object(this, host_object, &mut env.mem)
 }
