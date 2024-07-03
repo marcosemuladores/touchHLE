@@ -193,12 +193,12 @@ pub const CLASSES: ClassExports = objc_classes! {
             return i as NSUInteger;
         }
     }
-    NSNotFound
+    NSNotFound.try_into().unwrap()
 }
 
 -(bool)containsObject:(id)needle {
     let idx: NSUInteger = msg![env; this indexOfObject: needle];
-    idx != NSNotFound
+    idx != NSNotFound.try_into().unwrap()
 }
     
 - (id)objectEnumerator { // NSEnumerator*
