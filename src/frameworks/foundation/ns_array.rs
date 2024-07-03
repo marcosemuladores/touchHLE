@@ -217,7 +217,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     () = msg![env; this sortUsingDescriptors: desc];
     autorelease(env, new)
 }
-    
+
 @end
 
 // NSMutableArray is an abstract class. A subclass must provide everything
