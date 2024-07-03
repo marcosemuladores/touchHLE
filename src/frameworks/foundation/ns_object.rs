@@ -17,7 +17,7 @@
 use super::ns_dictionary::dict_from_keys_and_objects;
 use super::ns_run_loop::NSDefaultRunLoopMode;
 use super::ns_string::{from_rust_string, get_static_str, to_rust_string};
-use super::{ns_run_loop, ns_thread, NSUInteger};
+use super::NSUInteger;
 use crate::mem::MutVoidPtr;
 use crate::objc::{
     id, msg, msg_class, msg_send, nil, objc_classes, retain, Class, ClassExports, NSZonePtr, ObjC,
@@ -228,18 +228,6 @@ forUndefinedKey:(id)key { // NSString*
     msg_send(env, (this, sel, o1, o2))
 }
 
-- (())performSelector:(SEL)selector
-               onThread:(id)thread
-             withObject:(id)arg
-          waitUntilDone:(bool)wait {
-    if wait {
-        log!("performSelector with true waitUntilDone, let's hope it wasn't actually needed");
-    }
-    let run_loop = ns_thread::get_run_loop(env, thread);
-    ns_run_loop::schedule_invocation(env, run_loop, this, selector, arg);
-}
-
-    
 - (())performSelectorOnMainThread:(SEL)sel withObject:(id)arg waitUntilDone:(bool)wait {
     log!("performSelectorOnMainThread:{} withObject:{:?} waitUntilDone:{}", sel.as_str(&env.mem), arg, wait);
     if wait {
