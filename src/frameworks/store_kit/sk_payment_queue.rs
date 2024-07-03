@@ -15,7 +15,7 @@ pub struct State {
 
 #[derive(Default)]
 struct QueueHostObject {
-    observers: id
+    observers: id,
 }
 
 impl HostObject for QueueHostObject {}
