@@ -73,7 +73,7 @@ pub fn AudioFileOpenURL(
     in_permissions: AudioFilePermissions,
     in_file_type_hint: AudioFileTypeID,
     out_audio_file: MutPtr<AudioFileID>,
-) -> OSStatus {
+) -> OSStatus 
     return_if_null!(in_file_ref);
 
     assert!(in_permissions == kAudioFileReadPermission); // writing TODO
