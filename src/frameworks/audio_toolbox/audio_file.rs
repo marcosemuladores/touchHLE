@@ -84,9 +84,9 @@ pub fn AudioFileOpenURL(
     assert!(in_file_type_hint == 0);
     match in_file_type_hint {
     audio_file_open_inner(env, in_file_ref, out_audio_file)
-        0 >= {}
+        0 => {}
 }
-        kAudioFileCAFType >= {
+        kAudioFileCAFType => {
             log!("Ignoring 'caff' file type hint for AudioFileOpenURL()");
         }
         _ => unimplemented!(),
