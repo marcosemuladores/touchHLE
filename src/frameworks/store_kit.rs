@@ -5,4 +5,11 @@
  */
 //! StoreKit
 
+pub mod sk_payment_queue;
 pub mod sk_product;
+pub mod sk_request;
+
+#[derive(Default)]
+pub struct State {
+    sk_payment_queue: sk_payment_queue::State
+}
