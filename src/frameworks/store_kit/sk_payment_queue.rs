@@ -4,8 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-use crate::objc::{ClassExports, HostObject, id};
-use crate::{msg_class, objc_classes, msg};
+use crate::objc::{id, ClassExports, HostObject};
+use crate::{msg, msg_class, objc_classes};
 use crate::frameworks::foundation::ns_array::to_vec;
 
 #[derive(Default)]
