@@ -671,6 +671,9 @@ impl GLES for GLES1OnGL2 {
     unsafe fn Flush(&mut self) {
         gl21::Flush();
     }
+    unsafe fn Finish(&mut self) {
+        gl21::Finish();
+    }
     unsafe fn GetString(&mut self, name: GLenum) -> *const GLubyte {
         gl21::GetString(name)
     }
