@@ -44,5 +44,6 @@ pub struct State {
     media_player: media_player::State,
     openal: openal::State,
     opengles: opengles::State,
+    store_kit: store_kit::State,
     uikit: uikit::State,
 }
