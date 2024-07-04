@@ -292,7 +292,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 - (())removeObjectForKey:(id)key {
     let mut host_obj = std::mem::take(env.objc.borrow_mut::<DictionaryHostObject>(this));
-    host_obj.map.remove(env, key);
+    host_obj.map.remove(/* &u32 */);
     *env.objc.borrow_mut(this) = host_obj;
 }
     
