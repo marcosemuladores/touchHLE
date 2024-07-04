@@ -20,7 +20,7 @@ use super::ns_string::{from_rust_string, get_static_str, to_rust_string};
 use super::NSUInteger;
 use crate::mem::{ConstVoidPtr, MutVoidPtr};
 use crate::objc::{
-    class_conformsToProtocol, id, msg, msg_class, msg_send, nil, objc_classes, retain, Class, ClassExports,
+    autorelease, class_conformsToProtocol, id, msg, msg_class, msg_send, nil, objc_classes, retain, Class, ClassExports,
     NSZonePtr, ObjC, TrivialHostObject, IMP, SEL,
 };
 
