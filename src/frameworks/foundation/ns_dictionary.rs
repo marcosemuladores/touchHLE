@@ -300,7 +300,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     
 // Our private subclass that is the single implementation of NSDictionary for
 // the time being.
-implementation _touchHLE_NSDictionary: NSMutableDictionary
+@implementation _touchHLE_NSDictionary: NSMutableDictionary
 
 + (id)allocWithZone:(NSZonePtr)_zone {
     let host_object = Box::<DictionaryHostObject>::default();
