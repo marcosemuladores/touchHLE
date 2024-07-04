@@ -36,6 +36,7 @@ pub mod thread;
 
 #[derive(Default)]
 pub struct State {
+    pub cond: cond::State,
     key: key::State,
     thread: thread::State,
 }
