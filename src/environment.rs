@@ -21,6 +21,7 @@ use std::net::TcpListener;
 use std::time::{Duration, Instant};
 
 pub use mutex::{MutexId, MutexType, PTHREAD_MUTEX_DEFAULT};
+use crate::libc::pthread::cond::pthread_cond_t;
 
 /// Index into the [Vec] of threads. Thread 0 is always the main thread.
 pub type ThreadId = usize;
@@ -31,7 +32,7 @@ pub struct Thread {
     pub active: bool,
     /// If this is not [ThreadBlock::NotBlocked], the thread is not executing
     /// until a certain condition is fufilled.
-    blocked_by: ThreadBlock,
+    pub blocked_by: ThreadBlock,
     /// Set to [true] when a thread is running its startup routine (i.e. the
     /// function pointer passed to `pthread_create`). When it returns to the
     /// host, it should become inactive.
@@ -63,7 +64,7 @@ pub struct Thread {
     context: Option<cpu::CpuContext>,
     /// Address range of this thread's stack, used to check if addresses are in
     /// range while producing a stack trace.
-    stack: Option<std::ops::RangeInclusive<u32>>,
+    pub stack: Option<std::ops::RangeInclusive<u32>>,
 }
 
 impl Thread {
@@ -110,8 +111,8 @@ enum ThreadNextAction {
 }
 
 /// If/what a thread is blocked by.
-#[derive(Debug, Clone)]
-enum ThreadBlock {
+#[derive(Debug, Clone, PartialEq)]
+pub enum ThreadBlock {
     // Default state. (thread is not blocked)
     NotBlocked,
     // Thread is sleeping. (until Instant)
@@ -120,10 +121,14 @@ enum ThreadBlock {
     Mutex(MutexId),
     // Thread is waiting on a semaphore.
     Semaphore(MutPtr<sem_t>),
+    // Thread is wating on a condition variable
+    Condition(pthread_cond_t),
     // Thread is waiting for another thread to finish (joining).
     Joining(ThreadId, MutPtr<MutVoidPtr>),
     // Deferred guest-to-host return
     DeferredReturn,
+    // Thread is suspended.
+    Suspended
 }
 
 impl Environment {
@@ -441,6 +446,23 @@ impl Environment {
         )
     }
 
+    pub fn stack_for_longjmp(&self, mut lr: u32, fp: u32) -> Vec<u32> {
+        let stack_range = self.threads[self.current_thread].stack.clone().unwrap();
+        let mut frames = Vec::new();
+        let mut fp: mem::ConstPtr<u8> = mem::Ptr::from_bits(fp);
+        let thread_exit_routine_addr = self.dyld.thread_exit_routine().addr_with_thumb_bit();
+        let return_to_host_routine_addr = self.dyld.return_to_host_routine().addr_with_thumb_bit();
+        while stack_range.contains(&fp.to_bits())
+            && lr != thread_exit_routine_addr
+            && lr != return_to_host_routine_addr
+        {
+            frames.push(lr);
+            lr = self.mem.read((fp + 4).cast());
+            fp = self.mem.read(fp.cast());
+        }
+        frames
+    }
+
     fn stack_trace(&self) {
         if self.current_thread == 0 {
             echo!("Attempting to produce stack trace for main thread:");
@@ -560,6 +582,16 @@ impl Environment {
             self.run_call();
             self.cpu.branch(old_pc);
         }
+    }
+
+    pub fn suspend_thread(&mut self, thread: ThreadId) {
+        //assert_eq!(self.threads[thread].blocked_by, ThreadBlock::NotBlocked);
+        self.threads[thread].blocked_by = ThreadBlock::Suspended;
+    }
+
+    pub fn resume_thread(&mut self, thread: ThreadId) {
+        assert_eq!(self.threads[thread].blocked_by, ThreadBlock::Suspended);
+        self.threads[thread].blocked_by = ThreadBlock::NotBlocked;
     }
 
     /// Block the current thread until the given mutex unlocks.
@@ -978,6 +1010,21 @@ impl Environment {
                                 break;
                             }
                         }
+                        ThreadBlock::Condition(cond) => {
+                            let x = self.libc_state.pthread.cond.condition_variables.get(&cond).unwrap();
+                            if x.done {
+                                log_dbg!(
+                                    "Thread {} is unblocking on cond var {:?}.",
+                                    self.current_thread,
+                                    cond
+                                );
+                                self.threads[i].blocked_by = ThreadBlock::NotBlocked;
+                                suitable_thread = Some(i);
+                                let y = self.libc_state.pthread.cond.mutexes.remove(&cond).unwrap();
+                                mutex_to_relock = Some(y.mutex_id);
+                                break;
+                            }
+                        },
                         ThreadBlock::Joining(joinee_thread, ptr) => {
                             if !self.threads[joinee_thread].active {
                                 log_dbg!(
@@ -1012,6 +1059,7 @@ impl Environment {
                             suitable_thread = Some(i);
                             break;
                         }
+                        ThreadBlock::Suspended => {}
                     }
                 }
 
