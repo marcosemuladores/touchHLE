@@ -8,14 +8,19 @@
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::mem::{guest_size_of, MutPtr, SafeRead};
 use crate::Environment;
-use crate::libc::mach::{integer_t, kern_return_t, KERN_SUCCESS, mach_msg_type_number_t, mach_port_t};
 
+type mach_port_t = u32;
 type host_t = mach_port_t;
+type integer_t = i32;
 type host_flavor_t = integer_t;
 type host_info_t = MutPtr<integer_t>;
+type natural_t = u32;
+type mach_msg_type_number_t = natural_t;
+type kern_return_t = i32;
 
 const HOST_SELF: host_t = 0x484F5354; // HOST
 const HOST_VM_INFO: host_flavor_t = 2;
+const KERN_SUCCESS: kern_return_t = 0;
 
 #[repr(C, packed)]
 struct vm_statistics {
@@ -82,41 +87,7 @@ fn host_statistics(
     KERN_SUCCESS
 }
 
-#[repr(C, packed)]
-struct utsname {
-    sysname: [u8; 256],
-    nodename: [u8; 256],
-    release: [u8; 256],
-    version: [u8; 256],
-    machine: [u8; 256],
-}
-
-unsafe impl SafeRead for utsname {}
-
-fn uname(env: &mut Environment, ptr: MutPtr<utsname>) -> i32 {
-    let version = b"9.4.0";
-    let nodename = b"iPhone";
-    let release = b"9.4.0";
-    let sysname = b"Darwin";
-    let machine = b"iPhone1,1";
-    let mut res = utsname {
-        sysname: [0; 256],
-        nodename: [0; 256],
-        release: [0; 256],
-        version: [0; 256],
-        machine: [0; 256],
-    };
-    res.version[..version.len()].copy_from_slice(version);
-    res.nodename[..nodename.len()].copy_from_slice(nodename);
-    res.release[..release.len()].copy_from_slice(release);
-    res.sysname[..sysname.len()].copy_from_slice(sysname);
-    res.machine[..machine.len()].copy_from_slice(machine);
-    env.mem.write(ptr, res);
-    0
-}
-
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(mach_host_self()),
     export_c_func!(host_statistics(_, _, _, _)),
-    export_c_func!(uname(_))
 ];
