@@ -13,10 +13,9 @@
 
 use super::{id, nil, Class, ObjC, IMP, SEL};
 use crate::abi::{CallFromHost, GuestRet};
-use crate::mem::{ConstPtr, MutVoidPtr, SafeRead};
+use crate::mem::{ConstPtr, MutPtr, MutVoidPtr, SafeRead};
 use crate::Environment;
 use std::any::TypeId;
-use std::sync::atomic::Ordering;
 
 /// The core implementation of `objc_msgSend`, the main function of Objective-C.
 ///
@@ -32,7 +31,6 @@ use std::sync::atomic::Ordering;
 /// overwriting it.
 #[allow(non_snake_case)]
 fn objc_msgSend_inner(env: &mut Environment, receiver: id, selector: SEL, super2: Option<Class>) {
-    log_dbg!("Dispatching {} for {:?}", selector.as_str(&env.mem), receiver);
     let message_type_info = env.objc.message_type_info.take();
 
     if receiver == nil {
@@ -42,25 +40,17 @@ fn objc_msgSend_inner(env: &mut Environment, receiver: id, selector: SEL, super2
         return;
     }
 
-    let orig_class = super2.unwrap_or_else(|| ObjC::read_isa(receiver, &env.mem));
-    if orig_class == nil {
+    if selector.as_str(&env.mem) == "release" && receiver == MutPtr::from_bits(0x11) {
+        // WTF
         return;
     }
-    //assert!(orig_class != nil);
-
-    if !env
-        .objc
-        .get_host_object(orig_class)
-        .unwrap()
-        .as_any()
-        .downcast_ref::<super::ClassHostObject>()
-        .map(|x| x.initialized.load(Ordering::Relaxed))
-        .unwrap_or(true)
-        && selector.as_str(&env.mem) != "initialize"
-    {
-        initialize_class(env, receiver, orig_class);
+    let orig_class = super2.unwrap_or_else(|| ObjC::read_isa(receiver, &env.mem));
+    if orig_class == nil && selector.as_str(&env.mem) == "release" {
+        // WTF2
+        return;
     }
-    
+    assert!(orig_class != nil);
+
     // Traverse the chain of superclasses to find the method implementation.
 
     let mut class = orig_class;
@@ -108,7 +98,7 @@ fn objc_msgSend_inner(env: &mut Environment, receiver: id, selector: SEL, super2
             }
 
             if let Some(imp) = methods.get(&selector) {
-                log_dbg!("Found method on: {}", name);
+                // log!("Found method on: {}", name);
                 match imp {
                     IMP::Host(host_imp) => {
                         // TODO: do type checks when calling GuestIMPs too.
@@ -180,6 +170,7 @@ Type mismatch when sending message {} to {:?}!
 /// Standard variant of `objc_msgSend`. See [objc_msgSend_inner].
 #[allow(non_snake_case)]
 pub(super) fn objc_msgSend(env: &mut Environment, receiver: id, selector: SEL) {
+    // log!("objc_msgSend SEL {}", selector.as_str(&env.mem));
     objc_msgSend_inner(env, receiver, selector, /* super2: */ None)
 }
 
@@ -447,28 +438,4 @@ pub fn autorelease(env: &mut Environment, object: id) -> id {
         return nil;
     }
     msg![env; object autorelease]
-}
-
-fn initialize_class(env: &mut Environment, object: id, class: id) {
-    let class_host_object = env.objc.get_host_object(class).unwrap();
-    let &super::ClassHostObject {
-        superclass,
-        is_metaclass,
-        ref initialized,
-        ..
-    } = class_host_object.as_any().downcast_ref().unwrap();
-    if initialized.swap(true, Ordering::Relaxed) {
-        return;
-    }
-    if is_metaclass {
-        initialize_class(env, nil, object);
-    }
-    if superclass != nil {
-        initialize_class(env, object, superclass);
-    }
-    // We are sending another msg from inside msg_send, preserve the registers
-    let mut reg_copy = [0; 4];
-    reg_copy.copy_from_slice(&env.cpu.regs()[0..4]);
-    () = msg![env; class initialize];
-    env.cpu.regs_mut()[0..4].copy_from_slice(&reg_copy);
 }
