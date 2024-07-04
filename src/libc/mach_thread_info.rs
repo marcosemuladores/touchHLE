@@ -10,10 +10,13 @@
 #![allow(non_camel_case_types)]
 
 use crate::dyld::{export_c_func, FunctionExports};
-use crate::mem::{guest_size_of, MutPtr, SafeRead};
+use crate::mem::{guest_size_of, GuestUSize, MutPtr, MutVoidPtr, Ptr, SafeRead};
 use crate::Environment;
+use crate::environment::ThreadBlock::Suspended;
+use crate::environment::ThreadId;
 
 type kern_return_t = i32;
+type mach_msg_return_t = kern_return_t;
 const KERN_SUCCESS: kern_return_t = 0;
 
 type mach_port_t = u32;
@@ -22,16 +25,56 @@ type natural_t = u32;
 type integer_t = i32;
 type boolean_t = i32;
 
+type task_t = mach_port_t;
+type thread_act_t = mach_port_t;
+type thread_act_array_t = MutPtr<thread_act_t>;
+type ipc_space_t = mach_port_t;
+type mach_port_name_t = natural_t;
+type mach_port_right_t = natural_t;
+
+type vm_map_t = mach_port_t;
+type mach_vm_address_t = u32;
+type mach_vm_size_t = u32;
+
 type thread_inspect_t = mach_port_t;
 type thread_flavor_t = natural_t;
 type thread_info_t = MutPtr<integer_t>;
+type thread_state_flavor_t = i32;
+type thread_state_t = MutPtr<natural_t>;
+
 type mach_msg_type_number_t = natural_t;
+type mach_msg_type_name_t = u32;
+
+type mach_msg_option_t = integer_t;
+type mach_msg_size_t = natural_t;
+type mach_msg_timeout_t = natural_t;
+
+type exception_mask_t = u32;
+type exception_behavior_t = i32;
+
+type vm_offset_t = natural_t;
+type vm_size_t = natural_t;
+
+type vm_address_t = vm_offset_t;
 
 type policy_t = i32;
 const POLICY_TIMESHARE: policy_t = 1;
 
 const THREAD_BASIC_INFO: thread_flavor_t = 3;
 const THREAD_SCHED_TIMESHARE_INFO: thread_flavor_t = 10;
+
+const ARM_THREAD_STATE: thread_state_flavor_t = 1;
+const MACHINE_THREAD_STATE: thread_state_flavor_t = ARM_THREAD_STATE;
+
+#[repr(C, packed)]
+struct arm_thread_state {
+    r: [u32; 13], // General purpose register r0-r12
+    sp: u32, // Stack pointer r13
+    lr: u32, // Link register r14
+    pc: u32, // Program counter r15
+    cpsr: u32 // Current program status register
+}
+unsafe impl SafeRead for arm_thread_state {}
 
 #[repr(C, packed)]
 struct time_value_t {
@@ -84,7 +127,7 @@ fn thread_info(
         THREAD_BASIC_INFO => {
             let out_size_expected =
                 guest_size_of::<thread_basic_info>() / guest_size_of::<integer_t>();
-            assert!(out_size_expected == out_size_available);
+            assert!(out_size_expected <= out_size_available);
             env.mem.write(
                 thread_info_out.cast(),
                 thread_basic_info {
@@ -104,15 +147,20 @@ fn thread_info(
                         TH_STATE_STOPPED
                     },
                     flags: 0, // FIXME
-                    suspend_count: 0,
+                    suspend_count: if thread.blocked_by == Suspended {
+                        1
+                    } else {
+                        0
+                    },
                     sleep_time: 0,
                 },
             );
+            env.mem.write(thread_info_out_count, out_size_expected);
         }
         THREAD_SCHED_TIMESHARE_INFO => {
             let out_size_expected =
                 guest_size_of::<policy_timeshare_info>() / guest_size_of::<integer_t>();
-            assert!(out_size_expected == out_size_available);
+            assert!(out_size_expected <= out_size_available);
             env.mem.write(
                 thread_info_out.cast(),
                 policy_timeshare_info {
@@ -123,6 +171,7 @@ fn thread_info(
                     depress_priority: 0,
                 },
             );
+            env.mem.write(thread_info_out_count, out_size_expected);
         }
         _ => unimplemented!("TODO: flavor {:?}", flavor),
     }
@@ -152,25 +201,187 @@ fn thread_policy_set(
     KERN_SUCCESS
 }
 
-fn mach_host_self(_env: &mut Environment) -> i32 {
+fn mach_thread_self(env: &mut Environment) -> i32 {
+    //assert_eq!(env.current_thread, 0);
+    env.current_thread as i32
+}
+
+fn task_threads(
+    env: &mut Environment,
+    task: task_t,
+    thread_list: MutPtr<thread_act_array_t>,
+    thread_count_: MutPtr<mach_msg_type_number_t>
+) -> kern_return_t {
+    assert_eq!(task, 0); // mach_task_self_
+    let thread_count = env.threads.len() as GuestUSize;
+    let arr: MutPtr<thread_act_t> = env.mem.alloc(thread_count * guest_size_of::<thread_act_t>()).cast();
+    for i in 0..thread_count {
+        env.mem.write(arr + i, i);
+    }
+    env.mem.write(thread_list, arr);
+    env.mem.write(thread_count_, thread_count);
+    KERN_SUCCESS
+}
+
+fn mach_msg(
+    env: &mut Environment,
+    msg: MutVoidPtr, // MutPtr<mach_msg_header_t>,
+    option: mach_msg_option_t,
+    send_size: mach_msg_size_t,
+    rcv_size: mach_msg_size_t,
+    rcv_name: mach_port_name_t,
+    timeout: mach_msg_timeout_t,
+    notify: mach_port_name_t,
+) -> mach_msg_return_t {
+    log_dbg!("TOD0: mach_msg send/rcv");
+    KERN_SUCCESS
+}
+
+fn mach_port_allocate(
+    env: &mut Environment,
+    task: ipc_space_t,
+    right: mach_port_right_t,
+    name: MutPtr<mach_port_name_t>
+) -> kern_return_t {
+    // TODO: implement
+    KERN_SUCCESS
+}
+
+fn mach_port_deallocate(
+    env: &mut Environment,
+    task: ipc_space_t,
+    name: mach_port_name_t
+) -> kern_return_t {
+    // TODO: implement
+    KERN_SUCCESS
+}
+
+fn mach_port_insert_right(
+    env: &mut Environment,
+    task: ipc_space_t,
+    name: mach_port_name_t,
+    poly: mach_port_t,
+    polyPoly: mach_msg_type_name_t
+) -> kern_return_t {
+    // TODO: implement
+    KERN_SUCCESS
+}
+
+fn vm_deallocate(
+    env: &mut Environment,
+    target_task: vm_map_t,
+    address: mach_vm_address_t,
+    size: mach_vm_size_t
+) -> kern_return_t {
+    // Is it OK? vm_deallocate() can be called to free a list created by task_threads()
+    // But in general there is no guarantee what memory was previously allocated by malloc!
+    env.mem.free(Ptr::from_bits(address));
+    KERN_SUCCESS
+}
+
+fn exc_server(
+    env: &mut Environment,
+    request_msg: MutVoidPtr, // MutPtr<mach_msg_header_t>,
+    reply_ms: MutVoidPtr, // MutPtr<mach_msg_header_t>,
+) -> boolean_t {
+    1 // FALSE
+}
+
+fn task_set_exception_ports(
+    env: &mut Environment,
+    task: task_t,
+    exception_mask: exception_mask_t,
+    new_port: mach_port_t,
+    behavior: exception_behavior_t,
+    new_flavor: thread_state_flavor_t
+) -> kern_return_t {
+    KERN_SUCCESS
+}
+
+fn thread_suspend(
+    env: &mut Environment,
+    target_thread: thread_inspect_t
+) -> kern_return_t {
+    env.suspend_thread(target_thread as ThreadId);
     0
 }
 
-// TODO: types
-fn host_statistics(env: &mut Environment, host_priv: i32, flavor: i32,
-                   host_info: MutPtr<i32>, host_info_count: MutPtr<i32>) -> i32 {
-    assert_eq!(host_priv, 0);
-    assert_eq!(flavor, 2);
-    // free memory
-    // TODO: count used chunks in bytes and write here
-    env.mem.write(host_info, 380_818);
-    env.mem.write(host_info_count, 1);
+fn thread_resume(
+    env: &mut Environment,
+    target_thread: thread_inspect_t
+) -> kern_return_t {
+    env.resume_thread(target_thread as ThreadId);
+    0
+}
+
+fn thread_get_state(
+    env: &mut Environment,
+    target_thread: thread_act_t,
+    flavor: thread_state_flavor_t,
+    old_state: thread_state_t,
+    old_state_count: MutPtr<mach_msg_type_number_t>,
+) -> kern_return_t {
+    assert_eq!(flavor, MACHINE_THREAD_STATE);
+    let old_thread = env.current_thread;
+    env.switch_thread(target_thread as ThreadId);
+
+    let out_size_available = env.mem.read(old_state_count);
+    let out_size_expected =
+        guest_size_of::<arm_thread_state>() / guest_size_of::<integer_t>();
+    assert!(out_size_expected <= out_size_available);
+    let state = arm_thread_state {
+        r: env.cpu.regs()[..13].try_into().unwrap(),
+        sp: env.cpu.regs()[crate::cpu::Cpu::SP],
+        lr: env.cpu.regs()[crate::cpu::Cpu::LR],
+        pc: env.cpu.regs()[crate::cpu::Cpu::PC],
+        cpsr: env.cpu.cpsr()
+    };
+    env.mem.write(old_state.cast(), state);
+    env.mem.write(old_state_count, out_size_expected);
+
+    env.switch_thread(old_thread);
+    0
+}
+
+fn vm_allocate(
+    env: &mut Environment,
+    target_task: task_t,
+    address: MutPtr<vm_address_t>,
+    size: vm_size_t,
+    anywhere: boolean_t
+) -> kern_return_t {
+    assert_eq!(anywhere, 1);
+    let ptr = env.mem.alloc(size);
+    env.mem.write(address, ptr.to_bits());
+    0
+}
+
+fn vm_protect(
+    env: &mut Environment,
+    target_task: task_t,
+    address: MutPtr<vm_address_t>,
+    size: vm_size_t,
+    set_maximum: boolean_t,
+    new_protection : natural_t
+) -> kern_return_t {
     0
 }
 
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(thread_info(_, _, _, _)),
     export_c_func!(thread_policy_set(_, _, _, _)),
-    export_c_func!(mach_host_self()),
-    export_c_func!(host_statistics(_, _, _, _)),
+    export_c_func!(mach_thread_self()),
+    export_c_func!(task_threads(_, _, _)),
+    export_c_func!(mach_msg(_, _, _, _, _, _, _)),
+    export_c_func!(mach_port_allocate(_, _, _)),
+    export_c_func!(mach_port_deallocate(_, _)),
+    export_c_func!(mach_port_insert_right(_, _, _, _)),
+    export_c_func!(vm_deallocate(_, _, _)),
+    export_c_func!(exc_server(_, _)),
+    export_c_func!(task_set_exception_ports(_, _, _, _, _)),
+    export_c_func!(thread_suspend(_)),
+    export_c_func!(thread_resume(_)),
+    export_c_func!(thread_get_state(_, _, _, _)),
+    export_c_func!(vm_allocate(_, _, _, _)),
+    export_c_func!(vm_protect(_, _, _, _, _)),
 ];
