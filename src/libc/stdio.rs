@@ -15,7 +15,6 @@ use crate::libc::string::strlen;
 use crate::mem::{ConstPtr, ConstVoidPtr, GuestUSize, Mem, MutPtr, MutVoidPtr, Ptr, SafeRead};
 use crate::Environment;
 use std::io::Write;
-use crate::abi::{CallFromHost, GuestFunction};
 
 // Standard C functions
 
@@ -27,7 +26,7 @@ const EOF: i32 = -1;
 /// C `FILE` struct. This is an opaque type in C, so the definition here is our
 /// own.
 pub struct FILE {
-    pub fd: posix_io::FileDescriptor,
+    fd: posix_io::FileDescriptor,
 }
 unsafe impl SafeRead for FILE {}
 
@@ -121,12 +120,6 @@ fn fgetc(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
     }
 }
 
-fn ungetc(env: &mut Environment, c: u8, file_ptr: MutPtr<FILE>) -> i32 {
-    let FILE { fd } = env.mem.read(file_ptr);
-
-    posix_io::lseek(env, fd, -1, SEEK_CUR) as i32
-}
-
 fn fgets(
     env: &mut Environment,
     str: MutPtr<u8>,
@@ -151,26 +144,21 @@ fn fgets(
     str
 }
 
-fn fputc(env: &mut Environment, c: i32, stream: MutPtr<FILE>) -> i32 {
-    let cc: u8 = c as u8;
-    let ptr = env.mem.alloc_and_write(cc);
-    let res = fwrite(env, ptr.cast_const().cast(), 1, 1, stream)
-        .try_into()
-        .unwrap();
-    env.mem.free(ptr.cast());
-    res
-}
-
-fn fflush(_env: &mut Environment, _stream: MutPtr<FILE>) -> i32 {
-    0
-}
-
 fn fputs(env: &mut Environment, str: ConstPtr<u8>, stream: MutPtr<FILE>) -> i32 {
     // TODO: this function doesn't set errno or return EOF yet
     let str_len = strlen(env, str);
     fwrite(env, str.cast(), str_len, 1, stream)
         .try_into()
         .unwrap()
+}
+
+fn fputc(env: &mut Environment, c: i32, stream: MutPtr<FILE>) -> i32 {
+    let ptr: MutPtr<u8> = env.mem.alloc_and_write(c.try_into().unwrap());
+    let res = fwrite(env, ptr.cast_const().cast(), 1, 1, stream)
+        .try_into()
+        .unwrap();
+    env.mem.free(ptr.cast());
+    res
 }
 
 fn fwrite(
@@ -242,8 +230,7 @@ fn ftell(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
     }
 }
 
-fn rewind(env: &mut Environment, file_ptr: MutPtr<FILE>)  {
-    // TODO: the error indicator for the stream should be also cleared
+fn rewind(env: &mut Environment, file_ptr: MutPtr<FILE>) {
     fseek(env, file_ptr, 0, SEEK_SET);
 }
 
@@ -288,10 +275,15 @@ fn feof(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
 
 fn clearerr(env: &mut Environment, file_ptr: MutPtr<FILE>) {
     let FILE { fd } = env.mem.read(file_ptr);
-    posix_io::clearerr(env, fd);
+    posix_io::clearerr(env, fd)
 }
 
-pub fn puts(env: &mut Environment, s: ConstPtr<u8>) -> i32 {
+fn fflush(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
+    let FILE { fd } = env.mem.read(file_ptr);
+    posix_io::fflush(env, fd)
+}
+
+fn puts(env: &mut Environment, s: ConstPtr<u8>) -> i32 {
     let _ = std::io::stdout().write_all(env.mem.cstr_at(s));
     let _ = std::io::stdout().write_all(b"\n");
     // TODO: I/O error handling
@@ -342,16 +334,6 @@ fn fileno(env: &mut Environment, file_ptr: MutPtr<FILE>) -> posix_io::FileDescri
     fd
 }
 
-fn _ZNK3irr17IReferenceCounted4dropEv(env: &mut Environment, ptr: MutVoidPtr) {
-    let func = GuestFunction::from_addr_with_thumb_bit(0x00161e08);
-    func.call_from_host(env, (ptr,))
-}
-
-fn _ZNK4Body18isIslandGeneratingEv(env: &mut Environment, ptr: MutVoidPtr) {
-    let func = GuestFunction::from_addr_with_thumb_bit(0x007659d0);
-    func.call_from_host(env, (ptr,))
-}
-
 pub const CONSTANTS: ConstantExports = &[
     (
         "___stdinp",
@@ -382,10 +364,8 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(fread(_, _, _, _)),
     export_c_func!(fgetc(_)),
     export_c_func!(fgets(_, _, _)),
-    export_c_func!(ungetc(_, _)),
-    export_c_func!(fputc(_, _)),
-    export_c_func!(fflush(_)),
     export_c_func!(fputs(_, _)),
+    export_c_func!(fputc(_, _)),
     export_c_func!(fwrite(_, _, _, _)),
     export_c_func!(fseek(_, _, _)),
     export_c_func!(ftell(_)),
@@ -394,6 +374,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(fgetpos(_, _)),
     export_c_func!(feof(_)),
     export_c_func!(clearerr(_)),
+    export_c_func!(fflush(_)),
     export_c_func!(fclose(_)),
     export_c_func!(puts(_)),
     export_c_func!(putchar(_)),
@@ -401,6 +382,4 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(setbuf(_, _)),
     // POSIX-specific functions
     export_c_func!(fileno(_)),
-    export_c_func!(_ZNK3irr17IReferenceCounted4dropEv(_)),
-    export_c_func!(_ZNK4Body18isIslandGeneratingEv(_)),
 ];
