@@ -10,7 +10,7 @@ use super::{ns_string, ns_url, NSUInteger};
 use crate::abi::VaList;
 use crate::frameworks::foundation::ns_array::from_vec;
 use crate::frameworks::foundation::ns_property_list_serialization::NSPropertyListXMLFormat_v1_0;
-use crate::frameworks::foundation::ns_string::{from_rust_string, get_static_str, to_rust_string};
+use crate::frameworks::foundation::ns_string::{from_rust_string, to_rust_string};
 use crate::fs::GuestPath;
 use crate::mem::MutPtr;
 use crate::objc::{
@@ -292,7 +292,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 - (())removeObjectForKey:(id)key {
     let mut host_obj = std::mem::take(env.objc.borrow_mut::<DictionaryHostObject>(this));
-    host_obj.map.remove(/* &u32 */);
+    host_obj.remove(env, key);
     *env.objc.borrow_mut(this) = host_obj;
 }
     
