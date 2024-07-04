@@ -132,6 +132,14 @@ pub const CLASSES: ClassExports = objc_classes! {
 // to prevent weird behavior.
 // TODO: localized description methods also? (not sure if NSObject has them)
 
+-(id)description {
+    let class = msg![env; this class];
+    let desc = from_rust_string(env, format!(
+        "<{}: {:#x}>", env.objc.get_class_name(class), this.to_bits()
+    ));
+    autorelease(env, desc)
+}
+    
 // Helper for NSCopying
 - (id)copy {
     msg![env; this copyWithZone:(MutVoidPtr::null())]
