@@ -7,10 +7,10 @@
 
 use super::NSTimeInterval;
 use crate::frameworks::core_foundation::time::apple_epoch;
-use crate::objc::{autorelease, id, msg, msg_class, objc_classes, ClassExports, HostObject, NSZonePtr};
+use crate::objc::{autorelease, id, msg, msg_class, objc_classes, ClassExports, HostObject};
 
 use std::ops::Add;
-use std::time::{Duration, Instant, SystemTime};
+use std::time::{Duration, SystemTime};
 
 struct NSDateHostObject {
     time_interval: NSTimeInterval,
@@ -30,7 +30,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         .as_secs_f64()
 }
 
-+ (id)allocWithZone:(NSZonePtr)_zone {
++ (id)date {
     // "Date objects are immutable, representing an invariant time interval
     // relative to an absolute reference date (00:00:00 UTC on 1 January 2001)."
     let time_interval = SystemTime::now()
@@ -40,26 +40,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     let host_object = Box::new(NSDateHostObject {
         time_interval
     });
-    env.objc.alloc_object(this, host_object, &mut env.mem)
-}
-
-+ (id)date {
-    let new = msg![env; this alloc];
+    let new = env.objc.alloc_object(this, host_object, &mut env.mem);
     log_dbg!("[NSDate date] => {:?} ({:?}s)", new, time_interval);
     autorelease(env, new)
 }
 
-+ (id)init {
-    this
-}
-
-+ (id)initWithTimeIntervalSinceNow:(NSTimeInterval)secs {
-    let host_object = env.objc.borrow_mut::<NSDateHostObject>(this);
-    host_object.instant = Instant::now() + Duration::from_secs_f64(secs);
-    this
-}
-
-                                      
 + (NSTimeInterval)timeIntervalSinceReferenceDate {
     let now: id = msg_class![env; NSDate date];
     msg![env; now timeIntervalSinceReferenceDate]
