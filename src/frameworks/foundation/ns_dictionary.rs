@@ -8,6 +8,7 @@
 use super::ns_property_list_serialization::deserialize_plist_from_file;
 use super::{ns_string, ns_url, NSUInteger};
 use crate::abi::VaList;
+use crate::frameworks::foundation::ns_array::from_vec;
 use crate::frameworks::foundation::ns_property_list_serialization::NSPropertyListXMLFormat_v1_0;
 use crate::frameworks::foundation::ns_string::{from_rust_string, to_rust_string};
 use crate::fs::GuestPath;
@@ -31,7 +32,7 @@ pub(super) struct DictionaryHostObject {
     /// hash-map, which is not ideally efficient. :)
     /// The keys are the hash values, the values are a list of key-value pairs
     /// where the keys have the same hash value.
-    map: HashMap<Hash, Vec<(id, id)>>,
+    pub(super) map: HashMap<Hash, Vec<(id, id)>>,
     pub(super) count: NSUInteger,
 }
 impl HostObject for DictionaryHostObject {}
@@ -66,6 +67,7 @@ impl DictionaryHostObject {
         for &mut (candidate_key, ref mut existing_value) in collisions.iter_mut() {
             if candidate_key == key || msg![env; candidate_key isEqualTo:key] {
                 release(env, *existing_value);
+                release(env, key);
                 *existing_value = value;
                 return;
             }
@@ -196,6 +198,15 @@ pub const CLASSES: ClassExports = objc_classes! {
     retain(env, this)
 }
 
+-(id)allKeys {
+    let keys = env.objc.borrow::<DictionaryHostObject>(this).iter_keys().collect::<Vec<_>>();
+    for key in &keys {
+        retain(env, *key);
+    }
+    let ns_keys = from_vec(env, keys);
+    autorelease(env, ns_keys)
+}
+    
 // TODO
 
 - (id)valueForKey:(id)key { // NSString*
@@ -259,6 +270,16 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, new)
 }
 
+- (())setValue:(id)value
+       forKey:(id)key {
+    msg![env; this setObject: value forKey: key]
+}
+
+-(())removeAllObjects {
+    let mut objects = std::mem::take(env.objc.borrow_mut::<DictionaryHostObject>(this));
+    objects.release(env);
+}
+    
 @end
     
 // Our private subclass that is the single implementation of NSDictionary for
@@ -302,6 +323,12 @@ implementation _touchHLE_NSDictionary: NSMutableDictionary
     res
 }
 
+-(())setObject:(id)value forKey:(id)key {
+    let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+    host_obj.insert(env, key, value, true);
+    *env.objc.borrow_mut(this) = host_obj;
+}
+    
 - (id)description {
     // According to docs, this description should be formatted as property list.
     // But by the same docs, it's meant to be used for debugging purposes only.
@@ -385,7 +412,7 @@ implementation _touchHLE_NSDictionary: NSMutableDictionary
 /// with a more intuitive argument order. Unlike [super::ns_array::from_vec],
 /// this **does** copy and retain!
 pub fn dict_from_keys_and_objects(env: &mut Environment, keys_and_objects: &[(id, id)]) -> id {
-    let dict: id = msg_class![env; NSDictionary alloc];
+    let dict: id = msg_class![env; NSMutableDictionary alloc];
 
     let mut host_object = <DictionaryHostObject as Default>::default();
     for &(key, object) in keys_and_objects {
