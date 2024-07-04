@@ -198,6 +198,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     retain(env, this)
 }
 
+- (id)mutableCopy{
+    let ko = dict_to_keys_and_objects(env, this);
+    dict_from_keys_and_objects(env, &ko)
+}
+    
 -(id)allKeys {
     let keys = env.objc.borrow::<DictionaryHostObject>(this).iter_keys().collect::<Vec<_>>();
     for key in &keys {
@@ -205,6 +210,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     }
     let ns_keys = from_vec(env, keys);
     autorelease(env, ns_keys)
+}
+
+- (id)fileSize {
+    let key = get_static_str(env, "NSFileSize");
+    msg![env; this objectForKey:key]
 }
     
 // TODO
