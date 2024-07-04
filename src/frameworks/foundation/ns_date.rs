@@ -48,20 +48,21 @@ pub const CLASSES: ClassExports = objc_classes! {
     log_dbg!("[NSDate date] => {:?} ({:?}s)", new, time_interval);
     autorelease(env, new)
 }
-                          
-+ (NSTimeInterval)timeIntervalSinceReferenceDate {
-    let now: id = msg_class![env; NSDate date];
-    msg![env; now timeIntervalSinceReferenceDate]
-}
 
-- (id)init {
++ (id)init {
     this
 }
 
-- (id)initWithTimeIntervalSinceNow:(NSTimeInterval)secs {
++ (id)initWithTimeIntervalSinceNow:(NSTimeInterval)secs {
     let host_object = env.objc.borrow_mut::<NSDateHostObject>(this);
     host_object.instant = Instant::now() + Duration::from_secs_f64(secs);
     this
+}
+
+                                      
++ (NSTimeInterval)timeIntervalSinceReferenceDate {
+    let now: id = msg_class![env; NSDate date];
+    msg![env; now timeIntervalSinceReferenceDate]
 }
 
 - (NSTimeInterval)timeIntervalSinceDate:(id)anotherDate {
