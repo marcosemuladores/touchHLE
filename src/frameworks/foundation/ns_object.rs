@@ -18,10 +18,10 @@ use super::ns_dictionary::dict_from_keys_and_objects;
 use super::ns_run_loop::NSDefaultRunLoopMode;
 use super::ns_string::{from_rust_string, get_static_str, to_rust_string};
 use super::NSUInteger;
-use crate::mem::MutVoidPtr;
+use crate::mem::{ConstVoidPtr, MutVoidPtr};
 use crate::objc::{
     class_conformsToProtocol, id, msg, msg_class, msg_send, nil, objc_classes, retain, Class, ClassExports,
-    NSZonePtr, ObjC, TrivialHostObject, SEL,
+    NSZonePtr, ObjC, TrivialHostObject, IMP, SEL,
 };
 
 pub const CLASSES: ClassExports = objc_classes! {
@@ -70,6 +70,13 @@ pub const CLASSES: ClassExports = objc_classes! {
     true
 }
 
++(ConstVoidPtr)instanceMethodForSelector:(SEL)selector {
+    match ObjC::lookup_method_imp(env, this, selector) {
+        IMP::Guest(g) => ConstVoidPtr::from_bits(g.addr_with_thumb_bit()),
+        _ => todo!()
+    }
+}
+    
 - (id)init {
     this
 }
@@ -236,6 +243,14 @@ forUndefinedKey:(id)key { // NSString*
     msg_send(env, (this, sel, o1, o2))
 }
 
+- (ConstVoidPtr)methodForSelector:(SEL)selector {
+    let isa = ObjC::read_isa(this, &env.mem);
+    match ObjC::lookup_method_imp(env, isa, selector) {
+        IMP::Guest(g) => ConstVoidPtr::from_bits(g.addr_with_thumb_bit()),
+        _ => todo!()
+    }
+}
+    
 - (bool)conformsToProtocol:(id)protocol {
     let class = msg![env; this class];
     class_conformsToProtocol(env, class, protocol)
