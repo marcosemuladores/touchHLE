@@ -191,8 +191,16 @@ fn stat(env: &mut Environment, path: ConstPtr<u8>, buf: MutPtr<stat>) -> i32 {
     result
 }
 
+fn statfs(_: &mut Environment, _: MutVoidPtr, _: MutVoidPtr) -> i32 {
+    log!(
+        "Warning: statfs() call, this is completely unimplemented, but should be enough for sqlite"
+    );
+    -1
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(mkdir(_, _)),
     export_c_func!(fstat(_, _)),
     export_c_func!(stat(_, _)),
+    export_c_func!(statfs(_, _)),
 ];
