@@ -16,7 +16,7 @@ use crate::frameworks::foundation::ns_string::{
     from_rust_string, to_rust_string, NSUTF8StringEncoding,
 };
 use crate::frameworks::foundation::{ns_string, NSUInteger};
-use crate::mem::{ConstPtr, MutPtr};
+use crate::mem::{ConstPtr, ConstVoidPtr, MutPtr, MutVoidPtr};
 use crate::objc::{id, msg, msg_class};
 use crate::Environment;
 
