@@ -24,11 +24,11 @@ use crate::frameworks::core_graphics::cg_color::CGColorRef;
 use crate::frameworks::core_graphics::cg_context::{CGContextClearRect, CGContextRef};
 use crate::frameworks::core_graphics::{CGFloat, CGPoint, CGRect};
 use crate::frameworks::foundation::ns_string::{get_static_str, to_rust_string};
-use crate::frameworks::foundation::{ns_array, NSInteger, NSUInteger, NSTimeInterval};
-use crate::mem::{ConstVoidPtr, MutVoidPtr};
+use crate::frameworks::foundation::{ns_array, NSInteger, NSUInteger};
+use crate::mem::ConstVoidPtr;
 use crate::objc::{
     autorelease, id, msg, msg_class, nil, objc_classes, release, retain, Class, ClassExports,
-    HostObject, NSZonePtr, SEL,
+    HostObject, NSZonePtr,
 };
 use crate::Environment;
 
@@ -37,10 +37,6 @@ pub struct State {
     /// List of views for internal purposes. Non-retaining!
     pub(super) views: Vec<id>,
     pub ui_window: ui_window::State,
-    anim_delegate: id,
-    anim_selector: Option<SEL>,
-    anim_id: id,
-    anim_context: id,
 }
 
 pub(super) struct UIViewHostObject {
@@ -112,72 +108,11 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 + (())beginAnimations:(id)animationID // NSString*
               context:(ConstVoidPtr)context {
-    log!("WARNING: Ignoring beginAnimations:{:?} context:{:?}", animId, context);
-    env
-        .framework_state
-        .uikit
-        .ui_view
-        .anim_id = animId;
-    env
-        .framework_state
-        .uikit
-        .ui_view
-        .anim_context = context.cast();
+    log!("TODO: [UIView beginAnimations:{:?} {:?} context:{:?}]", to_rust_string(env, animationID), animationID, context);
 }
 
-+ (())setAnimationDelegate:(id)delegate {
-    log!("WARNING: Ignoring setAnimationDelegate:");
-    retain(env, delegate);
-    env
-        .framework_state
-        .uikit
-        .ui_view
-        .anim_delegate = delegate;
-}
-+ (())setAnimationDidStopSelector:(SEL)selector {    
-    log!("WARNING: Ignoring setAnimationDidStopSelector: {}", selector.as_str(&env.mem));
-    env
-        .framework_state
-        .uikit
-        .ui_view
-        .anim_selector = Some(selector);
-}
-+ (())setAnimationDuration:(NSTimeInterval)duration {
-    log!("WARNING: Ignoring setAnimationDuration:");
-}
 + (())commitAnimations {
     log!("TODO: [UIView commitAnimations]");
-    let delegate = env
-        .framework_state
-        .uikit
-        .ui_view
-        .anim_delegate;
-    //release(env, y);
-    if let Some(sel) = env
-        .framework_state
-        .uikit
-        .ui_view
-        .anim_selector.unwrap();
-    let anim_id = env
-        .framework_state
-        .uikit
-        .ui_view
-        .anim_selector {
-        let anim_id = env
-            .framework_state
-            .uikit
-            .ui_view
-            .anim_id;
-        let context = env
-            .framework_state
-            .uikit
-            .ui_view
-            .anim_context;
-        crate::objc::msg_send(env, (delegate, sel, anim_id, true, context))
-    }
-    // let ui_application: id = msg_class![env; UIApplication sharedApplication];
-    // let delegate: id = msg![env; ui_application delegate];
-    // () = msg![env; delegate unlockTouch];
 }
 
 // TODO: accessors etc
@@ -294,21 +229,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, subs)
 }
 
-- (id)window {
-    let mut window: id = env.objc.borrow::<UIViewHostObject>(this).superview;
-    let window_class = env.objc.get_known_class("UIWindow", &mut env.mem);
-    while (window != nil) {
-        let current_class: Class = msg![env; window class];
-        log!("window {:?} curr class {}", window, env.objc.get_class_name(current_class));
-        if current_class == window_class {
-            break;
-        }
-        window = env.objc.borrow::<UIViewHostObject>(window).superview;
-    }
-    log!("view {:?} has window {:?}", this, window);
-    window
-}
-    
 - (())addSubview:(id)view {
     log_dbg!("[(UIView*){:?} addSubview:{:?}] => ()", this, view);
 
@@ -599,10 +519,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     log!("TODO: [(UIView*){:?} setAutoresizesSubviews:{}]", this, enabled);
 }
 
-- (bool)endEditing:(bool)_force {
-    true
-}
-    
 @end
 
 @implementation UIToolbar: UIView
