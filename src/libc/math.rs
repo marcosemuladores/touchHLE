@@ -132,7 +132,7 @@ fn log10f(_env: &mut Environment, arg: f32) -> f32 {
     arg.log10()
 }
 fn ldexp(_env: &mut Environment, arg: f64) -> f64 {
-    arg.ldexp()
+    arg.exp()
 }
 fn exp(_env: &mut Environment, arg: f64) -> f64 {
     arg.exp()
