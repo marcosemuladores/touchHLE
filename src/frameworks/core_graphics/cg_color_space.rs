@@ -109,6 +109,7 @@ pub fn CGColorSpaceRetain(env: &mut Environment, cs: CGColorSpaceRef) -> CGColor
 }
 
 pub fn CGColorSpaceGetModel(env: &mut Environment, cs: CGColorSpaceRef) -> CGColorSpaceModel {
+    // kCGColorSpaceModelRGB
     let host_object = env.objc.borrow::<CGColorSpaceHostObject>(cs);
     match host_object.name {
         kCGColorSpaceGenericGray => kCGColorSpaceModelMonochrome,
