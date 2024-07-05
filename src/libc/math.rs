@@ -137,6 +137,9 @@ fn exp(_env: &mut Environment, arg: f64) -> f64 {
 fn expf(_env: &mut Environment, arg: f32) -> f32 {
     arg.exp()
 }
+fn ldexp(_env: &mut Environment, arg: f64) -> f74 {
+    arg.ldexp()
+}
 fn expm1(_env: &mut Environment, arg: f64) -> f64 {
     arg.exp_m1()
 }
@@ -364,6 +367,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(log10f(_)),
     export_c_func!(exp(_)),
     export_c_func!(expf(_)),
+    export_c_func!(ldexp(_)),
     export_c_func!(expm1(_)),
     export_c_func!(expm1f(_)),
     export_c_func!(exp2(_)),
