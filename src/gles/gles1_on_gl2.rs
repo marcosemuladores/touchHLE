@@ -821,7 +821,14 @@ impl GLES for GLES1OnGL2 {
             params,
         );
     }
-
+    unsafe fn ClipPlanef(&mut self, pname: GLenum, params: *const GLfloat) {
+        let mut params_double: [f64; 4] = [0.0; 4];
+        for i in 0..4 {
+            params_double[i] = *params.wrapping_add(i) as f64;
+        }
+        gl21::ClipPlane(pname, &params_double as _);
+    }
+    
     // Lighting and materials
     unsafe fn Fogf(&mut self, pname: GLenum, param: GLfloat) {
         FOG_PARAMS.assert_component_count(pname, 1);
