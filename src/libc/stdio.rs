@@ -144,7 +144,7 @@ fn fgets(
     str
 }
 
-pub fn fputs(env: &mut Environment, str: ConstPtr<u8>, stream: MutPtr<FILE>) -> i32 {
+fn fputs(env: &mut Environment, str: ConstPtr<u8>, stream: MutPtr<FILE>) -> i32 {
     // TODO: this function doesn't set errno or return EOF yet
     let str_len = strlen(env, str);
     fwrite(env, str.cast(), str_len, 1, stream)
@@ -283,7 +283,7 @@ fn fflush(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
     posix_io::fflush(env, fd)
 }
 
-fn puts(env: &mut Environment, s: ConstPtr<u8>) -> i32 {
+pub fn puts(env: &mut Environment, s: ConstPtr<u8>) -> i32 {
     let _ = std::io::stdout().write_all(env.mem.cstr_at(s));
     let _ = std::io::stdout().write_all(b"\n");
     // TODO: I/O error handling
