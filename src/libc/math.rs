@@ -26,6 +26,9 @@ fn sin(_env: &mut Environment, arg: f64) -> f64 {
 fn sinf(_env: &mut Environment, arg: f32) -> f32 {
     arg.sin()
 }
+fn socket(_env: &mut Environment, arg: f64) -> f64 {
+    arg.socket()
+}
 fn cos(_env: &mut Environment, arg: f64) -> f64 {
     arg.cos()
 }
@@ -331,6 +334,7 @@ pub const FUNCTIONS: FunctionExports = &[
     // Trigonometric functions
     export_c_func!(sin(_)),
     export_c_func!(sinf(_)),
+    export_c_func!(socket(_)),
     export_c_func!(cos(_)),
     export_c_func!(cosf(_)),
     export_c_func!(tan(_)),
