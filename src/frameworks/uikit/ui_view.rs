@@ -24,7 +24,7 @@ use crate::frameworks::core_graphics::cg_color::CGColorRef;
 use crate::frameworks::core_graphics::cg_context::{CGContextClearRect, CGContextRef};
 use crate::frameworks::core_graphics::{CGFloat, CGPoint, CGRect};
 use crate::frameworks::foundation::ns_string::{get_static_str, to_rust_string};
-use crate::frameworks::foundation::{ns_array, NSInteger, NSUInteger};
+use crate::frameworks::foundation::{ns_array, NSInteger, NSUInteger, NSTimeInterval};
 use crate::mem::ConstVoidPtr;
 use crate::objc::{
     autorelease, id, msg, msg_class, nil, objc_classes, release, retain, Class, ClassExports,
@@ -37,6 +37,10 @@ pub struct State {
     /// List of views for internal purposes. Non-retaining!
     pub(super) views: Vec<id>,
     pub ui_window: ui_window::State,
+    anim_delegate: id,
+    anim_selector: Option<SEL>,
+    anim_id: id,
+    anim_context: id,
 }
 
 pub(super) struct UIViewHostObject {
@@ -108,11 +112,74 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 + (())beginAnimations:(id)animationID // NSString*
               context:(ConstVoidPtr)context {
-    log!("TODO: [UIView beginAnimations:{:?} {:?} context:{:?}]", to_rust_string(env, animationID), animationID, context);
+    log!("WARNING: Ignoring beginAnimations:{:?} context:{:?}", animId, context);
+    env
+        .framework_state
+        .uikit
+        .ui_view
+        .anim_id = animId;
+    env
+        .framework_state
+        .uikit
+        .ui_view
+        .anim_context = context.cast();
 }
 
++ (())setAnimationDelegate:(id)delegate {
+    log!("WARNING: Ignoring setAnimationDelegate:");
+    retain(env, delegate);
+    env
+        .framework_state
+        .uikit
+        .ui_view
+        .anim_delegate = delegate;
+}
++ (())setAnimationDidStopSelector:(SEL)selector {    
+    log!("WARNING: Ignoring setAnimationDidStopSelector: {}", selector.as_str(&env.mem));
+    env
+        .framework_state
+        .uikit
+        .ui_view
+        .anim_selector = Some(selector);
+}
++ (())setAnimationDuration:(NSTimeInterval)duration {
+    log!("WARNING: Ignoring setAnimationDuration:");
+}
 + (())commitAnimations {
     log!("TODO: [UIView commitAnimations]");
+    let delegate = env
+        .framework_state
+        .uikit
+        .ui_view
+        .anim_delegate;
+    //release(env, y);
+    let sel = env
+        .framework_state
+        .uikit
+        .ui_view
+        .anim_selector.unwrap();
+    let anim_id = env
+        .framework_state
+        .uikit
+        .ui_view
+        .anim_id;
+    let context = env
+        .framework_state
+        .uikit
+        .ui_view
+        .anim_context;
+    // env
+    //     .framework_state
+    //     .uikit
+    //     .ui_view
+    //     .anim_delegate = nil;
+    // env
+    //     .framework_state
+    //     .uikit
+    //     .ui_view
+    //     .anim_selector = None;
+    //let _: id = msg![env; y performSelector:x];
+    crate::objc::msg_send(env, (delegate, sel, anim_id, true, context))
 }
 
 // TODO: accessors etc
