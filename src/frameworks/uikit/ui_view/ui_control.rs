@@ -335,4 +335,8 @@ forControlEvents:(UIControlEvents)events {
 
 @end
 
+@implementation UISwitch: UIControl
+
+@end
+
 };
