@@ -26,9 +26,6 @@ fn sin(_env: &mut Environment, arg: f64) -> f64 {
 fn sinf(_env: &mut Environment, arg: f32) -> f32 {
     arg.sin()
 }
-fn socket(_env: &mut Environment, arg: f64) -> f64 {
-    arg.socket()
-}
 fn cos(_env: &mut Environment, arg: f64) -> f64 {
     arg.cos()
 }
@@ -228,7 +225,9 @@ fn fmin(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
 fn fminf(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
     arg1.min(arg2)
 }
-
+fn socket(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+    arg1.min(arg2)
+}
 fn hypot(env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     sqrt(env, arg1*arg1 + arg2*arg2)
 }
@@ -334,7 +333,6 @@ pub const FUNCTIONS: FunctionExports = &[
     // Trigonometric functions
     export_c_func!(sin(_)),
     export_c_func!(sinf(_)),
-    export_c_func!(socket(_)),
     export_c_func!(cos(_)),
     export_c_func!(cosf(_)),
     export_c_func!(tan(_)),
@@ -399,6 +397,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(fmaxf(_, _)),
     export_c_func!(fmin(_, _)),
     export_c_func!(fminf(_, _)),
+    export_c_func!(socket(_, _)),
     export_c_func!(hypot(_, _)),
     export_c_func!(lrint(_)),
     export_c_func!(lrintf(_)),
