@@ -179,6 +179,7 @@ pub struct Dyld {
     return_to_host_routine: Option<GuestFunction>,
     thread_exit_routine: Option<GuestFunction>,
     constants_to_link_later: Vec<(MutPtr<ConstVoidPtr>, &'static HostConstant)>,
+    functions_to_link_later: Vec<(MutPtr<ConstVoidPtr>, String)>,
     non_lazy_host_functions: HashMap<&'static str, GuestFunction>,
 }
 
@@ -202,6 +203,7 @@ impl Dyld {
             return_to_host_routine: None,
             thread_exit_routine: None,
             constants_to_link_later: Vec::new(),
+            functions_to_link_later: Vec::new(),
             non_lazy_host_functions: HashMap::new(),
         }
     }
@@ -336,6 +338,10 @@ impl Dyld {
             } else if name == "__objc_empty_vtable" || name == "__objc_empty_cache" {
                 // Our Objective-C runtime doesn't use these
                 Ptr::null()
+               } else if search_lists(function_lists::FUNCTION_LISTS, name).is_some() {
+                assert_eq!(offset, 0);
+                self.functions_to_link_later.push((ptr_ptr, name.clone()));
+                continue;
             } else if let Some(&external_addr) = bins
                 .iter()
                 .flat_map(|other_bin| other_bin.exported_symbols.get(name))
@@ -420,6 +426,12 @@ impl Dyld {
                 continue;
             }
 
+            if search_lists(function_lists::FUNCTION_LISTS, symbol).is_some() {
+                self.functions_to_link_later
+                    .push((ptr_ptr, symbol.to_owned()));
+                continue;
+            }
+
             log!(
                 "Warning: unhandled non-lazy symbol {:?} at {:?} in \"{}\"",
                 symbol,
@@ -452,6 +464,15 @@ impl Dyld {
                 HostConstant::Custom(f) => f(&mut env.mem),
             };
             env.mem.write(symbol_ptr_ptr, symbol_ptr.cast());
+        }
+        let to_link = std::mem::take(&mut env.dyld.functions_to_link_later);
+        for (symbol_ptr_ptr, symbol) in to_link {
+            let addr = env
+                .dyld
+                .create_proc_address(&mut env.mem, &mut env.cpu, &symbol)
+                .unwrap();
+            env.mem
+                .write(symbol_ptr_ptr, Ptr::from_bits(addr.addr_with_thumb_bit()));
         }
     }
 
