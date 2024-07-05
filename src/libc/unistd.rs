@@ -76,6 +76,10 @@ fn access(env: &mut Environment, path: ConstPtr<u8>, mode: i32) -> i32 {
     0
 }
 
+fn CC_MD5(env: &mut Environment, data: ConstVoidPtr, len: u32, md: MutPtr<u8>) -> MutPtr<u8> {
+    md
+}
+
 fn uname(_env: &mut Environment, name: MutVoidPtr) -> i32 {
     -1
 }
@@ -161,6 +165,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(getppid()),
     export_c_func!(isatty(_)),
     export_c_func!(access(_, _)),
+    export_c_func!(CC_MD5(_, _, _)),
     export_c_func!(uname(_)),
     export_c_func!(sigaction(_, _, _)),
     export_c_func!(sigprocmask(_, _, _)),
