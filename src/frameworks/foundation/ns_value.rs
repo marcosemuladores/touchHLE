@@ -18,6 +18,7 @@ use std::cmp::Ordering;
 
 enum NSNumberHostObject {
     Bool(bool),
+    Int(i32),
     UnsignedLongLong(u64),
     LongLong(i64),
     Double(f64),
@@ -55,6 +56,14 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, new)
 }
 
++ (id)numberWithInt:(i32)value {
+    // TODO: for greater efficiency we could return a static-lifetime value
+
+    let new: id = msg![env; this alloc];
+    let new: id = msg![env; new initWithInt:value];
+    autorelease(env, new)
+}
+    
 + (id)numberWithFloat:(f32)value {
     // TODO: for greater efficiency we could return a static-lifetime value
 
@@ -110,6 +119,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     this
 }
 
+- (id)initWithInt:(i32)value {
+    *env.objc.borrow_mut(this) = NSNumberHostObject::Int(value);
+    this
+}
+
 - (id)initWithFloat:(f32)value {
     msg![env; this initWithDouble: (value as f64)]
 }
@@ -141,6 +155,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (id)description {
     let desc = match env.objc.borrow(this) {
         NSNumberHostObject::Bool(value) => from_rust_string(env, (*value as i32).to_string()),
+        NSNumberHostObject::Int(value) => from_rust_string(env, value.to_string()),
         NSNumberHostObject::UnsignedLongLong(value) => from_rust_string(env, value.to_string()),
         NSNumberHostObject::LongLong(value) => from_rust_string(env, value.to_string()),
         NSNumberHostObject::Double(value) => from_rust_string(env, value.to_string())
