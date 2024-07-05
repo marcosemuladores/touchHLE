@@ -8,7 +8,7 @@
 //! Resources:
 //! - Apple's [Threading Programming Guide](https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/Multithreading/Introduction/Introduction.html)
 
-use super::{ns_string, ns_timer};
+use super::{ns_string, ns_timer, NSTimeInterval};
 use crate::dyld::{ConstantExports, HostConstant};
 use crate::frameworks::audio_toolbox::audio_queue::{handle_audio_queue, AudioQueueRef};
 use crate::frameworks::audio_toolbox::audio_unit::{render_audio_unit, AudioUnit};
@@ -17,7 +17,7 @@ use crate::frameworks::core_foundation::cf_run_loop::{
 };
 use crate::frameworks::{core_animation, media_player, uikit};
 use crate::objc::{id, msg, objc_classes, release, retain, ClassExports, HostObject};
-use crate::Environment;
+use crate::{Environment, msg_class};
 use std::time::{Duration, Instant};
 
 /// `NSString*`
@@ -118,6 +118,16 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (())run {
+    run_run_loop(env, this, /* single_iteration: */ false);
+}
+
+- (())runMode:(NSRunLoopMode)mode
+   beforeDate:(id)limit_date { // NSDate *
+    let default_mode = ns_string::get_static_str(env, NSDefaultRunLoopMode);
+    assert!(msg![env; mode isEqualToString:default_mode]);
+    let distant_future: id = msg_class![env; NSDate distantFuture];
+    let delta: NSTimeInterval = msg![env; limit_date timeIntervalSinceDate:distant_future];
+    assert!(delta < 10.0);
     run_run_loop(env, this, /* single_iteration: */ false);
 }
 // TODO: other run methods
