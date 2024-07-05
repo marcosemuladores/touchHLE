@@ -186,6 +186,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (bool)boolValue {
     match env.objc.borrow::<NSNumberHostObject>(this) {
         NSNumberHostObject::Bool(b) => *b,
+        NSNumberHostObject::Int(_) => todo!(),
         NSNumberHostObject::UnsignedLongLong(u) => *u != 0,
         NSNumberHostObject::LongLong(l) => *l != 0,
         NSNumberHostObject::Double(d) => *d != 0.0,
@@ -195,6 +196,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (f64)doubleValue {
     match env.objc.borrow::<NSNumberHostObject>(this) {
         NSNumberHostObject::Bool(b) => *b as i32 as f64,
+        NSNumberHostObject::Int(_) => todo!(),
         NSNumberHostObject::UnsignedLongLong(u) => *u as f64,
         NSNumberHostObject::LongLong(l) => *l as f64,
         NSNumberHostObject::Double(d) => *d,
@@ -209,6 +211,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (i64)longLongValue {
     match env.objc.borrow::<NSNumberHostObject>(this) {
         NSNumberHostObject::Bool(b) => *b as i64,
+        NSNumberHostObject::Int(_) => todo!(),
         NSNumberHostObject::UnsignedLongLong(u) => *u as i64,
         NSNumberHostObject::LongLong(l) => *l,
         NSNumberHostObject::Double(d) => *d as i64,
@@ -223,6 +226,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 -(ConstPtr<u8>)objCType {
     let ty = match env.objc.borrow::<NSNumberHostObject>(this) {
         NSNumberHostObject::Bool(_) => "B",
+        NSNumberHostObject::Int(_) => todo!(),
         NSNumberHostObject::UnsignedLongLong(_) => "Q",
         NSNumberHostObject::LongLong(_) => "q",
         NSNumberHostObject::Double(_) => "d",
@@ -245,6 +249,14 @@ pub const CLASSES: ClassExports = objc_classes! {
                 NSOrderedSame
             } else {
                 NSOrderedDescending
+            }
+        }
+        NSNumberHostObject::Int(_) => todo!(),
+            let other_v: i64 = msg![env; other int];
+            match v.cmp(&other_v) {
+                Ordering::Less => NSOrderedAscending,
+                Ordering::Equal => NSOrderedSame,
+                Ordering::Greater => NSOrderedDescending
             }
         }
         NSNumberHostObject::UnsignedLongLong(v) => {
