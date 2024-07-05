@@ -6,7 +6,7 @@
 //! `time.h` (C) and `sys/time.h` (POSIX)
 
 use crate::dyld::{export_c_func, FunctionExports};
-use crate::mem::{guest_size_of, ConstPtr, MutPtr, Ptr, SafeRead};
+use crate::mem::{guest_size_of, ConstPtr, MutPtr, Ptr, SafeRead, GuestUSize};
 use crate::Environment;
 use std::time::{Duration, Instant, SystemTime};
 
@@ -348,6 +348,19 @@ fn nanosleep(env: &mut Environment, rqtp: ConstPtr<timespec>, _rmtp: MutPtr<time
     0 // success
 }
 
+fn strftime(
+    env: &mut Environment,
+    s: MutPtr<u8>,
+    maxsize: GuestUSize,
+    format: ConstPtr<u8>,
+    tm: ConstPtr<tm>) -> GuestUSize {
+    let fmt = env.mem.cstr_at_utf8(format).unwrap();
+    log!("strftime fmt {}", fmt);
+    assert_eq!(fmt, "%Z");
+    env.mem.write(s, b'\0');
+    0
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(clock()),
     export_c_func!(time(_)),
@@ -358,4 +371,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(localtime(_)),
     export_c_func!(gettimeofday(_, _)),
     export_c_func!(nanosleep(_, _)),
+    export_c_func!(strftime(_, _, _, _)),
 ];
