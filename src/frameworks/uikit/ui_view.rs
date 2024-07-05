@@ -153,7 +153,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         .ui_view
         .anim_delegate;
     //release(env, y);
-    let sel = env
+    if let Some(sel) = env
         .framework_state
         .uikit
         .ui_view
