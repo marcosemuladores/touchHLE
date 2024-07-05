@@ -183,6 +183,9 @@ impl GLES for GLES1Native {
     unsafe fn PointParameterxv(&mut self, pname: GLenum, params: *const GLfixed) {
         gles11::PointParameterxv(pname, params)
     }
+    unsafe fn ClipPlanef(&mut self, pname: GLenum, params: *const GLfloat) {
+        gles11::ClipPlanef(pname, params);
+    }
 
     // Lighting and materials
     unsafe fn Fogf(&mut self, pname: GLenum, param: GLfloat) {
