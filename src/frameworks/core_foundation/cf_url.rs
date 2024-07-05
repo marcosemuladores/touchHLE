@@ -112,10 +112,20 @@ fn CFURLCopyFileSystemPath(
     msg![env; path copy]
 }
 
+fn SCNetworkReachabilityCreateWithAddress(_env: &mut Environment, _allocator: CFAllocatorRef, _addr: ConstVoidPtr) -> MutVoidPtr {
+    MutVoidPtr::null()
+}
+
+fn SCNetworkReachabilityGetFlags(_env: &mut Environment, _target: MutVoidPtr, _flags: MutVoidPtr) -> bool {
+    false
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFURLGetFileSystemRepresentation(_, _, _, _)),
     export_c_func!(CFURLCreateFromFileSystemRepresentation(_, _, _, _)),
     export_c_func!(CFURLCopyPathExtension(_)),
     export_c_func!(CFURLCreateWithFileSystemPath(_, _, _, _)),
     export_c_func!(CFURLCopyFileSystemPath(_, _)),
+    export_c_func!(SCNetworkReachabilityCreateWithAddress(_, _)),
+    export_c_func!(SCNetworkReachabilityGetFlags(_, _)),
 ];
