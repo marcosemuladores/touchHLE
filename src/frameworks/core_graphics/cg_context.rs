@@ -91,6 +91,10 @@ fn CGContextSetGrayFillColor(
         .rgb_fill_color = color;
 }
 
+fn CGContextSetBlendMode(env: &mut Environment, context: CGContextRef, blend_mode: i32) {
+
+}
+
 pub fn CGContextFillRect(env: &mut Environment, context: CGContextRef, rect: CGRect) {
     cg_bitmap_context::fill_rect(env, context, rect, /* clear: */ false);
 }
@@ -162,6 +166,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGContextRelease(_)),
     export_c_func!(CGContextSetRGBFillColor(_, _, _, _, _)),
     export_c_func!(CGContextSetGrayFillColor(_, _, _)),
+    export_c_func!(CGContextSetBlendMode(_, _)),
     export_c_func!(CGContextFillRect(_, _)),
     export_c_func!(CGContextClearRect(_, _)),
     export_c_func!(CGContextConcatCTM(_, _)),
