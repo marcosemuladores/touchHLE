@@ -334,6 +334,11 @@ fn fileno(env: &mut Environment, file_ptr: MutPtr<FILE>) -> posix_io::FileDescri
     fd
 }
 
+fn _ZNK4Body18isIslandGeneratingEv(env: &mut Environment, ptr: MutVoidPtr) {
+    let func = GuestFunction::from_addr_with_thumb_bit(0x007659d0);
+    func.call_from_host(env, (ptr,))
+}
+
 pub const CONSTANTS: ConstantExports = &[
     (
         "___stdinp",
@@ -382,4 +387,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(setbuf(_, _)),
     // POSIX-specific functions
     export_c_func!(fileno(_)),
+    export_c_func!(_ZNK4Body18isIslandGeneratingEv(_)),
 ];
