@@ -123,6 +123,7 @@ fn CFRunLoopRunInMode(
 
 pub const kCFRunLoopCommonModes: &str = "kCFRunLoopCommonModes";
 pub const kCFRunLoopDefaultMode: &str = "kCFRunLoopDefaultMode";
+pub const kCFBundleVersionKey: &str = "CFBundleVersion";
 
 pub const CONSTANTS: ConstantExports = &[
     (
@@ -132,6 +133,10 @@ pub const CONSTANTS: ConstantExports = &[
     (
         "_kCFRunLoopDefaultMode",
         HostConstant::NSString(kCFRunLoopDefaultMode),
+    ),
+    (
+        "_kCFBundleVersionKey",
+        HostConstant::NSString(kCFBundleVersionKey),
     ),
 ];
 
