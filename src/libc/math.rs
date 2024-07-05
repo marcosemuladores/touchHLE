@@ -223,6 +223,14 @@ fn fminf(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
     arg1.min(arg2)
 }
 
+fn lrint(_env: &mut Environment, arg1: f64) -> i64 {
+    arg1.max(i64::MIN as f64).min(i64::MAX as f64).round() as i64
+}
+
+fn lrintf(_env: &mut Environment, arg1: f32) -> i32 {
+    arg1.max(i32::MIN as f32).min(i32::MAX as f32).round() as i32
+}
+
 type GuestFPCategory = i32;
 const FP_NAN: GuestFPCategory = 1;
 const FP_INFINITE: GuestFPCategory = 1;
@@ -249,6 +257,12 @@ fn OSAtomicAdd32Barrier(
     let new = curr + the_amount;
     env.mem.write(the_value, new);
     new
+}
+
+fn OSAtomicCompareAndSwap32(
+    env: &mut Environment, old_value: i32, new_value: i32, the_value: MutPtr<i32>
+) -> bool {
+    OSAtomicCompareAndSwap32Barrier(env, old_value, new_value, the_value)
 }
 
 fn OSAtomicCompareAndSwap32Barrier(
@@ -373,9 +387,12 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(fmaxf(_, _)),
     export_c_func!(fmin(_, _)),
     export_c_func!(fminf(_, _)),
+    export_c_func!(lrint(_)),
+    export_c_func!(lrintf(_)),
     export_c_func!(__fpclassifyf(_)),
     export_c_func!(fesetround(_)),
     // Atomic ops (libkern)
+    export_c_func!(OSAtomicCompareAndSwap32(_, _, _)),
     export_c_func!(OSAtomicCompareAndSwap32Barrier(_, _, _)),
     export_c_func!(OSAtomicCompareAndSwapPtr(_, _, _)),
     export_c_func!(OSAtomicAdd32Barrier(_, _)),
