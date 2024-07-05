@@ -9,6 +9,7 @@ use super::posix_io::{
     self, off_t, O_APPEND, O_CREAT, O_RDONLY, O_RDWR, O_TRUNC, O_WRONLY, STDERR_FILENO,
     STDIN_FILENO, STDOUT_FILENO,
 };
+use crate::abi::{CallFromHost, GuestFunction};
 use crate::dyld::{export_c_func, ConstantExports, FunctionExports, HostConstant};
 use crate::fs::GuestPath;
 use crate::libc::string::strlen;
@@ -334,6 +335,11 @@ fn fileno(env: &mut Environment, file_ptr: MutPtr<FILE>) -> posix_io::FileDescri
     fd
 }
 
+fn _ZNK3irr17IReferenceCounted4dropEv(env: &mut Environment, ptr: MutVoidPtr) {
+    let func = GuestFunction::from_addr_with_thumb_bit(0x00161e08);
+    func.call_from_host(env, (ptr,))
+}
+
 fn _ZNK4Body18isIslandGeneratingEv(env: &mut Environment, ptr: MutVoidPtr) {
     let func = GuestFunction::from_addr_with_thumb_bit(0x007659d0);
     func.call_from_host(env, (ptr,))
@@ -387,5 +393,6 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(setbuf(_, _)),
     // POSIX-specific functions
     export_c_func!(fileno(_)),
+    export_c_func!(_ZNK3irr17IReferenceCounted4dropEv(_)),
     export_c_func!(_ZNK4Body18isIslandGeneratingEv(_)),
 ];
