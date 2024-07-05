@@ -586,6 +586,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     log!("TODO: [(UIView*){:?} setAutoresizesSubviews:{}]", this, enabled);
 }
 
+- (bool)endEditing:(bool)_force {
+    true
+}
+    
 @end
 
 @implementation UIToolbar: UIView
