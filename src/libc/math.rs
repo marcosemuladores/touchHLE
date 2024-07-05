@@ -223,6 +223,10 @@ fn fminf(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
     arg1.min(arg2)
 }
 
+fn hypot(env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+    sqrt(env, arg1*arg1 + arg2*arg2)
+}
+
 fn lrint(_env: &mut Environment, arg1: f64) -> i64 {
     arg1.max(i64::MIN as f64).min(i64::MAX as f64).round() as i64
 }
@@ -387,6 +391,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(fmaxf(_, _)),
     export_c_func!(fmin(_, _)),
     export_c_func!(fminf(_, _)),
+    export_c_func!(hypot(_, _)),
     export_c_func!(lrint(_)),
     export_c_func!(lrintf(_)),
     export_c_func!(__fpclassifyf(_)),
