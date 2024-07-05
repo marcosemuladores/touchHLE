@@ -144,7 +144,7 @@ fn fgets(
     str
 }
 
-fn fputs(env: &mut Environment, str: ConstPtr<u8>, stream: MutPtr<FILE>) -> i32 {
+pub fn fputs(env: &mut Environment, str: ConstPtr<u8>, stream: MutPtr<FILE>) -> i32 {
     // TODO: this function doesn't set errno or return EOF yet
     let str_len = strlen(env, str);
     fwrite(env, str.cast(), str_len, 1, stream)
