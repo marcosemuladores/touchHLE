@@ -228,6 +228,9 @@ fn fminf(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
 fn socket(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
+fn ioctl(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+    arg1.min(arg2)
+}
 fn hypot(env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     sqrt(env, arg1*arg1 + arg2*arg2)
 }
@@ -398,6 +401,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(fmin(_, _)),
     export_c_func!(fminf(_, _)),
     export_c_func!(socket(_, _)),
+    export_c_func!(ioctl(_, _)),
     export_c_func!(hypot(_, _)),
     export_c_func!(lrint(_)),
     export_c_func!(lrintf(_)),
