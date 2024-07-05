@@ -6,7 +6,7 @@
 //! The `NSValue` class cluster, including `NSNumber`.
 
 use super::{
-    NSComparisonResult, NSOrderedAscending, NSOrderedDescending, NSOrderedSame, NSInteger, NSUInteger,
+    NSComparisonResult, NSOrderedAscending, NSOrderedDescending, NSOrderedSame, NSUInteger,
 };
 use crate::frameworks::foundation::ns_string::from_rust_string;
 use crate::mem::ConstPtr;
@@ -18,7 +18,6 @@ use std::cmp::Ordering;
 
 enum NSNumberHostObject {
     Bool(bool),
-    Int(i32),
     UnsignedLongLong(u64),
     LongLong(i64),
     Double(f64),
@@ -56,14 +55,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, new)
 }
 
-+ (id)numberWithInt:(i32)value {
-    // TODO: for greater efficiency we could return a static-lifetime value
-
-    let new: id = msg![env; this alloc];
-    let new: id = msg![env; new initWithInt:value];
-    autorelease(env, new)
-}
-    
 + (id)numberWithFloat:(f32)value {
     // TODO: for greater efficiency we could return a static-lifetime value
 
@@ -80,14 +71,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, new)
 }
 
-+ (id)numberWithInteger:(NSInteger)value {
-    // TODO: for greater efficiency we could return a static-lifetime value
-
-    let new: id = msg![env; this alloc];
-    let new: id = msg![env; new initWithInteger:value];
-    autorelease(env, new)
-}
-    
 + (id)numberWithInt:(i32)value {
     // TODO: for greater efficiency we could return a static-lifetime value
 
@@ -119,22 +102,12 @@ pub const CLASSES: ClassExports = objc_classes! {
     this
 }
 
-- (id)initWithInt:(i32)value {
-    *env.objc.borrow_mut(this) = NSNumberHostObject::Int(value);
-    this
-}
-
 - (id)initWithFloat:(f32)value {
     msg![env; this initWithDouble: (value as f64)]
 }
 
 - (id)initWithDouble:(f64)value {
     *env.objc.borrow_mut(this) = NSNumberHostObject::Double(value);
-    this
-}
-
-- (id)initWithInteger:(NSInteger)value {
-    *env.objc.borrow_mut::<NSNumberHostObject>(this) = NSNumberHostObject::Int(value);
     this
 }
 
@@ -155,7 +128,6 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (id)description {
     let desc = match env.objc.borrow(this) {
         NSNumberHostObject::Bool(value) => from_rust_string(env, (*value as i32).to_string()),
-        NSNumberHostObject::Int(value) => from_rust_string(env, value.to_string()),
         NSNumberHostObject::UnsignedLongLong(value) => from_rust_string(env, value.to_string()),
         NSNumberHostObject::LongLong(value) => from_rust_string(env, value.to_string()),
         NSNumberHostObject::Double(value) => from_rust_string(env, value.to_string())
@@ -186,7 +158,6 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (bool)boolValue {
     match env.objc.borrow::<NSNumberHostObject>(this) {
         NSNumberHostObject::Bool(b) => *b,
-        NSNumberHostObject::Int(_) => todo!(),
         NSNumberHostObject::UnsignedLongLong(u) => *u != 0,
         NSNumberHostObject::LongLong(l) => *l != 0,
         NSNumberHostObject::Double(d) => *d != 0.0,
@@ -196,7 +167,6 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (f64)doubleValue {
     match env.objc.borrow::<NSNumberHostObject>(this) {
         NSNumberHostObject::Bool(b) => *b as i32 as f64,
-        NSNumberHostObject::Int(_) => todo!(),
         NSNumberHostObject::UnsignedLongLong(u) => *u as f64,
         NSNumberHostObject::LongLong(l) => *l as f64,
         NSNumberHostObject::Double(d) => *d,
@@ -211,7 +181,6 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (i64)longLongValue {
     match env.objc.borrow::<NSNumberHostObject>(this) {
         NSNumberHostObject::Bool(b) => *b as i64,
-        NSNumberHostObject::Int(_) => todo!(),
         NSNumberHostObject::UnsignedLongLong(u) => *u as i64,
         NSNumberHostObject::LongLong(l) => *l,
         NSNumberHostObject::Double(d) => *d as i64,
@@ -226,7 +195,6 @@ pub const CLASSES: ClassExports = objc_classes! {
 -(ConstPtr<u8>)objCType {
     let ty = match env.objc.borrow::<NSNumberHostObject>(this) {
         NSNumberHostObject::Bool(_) => "B",
-        NSNumberHostObject::Int(_) => todo!(),
         NSNumberHostObject::UnsignedLongLong(_) => "Q",
         NSNumberHostObject::LongLong(_) => "q",
         NSNumberHostObject::Double(_) => "d",
@@ -249,14 +217,6 @@ pub const CLASSES: ClassExports = objc_classes! {
                 NSOrderedSame
             } else {
                 NSOrderedDescending
-            }
-        }
-        NSNumberHostObject::Int(_) => todo!(),
-            let other_v: i64 = msg![env; other int];
-            match v.cmp(&other_v) {
-                Ordering::Less => NSOrderedAscending,
-                Ordering::Equal => NSOrderedSame,
-                Ordering::Greater => NSOrderedDescending
             }
         }
         NSNumberHostObject::UnsignedLongLong(v) => {
