@@ -301,6 +301,13 @@ fn glPointParameterxv(env: &mut Environment, pname: GLenum, params: ConstPtr<GLf
     })
 }
 
+fn glClipPlanef(env: &mut Environment, pname: GLenum, params: ConstPtr<GLfloat>) {
+    with_ctx_and_mem(env, |gles, mem| {
+        let params = mem.ptr_at(params, 4 /* upper bound */);
+        unsafe { gles.ClipPlanef(pname, params) }
+    })
+}
+
 // Lighting and materials
 fn glFogf(env: &mut Environment, pname: GLenum, param: GLfloat) {
     with_ctx_and_mem(env, |gles, _mem| unsafe { gles.Fogf(pname, param) })
@@ -1284,6 +1291,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glPointParameterx(_, _)),
     export_c_func!(glPointParameterfv(_, _)),
     export_c_func!(glPointParameterxv(_, _)),
+    export_c_func!(glClipPlanef(_, _)),
     // Lighting and materials
     export_c_func!(glFogf(_, _)),
     export_c_func!(glFogx(_, _)),
