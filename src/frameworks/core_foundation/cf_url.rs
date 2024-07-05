@@ -12,7 +12,6 @@ use super::cf_allocator::{kCFAllocatorDefault, CFAllocatorRef};
 use super::cf_string::CFStringRef;
 use super::CFIndex;
 use crate::dyld::{export_c_func, FunctionExports};
-use crate::frameworks::core_foundation::cf_string::CFStringRef;
 use crate::frameworks::foundation::ns_string::{
     from_rust_string, to_rust_string, NSUTF8StringEncoding,
 };
