@@ -7,10 +7,12 @@
 use crate::frameworks::uikit::ui_view_controller::UIViewControllerHostObject;
 use crate::objc::{id, msg, nil, objc_classes, release, retain, ClassExports, NSZonePtr};
 use crate::{impl_HostObject_with_superclass, msg_super};
+use crate::frameworks::foundation::NSUInteger;
 
 #[derive(Default)]
 struct UINavigationControllerHostObject {
     superclass: UIViewControllerHostObject,
+    delegate: id,
     stack: Vec<id>,
     nav_bar_hidden: bool,
 }
@@ -27,27 +29,51 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.alloc_object(this, host_object, &mut env.mem)
 }
 
-- (())setNavigationBarHidden:(bool)hidden {
-    let host = env.objc.borrow_mut::<UINavigationControllerHostObject>(this);
-    host.nav_bar_hidden = hidden;
-}
-
--(id)topViewController {
-    env.objc.borrow::<UINavigationControllerHostObject>(this).stack.last().cloned().unwrap_or(nil)
-}
-
--(id)initWithRootViewController:(id)controller {
+- (id)initWithRootViewController:(id)controller {
     retain(env, controller);
     let host = env.objc.borrow_mut::<UINavigationControllerHostObject>(this);
     host.stack.push(controller);
     let myView = msg![env; this view];
     let subView: id = msg![env; controller view];
-    () = msg![env; myView addSubview: subView];
+    () = msg![env; myView addSubview:subView];
 
     this
 }
 
--(())dealloc {
+- (())setDelegate:(id)delegate {
+    env.objc.borrow_mut::<UINavigationControllerHostObject>(this).delegate = delegate;
+}
+
+- (())setViewControllers:(id)controllers { // NSArray *
+    let count: NSUInteger = msg![env; controllers count];
+    assert_eq!(count, 1);
+    let host = env.objc.borrow_mut::<UINavigationControllerHostObject>(this);
+    assert_eq!(host.stack.len(), 0);
+    log!("setViewControllers: from {} to {}", host.stack.len(), count);
+
+    let controller: id = msg![env; controllers lastObject];
+    retain(env, controller);
+    let host = env.objc.borrow_mut::<UINavigationControllerHostObject>(this);
+    host.stack.push(controller);
+    let myView = msg![env; this view];
+    let subView: id = msg![env; controller view];
+    () = msg![env; myView addSubview:subView];
+    
+    let delegate = env.objc.borrow::<UINavigationControllerHostObject>(this).delegate;
+    () = msg![env; delegate navigationController:this willShowViewController:controller animated:false];
+    () = msg![env; delegate navigationController:this didShowViewController:controller animated:false];
+}
+
+- (())setNavigationBarHidden:(bool)hidden {
+    let host = env.objc.borrow_mut::<UINavigationControllerHostObject>(this);
+    host.nav_bar_hidden = hidden;
+}
+
+- (id)topViewController {
+    env.objc.borrow::<UINavigationControllerHostObject>(this).stack.last().cloned().unwrap_or(nil)
+}
+
+- (())dealloc {
     let mut stack = std::mem::take(&mut env.objc.borrow_mut::<UINavigationControllerHostObject>(this).stack);
     for controller in stack.drain(..) {
         release(env, controller);
