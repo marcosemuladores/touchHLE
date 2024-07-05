@@ -28,7 +28,7 @@ use crate::frameworks::foundation::{ns_array, NSInteger, NSUInteger};
 use crate::mem::ConstVoidPtr;
 use crate::objc::{
     autorelease, id, msg, msg_class, nil, objc_classes, release, retain, Class, ClassExports,
-    HostObject, NSZonePtr,
+    HostObject, NSZonePtr, SEL,
 };
 use crate::Environment;
 
@@ -109,6 +109,13 @@ pub const CLASSES: ClassExports = objc_classes! {
 + (())beginAnimations:(id)animationID // NSString*
               context:(ConstVoidPtr)context {
     log!("TODO: [UIView beginAnimations:{:?} {:?} context:{:?}]", to_rust_string(env, animationID), animationID, context);
+}
+
++ (())setAnimationDelegate:(id)delegate {
+    log!("WARNING: Ignoring setAnimationDelegate:");
+}
++ (())setAnimationDidStopSelector:(SEL)selector {
+    log!("WARNING: Ignoring setAnimationDidStopSelector:");
 }
 
 + (())commitAnimations {
