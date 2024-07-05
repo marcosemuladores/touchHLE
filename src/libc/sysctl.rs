@@ -8,6 +8,7 @@
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::mem::{ConstPtr, GuestUSize, MutPtr, MutVoidPtr};
 use crate::Environment;
+use crate::libc::errno::ENOENT;
 
 fn sysctl(
     env: &mut Environment,
@@ -27,7 +28,7 @@ fn sysctl(
         newp,
         newlen
     );
-    assert!(!oldp.is_null() && !oldlenp.is_null()); // TODO
+    //assert!(!oldp.is_null() && !oldlenp.is_null()); // TODO
     assert!(newp.is_null()); // TODO
     env.mem.write(oldlenp, 0);
     0 // success
@@ -50,19 +51,37 @@ fn sysctlbyname(
         newp,
         newlen
     );
-    assert_eq!(name_str, "hw.machine");
+    // reference https://www.mail-archive.com/misc@openbsd.org/msg80988.html
+    let (val, len): (&[u8], GuestUSize) = match name_str {
+        "hw.machine" => (b"iPhone1,1", 10),
+        "hw.model" => (b"M68AP", 6),
+        "hw.ncpu" => (b"1", 2),
+        "hw.cputype" => (b"12", 3),
+        "hw.cpusubtype" => (b"6", 2),
+        "hw.cpufrequency" => (b"412000000", 10),
+        "hw.busfrequency" => (b"103000000", 10),
+        "hw.physmem" => (b"121634816", 10),
+        "hw.usermem" => (b"93564928", 9),
+        "hw.memsize" => (b"121634816", 10),
+        "hw.pagesize" => (b"4096", 5),
+        "kern.ostype" => (b"Darwin", 7),
+        "kern.osrelease" => (b"10.0.0d3", 9),
+        "kern.version" => (b"Darwin Kernel Version 10.0.0d3: Wed May 13 22:11:58 PDT 2009; root:xnu-1357.2.89~4/RELEASE_ARM_S5L8900X", 104),
+        "hw.optional.mmx" => return ENOENT,
+        "hw.optional.sse" => return ENOENT,
+        _str => unimplemented!("{}", _str)
+    };
     if oldp.is_null() && newp.is_null() {
-        // "iPhone1,1"
-        env.mem.write(oldlenp, 10);
+        env.mem.write(oldlenp, len);
         return 0;
     }
     assert!(!oldp.is_null() && !oldlenp.is_null());
     assert!(newp.is_null());
-    let hw_machine_str = env.mem.alloc_and_write_cstr(b"iPhone1,1");
-    assert_eq!(env.mem.read(oldlenp), 10);
+    let sysctl_str = env.mem.alloc_and_write_cstr(val);
+    // assert_eq!(env.mem.read(oldlenp), len);
     env.mem
-        .memmove(oldp, hw_machine_str.cast().cast_const(), 10);
-    env.mem.free(hw_machine_str.cast());
+        .memmove(oldp, sysctl_str.cast().cast_const(), len);
+    env.mem.free(sysctl_str.cast());
     0 // success
 }
 
