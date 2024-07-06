@@ -144,6 +144,11 @@ pub fn CGContextTranslateCTM(
     host_obj.transform = host_obj.transform.translate(tx, ty);
 }
 
+pub fn CGContextSetTextDrawingMode(env: &mut Environment, context: CGContextRef) -> CGAffineTransform {
+    let res = env.objc.borrow::<CGContextHostObject>(context).transform;
+    log_dbg!("CGContextSetTextDrawingMode() => {:?}", res);
+    res
+}
 pub fn CGContextDrawImage(
     env: &mut Environment,
     context: CGContextRef,
@@ -181,6 +186,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGContextRotateCTM(_, _)),
     export_c_func!(CGContextScaleCTM(_, _, _)),
     export_c_func!(CGContextTranslateCTM(_, _, _)),
+    export_c_func!(CGContextSetTextDrawingMode(_)),
     export_c_func!(CGContextDrawImage(_, _, _)),
     export_c_func!(CGContextSaveGState(_)),
     export_c_func!(CGContextRestoreGState(_)),
