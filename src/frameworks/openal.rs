@@ -238,6 +238,13 @@ fn alIsSource(_env: &mut Environment, source: ALuint) -> ALboolean {
     unsafe { al::alIsSource(source) }
 }
 
+fn alIsExtensionPresent(env: &mut Environment, extName: ConstPtr<u8>) -> ALboolean {
+    let s = env.mem.cstr_at_utf8(extName).unwrap();
+    let ss = CString::new(s).unwrap();
+    let res = unsafe { al::alIsExtensionPresent(ss.as_ptr()) };
+    res
+}
+
 fn alListenerf(_env: &mut Environment, param: ALenum, value: ALfloat) {
     unsafe { al::alListenerf(param, value) };
 }
@@ -364,6 +371,10 @@ fn alSourceiv(env: &mut Environment, source: ALuint, param: ALenum, values: Cons
     unsafe { al::alSourceiv(source, param, values) };
 }
 
+fn alEnable(_env: &mut Environment, capability: ALenum) {
+    unsafe { al::alEnable(capability) };
+}
+
 fn alGetSourcef(env: &mut Environment, source: ALuint, param: ALenum, value: MutPtr<ALfloat>) {
     unsafe { al::alGetSourcef(source, param, env.mem.ptr_at_mut(value, 1)) };
 }
@@ -421,6 +432,13 @@ fn alGetSource3i(
 fn alGetSourceiv(env: &mut Environment, source: ALuint, param: ALenum, values: MutPtr<ALint>) {
     let values = env.mem.ptr_at_mut(values, 3); // upper bound
     unsafe { al::alGetSourceiv(source, param, values) };
+}
+fn alGetString(env: &mut Environment, param: ALenum) -> ConstPtr<u8> {
+    let res = unsafe { al::alGetString(param) };
+    let s = unsafe { CStr::from_ptr(res) };
+    log_dbg!("alGetString({:?}) => {:?}", param, s);
+    log!("TODO: alGetString({}) leaks memory", param);
+    env.mem.alloc_and_write_cstr(s.to_bytes()).cast_const()
 }
 
 fn alSourcePlay(_env: &mut Environment, source: ALuint) {
@@ -555,6 +573,10 @@ fn alDopplerVelocity(env: &mut Environment, value: ALfloat) {
     unsafe { al::alDopplerVelocity(value) };
 }
 
+fn alSpeedOfSound(_env: &mut Environment, value: ALfloat) {
+    unsafe { al::alSpeedOfSound(value) };
+}
+
 // TODO: more functions
 
 // Note: For some reasons Wolf3d registers many OpenAl functions, but actually
@@ -581,15 +603,12 @@ fn alcIsExtensionPresent(
     _device: MutPtr<GuestALCdevice>,
     _extName: ConstPtr<u8>,
 ) -> ALCboolean {
-    0
+    todo!();
 }
 fn alGetBufferf(_env: &mut Environment, _buffer: ALuint, _param: ALenum, _value: MutPtr<ALfloat>) {
     todo!();
 }
 fn alGetBufferi(_env: &mut Environment, _buffer: ALuint, _param: ALenum, _value: MutPtr<ALint>) {
-    todo!();
-}
-fn alEnable(_env: &mut Environment, _capability: ALenum) {
     todo!();
 }
 fn alDisable(_env: &mut Environment, _capability: ALenum) {
@@ -619,14 +638,10 @@ fn alGetInteger(_env: &mut Environment, _param: ALenum) -> ALint {
 fn alGetIntegerv(_env: &mut Environment, _param: ALenum, _values: MutPtr<ALint>) {
     todo!();
 }
-fn alGetProcAddress(_env: &mut Environment, _funcName: ConstPtr<u8>) -> MutVoidPtr {
-    todo!();
-}
-fn alGetString(_env: &mut Environment, _param: ALenum) -> ConstPtr<u8> {
-    todo!();
-}
-fn alIsExtensionPresent(_env: &mut Environment, _extName: ConstPtr<u8>) -> ALboolean {
-    todo!();
+fn alGetProcAddress(env: &mut Environment, funcName: ConstPtr<u8>) -> MutVoidPtr {
+    let fname = env.mem.cstr_at_utf8(funcName).unwrap();
+    log!("alGetProcAddress {}", fname);
+    Ptr::null()
 }
 fn alIsEnabled(_env: &mut Environment, _capability: ALenum) -> ALboolean {
     todo!();
@@ -731,4 +746,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(alSourcePausev(_, _)),
     export_c_func!(alSourceStopv(_, _)),
     export_c_func!(alSourceRewindv(_, _)),
+    export_c_func!(alSpeedOfSound(_)),
 ];
