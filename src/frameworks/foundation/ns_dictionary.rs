@@ -137,6 +137,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg_class![env; _touchHLE_NSDictionary allocWithZone:zone]
 }
 
++ (id)boolForKey {
+    let new_dict: id = msg![env; this alloc];
+    let new_dict: id = msg![env; new_dict init];
+    autorelease(env, new_dict)
+}
 + (id)dictionary {
     let new_dict: id = msg![env; this alloc];
     let new_dict: id = msg![env; new_dict init];
