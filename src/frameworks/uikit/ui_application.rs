@@ -178,14 +178,6 @@ pub(super) fn UIApplicationMain(
     principal_class_name: id, // NSString*
     delegate_class_name: id,  // NSString*
 ) {
-
-pub(super) fn UIApplicationMain(
-    env: &mut Environment,
-    _argc: i32,
-    _argv: MutPtr<MutPtr<u8>>,
-    principal_class_name: id, // NSString*
-    delegate_class_name: id,  // NSString*
-) {
     // UIKit creates and drains autorelease pools when handling events.
     // It's not clear what granularity this should happen with, but this
     // granularity has already caught several bugs. :)
@@ -318,10 +310,8 @@ pub(super) fn exit(env: &mut Environment) {
     std::process::exit(0);
 }
 
-pub const FUNCTIONS: FunctionExports = &[
-    export_c_func!(UIApplicationMain(_, _, _, _)),
-    export_c_func!(UIApplicationDidReceiveMemoryWarningNotification(_)),
-];
+pub const FUNCTIONS: FunctionExports = &[export_c_func!(UIApplicationMain(_, _, _, _))];
+
 pub const CONSTANTS: ConstantExports = &[(
     "_UIApplicationLaunchOptionsURLKey",
     HostConstant::NSString("UIApplicationLaunchOptionsURLKey"),
