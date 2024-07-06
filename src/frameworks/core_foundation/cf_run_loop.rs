@@ -11,11 +11,12 @@
 use crate::abi::GuestFunction;
 use crate::dyld::{export_c_func, ConstantExports, FunctionExports, HostConstant};
 use crate::frameworks::core_foundation::cf_allocator::CFAllocatorRef;
+use crate::frameworks::core_foundation::cf_string::CFStringRef;
 use crate::frameworks::core_foundation::time::{CFAbsoluteTime, CFTimeInterval};
-use crate::frameworks::core_foundation::CFIndex;
+use crate::frameworks::core_foundation::{CFIndex, CFTypeRef};
 use crate::frameworks::foundation::ns_run_loop::run_run_loop_single_iteration;
 use crate::frameworks::foundation::ns_string;
-use crate::mem::MutVoidPtr;
+use crate::mem::{ConstVoidPtr, MutVoidPtr, Ptr};
 use crate::objc::{id, msg, msg_class, nil, Class};
 use crate::Environment;
 
@@ -121,6 +122,29 @@ fn CFRunLoopRunInMode(
     1 // kCFRunLoopRunFinished
 }
 
+fn CFPreferencesCopyAppValue(env: &mut Environment, key: CFStringRef, appID: CFStringRef) -> CFTypeRef {
+    Ptr::null()
+}
+
+fn CFPreferencesSetAppValue(env: &mut Environment, key: CFStringRef, value: CFTypeRef, appID: CFStringRef) {
+
+}
+
+fn CFPreferencesAppSynchronize(env: &mut Environment, appID: CFStringRef) -> bool {
+    false
+}
+
+const kCFNumberSInt32Type: CFIndex = 3;
+
+fn CFNumberCreate(
+    env: &mut Environment, allocator: CFAllocatorRef, type_: CFIndex, value_ptr: ConstVoidPtr
+) -> CFTypeRef {
+    log!("CFNumberCreate type {}", type_);
+    assert_eq!(type_, kCFNumberSInt32Type);
+    let val: i32 = env.mem.read(value_ptr.cast());
+    msg_class![env; NSNumber numberWithInt:val]
+}
+
 pub const kCFRunLoopCommonModes: &str = "kCFRunLoopCommonModes";
 pub const kCFRunLoopDefaultMode: &str = "kCFRunLoopDefaultMode";
 pub const kCFBundleVersionKey: &str = "CFBundleVersion";
@@ -147,4 +171,8 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFRunLoopTimerInvalidate(_)),
     export_c_func!(CFRunLoopAddTimer(_, _, _)),
     export_c_func!(CFRunLoopRunInMode(_, _, _)),
+    export_c_func!(CFPreferencesCopyAppValue(_, _)),
+    export_c_func!(CFPreferencesSetAppValue(_, _, _)),
+    export_c_func!(CFPreferencesAppSynchronize(_)),
+    export_c_func!(CFNumberCreate(_, _, _)),
 ];
