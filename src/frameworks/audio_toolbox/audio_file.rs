@@ -67,6 +67,56 @@ const kExtAudioFileProperty_FileDataFormat: AudioFilePropertyID = fourcc(b"ffmt"
 const kExtAudioFileProperty_ClientDataFormat: AudioFilePropertyID = fourcc(b"cfmt");
 const kExtAudioFileProperty_FileLengthFrames: AudioFilePropertyID = fourcc(b"#frm");
 
+pub fn AudioFileStreamOpen(
+    env: &mut Environment,
+    in_file_ref: CFURLRef,
+    in_permissions: AudioFilePermissions,
+    in_file_type_hint: AudioFileTypeID,
+    out_audio_file: MutPtr<AudioFileID>,
+) -> OSStatus {
+    return_if_null!(in_file_ref);
+
+    assert!(in_permissions == kAudioFileReadPermission); // writing TODO
+
+    // The hint is optional and is supposed to only be used for certain file
+    // formats that can't be uniquely identified, which we don't support so far.
+    // Hints for well-known types are ignored as well.
+    match in_file_type_hint {
+        0 => {}
+        kAudioFileCAFType => {
+            log!("Ignoring 'caff' file type hint for AudioFileStreamOpen()");
+        }
+        _ => unimplemented!(),
+    }
+
+    let path = to_rust_path(env, in_file_ref);
+    let Ok(audio_file) = audio::AudioFile::open_for_reading(path.clone(), &env.fs) else {
+        log!(
+            "Warning: AudioFileStreamOpen() for path {:?} {:?} failed",
+            in_file_ref,
+            path
+        );
+        return kAudioFileFileNotFoundError;
+    };
+
+    let host_object = AudioFileHostObject { audio_file };
+
+    let guest_audio_file = env.mem.alloc_and_write(OpaqueAudioFileID { _filler: 0 });
+    State::get(&mut env.framework_state)
+        .audio_files
+        .insert(guest_audio_file, host_object);
+
+    env.mem.write(out_audio_file, guest_audio_file);
+
+    log_dbg!(
+        "AudioFileStreamOpen() opened path {:?}, new audio file handle: {:?}",
+        in_file_ref,
+        guest_audio_file
+    );
+
+    0 // success
+}
+
 pub fn AudioFileOpenURL(
     env: &mut Environment,
     in_file_ref: CFURLRef,
@@ -469,6 +519,7 @@ pub fn AudioFileClose(env: &mut Environment, in_audio_file: AudioFileID) -> OSSt
 }
 
 pub const FUNCTIONS: FunctionExports = &[
+    export_c_func!(AudioFileStreamOpen(_, _, _, _)),
     export_c_func!(AudioFileOpenURL(_, _, _, _)),
     export_c_func!(AudioFileGetPropertyInfo(_, _, _, _)),
     export_c_func!(AudioFileGetProperty(_, _, _, _)),
