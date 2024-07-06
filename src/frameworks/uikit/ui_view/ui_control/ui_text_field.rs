@@ -131,6 +131,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; text_label setFont:new_font]
 }
 
+- (())setTextAlignment:(bool)text {
+    log!("TODO: setTextAlignment:{}", text);
+}
+
 - (())setPlaceholder:(bool)place {
     log!("TODO: setPlaceholder:{}", place);
 }
