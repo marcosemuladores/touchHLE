@@ -301,6 +301,12 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.alloc_object(this, host_object, &mut env.mem)
 }
 
++ (id)dictionaryWithCapacity:(NSUInteger)cap {
+    let new = msg![env; this alloc];
+    let new = msg![env; new initWithCapacity: cap];
+    autorelease(env, new)
+}
+
 - (())dealloc {
     std::mem::take(env.objc.borrow_mut::<DictionaryHostObject>(this)).release(env);
 
