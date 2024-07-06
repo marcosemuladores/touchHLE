@@ -179,6 +179,13 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.alloc_static_object(this, host_object, &mut env.mem)
 }
 
++ (id)colorWithAlphaComponent:(NSZonePtr)_zone {
+    let host_object = Box::new(UIColorHostObject {
+        cg_color: nil,
+    });
+    env.objc.alloc_static_object(this, host_object, &mut env.mem)
+}
+
 - (id) retain { this }
 - (()) release {}
 - (id) autorelease { this }
