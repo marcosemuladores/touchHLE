@@ -320,7 +320,7 @@ pub(super) fn exit(env: &mut Environment) {
 
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(UIApplicationMain(_, _, _, _)),
-    export_c_func!(UIApplicationDidReceiveMemoryWarningNotification(_, _, _, _)),
+    export_c_func!(UIApplicationDidReceiveMemoryWarningNotification(_)),
 ];
 pub const CONSTANTS: ConstantExports = &[(
     "_UIApplicationLaunchOptionsURLKey",
