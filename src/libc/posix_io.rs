@@ -194,7 +194,7 @@ pub fn read(
 ) -> GuestISize {
     if buffer.is_null() {
         // TODO: set errno to EFAULT
-        return -1;
+        return 0;
     }
 
     // TODO: error handling for unknown fd?
