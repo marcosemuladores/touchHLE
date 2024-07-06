@@ -112,11 +112,17 @@ pub fn CGContextConcatCTM(
     let host_obj = env.objc.borrow_mut::<CGContextHostObject>(context);
     host_obj.transform = transform.concat(host_obj.transform);
 }
+pub fn CGContextGetTextPosition(env: &mut Environment, context: CGContextRef) -> CGAffineTransform {
+    let res = env.objc.borrow::<CGContextHostObject>(context).transform;
+    log_dbg!("CGContextGetTextPosition() => {:?}", res);
+    res
+}
 pub fn CGContextGetCTM(env: &mut Environment, context: CGContextRef) -> CGAffineTransform {
     let res = env.objc.borrow::<CGContextHostObject>(context).transform;
     log_dbg!("CGContextGetCTM() => {:?}", res);
     res
 }
+
 pub fn CGContextRotateCTM(env: &mut Environment, context: CGContextRef, angle: CGFloat) {
     log_dbg!("CGContextRotateCTM({:?})", angle);
     let host_obj = env.objc.borrow_mut::<CGContextHostObject>(context);
@@ -171,6 +177,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGContextClearRect(_, _)),
     export_c_func!(CGContextConcatCTM(_, _)),
     export_c_func!(CGContextGetCTM(_)),
+    export_c_func!(CGContextGetTextPosition(_)),
     export_c_func!(CGContextRotateCTM(_, _)),
     export_c_func!(CGContextScaleCTM(_, _, _)),
     export_c_func!(CGContextTranslateCTM(_, _, _)),
