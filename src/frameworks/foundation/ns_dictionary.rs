@@ -137,11 +137,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg_class![env; _touchHLE_NSDictionary allocWithZone:zone]
 }
 
-+ (id)boolForKey {
-    let new_dict: id = msg![env; this alloc];
-    let new_dict: id = msg![env; new_dict init];
-    autorelease(env, new_dict)
-}
 + (id)dictionary {
     let new_dict: id = msg![env; this alloc];
     let new_dict: id = msg![env; new_dict init];
@@ -378,6 +373,12 @@ pub const CLASSES: ClassExports = objc_classes! {
 + (id)allocWithZone:(NSZonePtr)_zone {
     let host_object = Box::<DictionaryHostObject>::default();
     env.objc.alloc_object(this, host_object, &mut env.mem)
+}
+
++ (id)boolForKey {
+    let new_dict: id = msg![env; this alloc];
+    let new_dict: id = msg![env; new_dict init];
+    autorelease(env, new_dict)
 }
 
 - (())dealloc {
