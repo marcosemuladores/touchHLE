@@ -49,7 +49,10 @@ fn objc_msgSend_inner(env: &mut Environment, receiver: id, selector: SEL, super2
         // WTF2
         return;
     }
-    assert!(orig_class != nil);
+    if orig_class == nil {
+        return;
+    }
+    //assert!(orig_class != nil);
 
     // Traverse the chain of superclasses to find the method implementation.
 
