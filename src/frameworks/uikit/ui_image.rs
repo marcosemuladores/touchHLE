@@ -33,6 +33,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.alloc_object(this, host_object, &mut env.mem)
 }
 
++ (id)copyWithZone:(NSZonePtr)_zone {
+    let host_object = Box::new(UIImageHostObject { cg_image: nil });
+    env.objc.alloc_object(this, host_object, &mut env.mem)
+}
+
 + (id)imageWithCGImage:(CGImageRef)cg_image {
     let new: id = msg![env; this alloc];
     let new: id = msg![env; new initWithCGImage:cg_image];
