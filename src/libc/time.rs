@@ -195,6 +195,7 @@ pub fn timestamp_to_calendar_date(timestamp: time_t) -> tm {
 #[test]
 fn test_timestamp_to_calendar_date() {
     fn do_test(expected: &str, timestamp: time_t) {
+        let tmp = timestamp_to_calendar_date(timestamp);
         let tm {
             tm_year,
             tm_mon,
@@ -204,7 +205,7 @@ fn test_timestamp_to_calendar_date() {
             tm_sec,
             tm_wday,
             ..
-        } = timestamp_to_calendar_date(timestamp);
+        } = tmp;
         let wday = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][tm_wday as usize];
         assert_eq!(
             expected,
@@ -219,6 +220,7 @@ fn test_timestamp_to_calendar_date() {
                 tm_sec
             )
         );
+        assert_eq!(timestamp, calendar_date_to_timestamp(tmp));
     }
     // Random tests generated with this JavaScript:
     //
@@ -243,6 +245,45 @@ fn test_timestamp_to_calendar_date() {
     do_test("Thu, 1973-08-30T10:11:33", 115553493);
     do_test("Fri, 2005-05-27T19:45:47", 1117223147);
     do_test("Sat, 1955-03-26T20:47:45", -466053135);
+}
+
+pub fn calendar_date_to_timestamp(tm: tm) -> time_t {
+    let year = tm.tm_year + 1900;
+    let mut seconds = 0i64;
+
+    // Years
+    for y in 1970..year {
+        seconds += if is_leap_year(y) { 366 } else { 365 } * 86400;
+    }
+
+    // Months
+    for m in 0..tm.tm_mon {
+        let days_in_month =
+            DAYS_IN_MONTH[m as usize] + ((is_leap_year(year) && m == 1) as i32);
+        seconds += days_in_month as i64 * 86400;
+    }
+
+    // Days
+    seconds += (tm.tm_mday as i64 - 1) * 86400;
+
+    // Hours, minutes, and seconds
+    seconds += tm.tm_hour as i64 * 3600;
+    seconds += tm.tm_min as i64 * 60;
+    seconds += tm.tm_sec as i64;
+
+    // Adjust for dates before 1970
+    if year < 1970 {
+        // Account for the day of the year
+        let mut days_before_year = 0i64;
+        for y in year..1970 {
+            days_before_year += if is_leap_year(y) { 366 } else { 365 };
+        }
+
+        // Adjust seconds to be negative
+        seconds = -((days_before_year * 86400) - seconds);
+    }
+
+    seconds.try_into().unwrap()
 }
 
 fn gmtime_r(env: &mut Environment, timestamp: ConstPtr<time_t>, res: MutPtr<tm>) -> MutPtr<tm> {
@@ -348,6 +389,13 @@ fn nanosleep(env: &mut Environment, rqtp: ConstPtr<timespec>, _rmtp: MutPtr<time
     0 // success
 }
 
+fn mktime(env: &mut Environment, tm: MutPtr<tm>) -> time_t {
+    let tm_value = env.mem.read(tm);
+    let res = calendar_date_to_timestamp(tm_value);
+    log_dbg!("{} {:?}\n{:?}", res, tm_value, timestamp_to_calendar_date(res));
+    res
+}
+
 fn strftime(
     env: &mut Environment,
     s: MutPtr<u8>,
@@ -371,5 +419,6 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(localtime(_)),
     export_c_func!(gettimeofday(_, _)),
     export_c_func!(nanosleep(_, _)),
+    export_c_func!(mktime(_)),
     export_c_func!(strftime(_, _, _, _)),
 ];
