@@ -314,6 +314,17 @@ fn OSAtomicCompareAndSwap32(
     OSAtomicCompareAndSwap32Barrier(env, old_value, new_value, the_value)
 }
 
+fn OSAtomicCompareAndSwapIntBarrier(
+    env: &mut Environment, old_value: i32, new_value: i32, the_value: MutPtr<i32>
+) -> bool {
+    if old_value == env.mem.read(the_value) {
+        env.mem.write(the_value, new_value);
+        true
+    } else {
+        false
+    }
+}
+
 fn OSAtomicCompareAndSwap32Barrier(
     env: &mut Environment, old_value: i32, new_value: i32, the_value: MutPtr<i32>
 ) -> bool {
@@ -457,6 +468,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(__fpclassifyf(_)),
     export_c_func!(fesetround(_)),
     // Atomic ops (libkern)
+    export_c_func!(OSAtomicCompareAndSwapIntBarrier(_, _, _))
     export_c_func!(OSAtomicCompareAndSwap32(_, _, _)),
     export_c_func!(OSAtomicCompareAndSwap32Barrier(_, _, _)),
     export_c_func!(OSAtomicCompareAndSwapPtr(_, _, _)),
