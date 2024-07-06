@@ -468,7 +468,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(__fpclassifyf(_)),
     export_c_func!(fesetround(_)),
     // Atomic ops (libkern)
-    export_c_func!(OSAtomicCompareAndSwapIntBarrier(_, _, _))
+    export_c_func!(OSAtomicCompareAndSwapIntBarrier(_, _, _)),
     export_c_func!(OSAtomicCompareAndSwap32(_, _, _)),
     export_c_func!(OSAtomicCompareAndSwap32Barrier(_, _, _)),
     export_c_func!(OSAtomicCompareAndSwapPtr(_, _, _)),
