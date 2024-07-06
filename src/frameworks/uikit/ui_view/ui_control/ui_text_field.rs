@@ -131,6 +131,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; text_label setFont:new_font]
 }
 
+- (())setPlaceholder:(bool)Place {
+    log!("TODO: setPlaceholder:{}", place);
+}
+
 - (())setClearsOnBeginEditing:(bool)clear {
     log!("TODO: setClearsOnBeginEditing:{}", clear);
 }
