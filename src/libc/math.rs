@@ -237,6 +237,9 @@ fn socket(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
 fn ioctl(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
+fn inet_addr(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+    arg1.min(arg2)
+}
 fn listen(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
@@ -413,6 +416,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(setsockopt(_, _)),
     export_c_func!(socket(_, _)),
     export_c_func!(ioctl(_, _)),
+    export_c_func!(inet_addr(_, _)),
     export_c_func!(listen(_, _)),
     export_c_func!(hypot(_, _)),
     export_c_func!(lrint(_)),
