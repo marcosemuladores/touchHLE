@@ -336,6 +336,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     utf16[index as usize]
 }
 
+- (id)pathWithComponents
+    msg![env; this cStringUsingEncoding:NSUTF8StringEncoding]
+}
+
 - (NSRange)rangeOfString:(id)search_string {
     msg![env; this rangeOfString:search_string options:0u32]
 }
