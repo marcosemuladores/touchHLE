@@ -145,6 +145,9 @@ fn arc4random(env: &mut Environment) -> u32 {
 fn getenv(env: &mut Environment, name: ConstPtr<u8>) -> MutPtr<u8> {
     init_env_vars(env);
     let name_cstr = env.mem.cstr_at(name).to_owned();
+    if name_cstr == b"MONO_LOG_LEVEL" {
+        return env.mem.alloc_and_write_cstr(b"debug");
+    }
     if "XML_MEM_BREAKPOINT".as_bytes() == name_cstr || "XML_MEM_TRACE".as_bytes() == name_cstr {
         return Ptr::null();
     }
