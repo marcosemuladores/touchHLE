@@ -436,6 +436,12 @@ pub const CLASSES: ClassExports = objc_classes! {
     res
 }
 
+- (())setBool:(bool)value
+       forKey:(id)key { // NSString*
+    let num: id = msg_class![env; NSNumber numberWithBool:value];
+    msg![env; this setObject:num forKey:key]
+}
+
 - (())setObject:(id)object
          forKey:(id)key {
     // TODO: raise NSInvalidArgumentException
