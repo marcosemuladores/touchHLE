@@ -133,6 +133,18 @@ int sem_trywait(sem_t *);
 int sem_unlink(const char *);
 int sem_wait(sem_t *);
 
+#ifdef DEFINE_ME_WHEN_BUILDING_ON_MACOS
+typedef long _register_t; // 64-bit definition
+#else
+typedef int _register_t;
+#endif
+
+// <setjmp.h>
+#define _JBLEN (10 + 16 + 2)
+typedef _register_t jmp_buf[_JBLEN];
+int setjmp(jmp_buf env);
+void longjmp(jmp_buf env, int val);
+
 // <locale.h>
 #define LC_ALL 0
 #define LC_COLLATE 1
@@ -767,6 +779,24 @@ int test_strncat() {
   return 0;
 }
 
+void jmpfunction(jmp_buf env_buf) { longjmp(env_buf, 432); }
+
+int test_setjmp() {
+  int val;
+  jmp_buf env_buffer;
+
+  /* save calling environment for longjmp */
+  val = setjmp(env_buffer);
+
+  if (val != 0) {
+    return val == 432 ? 0 : -2;
+  }
+
+  jmpfunction(env_buffer);
+
+  return -1;
+}
+
 int test_strlcpy() {
   {
     char src[7] = "origen";
@@ -1043,6 +1073,7 @@ struct {
     FUNC_DEF(test_CGAffineTransform),
     FUNC_DEF(test_strncpy),
     FUNC_DEF(test_strncat),
+    FUNC_DEF(test_setjmp),
     FUNC_DEF(test_strlcpy),
     FUNC_DEF(test_setlocale),
     FUNC_DEF(test_strtoul),
