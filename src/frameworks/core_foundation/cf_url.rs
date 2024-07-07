@@ -102,6 +102,16 @@ fn CFURLCreateWithFileSystemPath(
     msg![env; url initFileURLWithPath:new_path isDirectory:is_directory]
 }
 
+fn CFURLCreateStringByAddingPercentEscapes(
+    env: &mut Environment,
+    url: CFURLRef,
+    style: CFURLPathStyle,
+) -> CFStringRef {
+    assert_eq!(style, kCFURLPOSIXPathStyle);
+    let path: CFStringRef = msg![env; url path];
+    msg![env; path copy]
+}
+
 fn CFURLCopyFileSystemPath(
     env: &mut Environment,
     url: CFURLRef,
@@ -125,7 +135,8 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFURLCreateFromFileSystemRepresentation(_, _, _, _)),
     export_c_func!(CFURLCopyPathExtension(_)),
     export_c_func!(CFURLCreateWithFileSystemPath(_, _, _, _)),
-    export_c_func!(CFURLCopyFileSystemPath(_, _)),
+    export_c_func!(CFURLCopyFileSystemPath
+    export_c_func!(CFURLCreateStringByAddingPercentEscapes(_, _)),
     export_c_func!(SCNetworkReachabilityCreateWithAddress(_, _)),
     export_c_func!(SCNetworkReachabilityGetFlags(_, _)),
 ];
