@@ -15,10 +15,9 @@ mod gles_guest;
 use std::ops::DerefMut;
 use std::ffi::c_void;
 
+use crate::mem::{ConstPtr, MutPtr};
 pub use gles_guest::FUNCTIONS;
 use touchHLE_gl_bindings::gles11::types::{GLenum, GLvoid};
-
-use crate::mem::{ConstPtr, MutPtr};
 
 #[derive(Default)]
 pub struct State {
@@ -56,8 +55,6 @@ fn sync_context<'a, F>(
                 "Restoring guest app OpenGL context for thread {}.",
                 current_thread
             );
-            current_thread
-        );
         gles_ctx.make_current(window);
     }
 
