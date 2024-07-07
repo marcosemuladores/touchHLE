@@ -152,7 +152,7 @@ pub fn CGContextSetTextDrawingMode(env: &mut Environment, context: CGContextRef)
 pub fn CGContextDrawImage(
     env: &mut Environment,
     context: CGContextRef,
-    point: CGPoint
+    point: CGPoint,
     rect: CGRect,
     image: CGImageRef,
 ) {
