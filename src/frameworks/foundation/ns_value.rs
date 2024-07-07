@@ -18,6 +18,7 @@ use std::cmp::Ordering;
 
 enum NSNumberHostObject {
     Bool(bool),
+    Int(i32),
     UnsignedLongLong(u64),
     LongLong(i64),
     Double(f64),
@@ -110,6 +111,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     this
 }
 
+        NSNumberHostObject::Int(value) => from_rust_string(env, value.to_string()),
 - (id)initWithFloat:(f32)value {
     msg![env; this initWithDouble: (value as f64)]
 }
