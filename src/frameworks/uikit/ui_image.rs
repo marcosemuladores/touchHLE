@@ -130,7 +130,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())drawInPoint:(CGPoint)point {
     let context = UIGraphicsGetCurrentContext(env);
     let image = env.objc.borrow::<UIImageHostObject>(this).cg_image;
-    CGContextDrawImage(env, context, Point, image);
+    CGContextDrawImage(env, context, point, image);
 }
 
 - (())drawInRect:(CGRect)rect {
