@@ -336,8 +336,18 @@ pub const CLASSES: ClassExports = objc_classes! {
     utf16[index as usize]
 }
 
-- (id)pathWithComponents
-    msg![env; this cStringUsingEncoding:NSUTF8StringEncoding]
+- (id)pathWithComponents:(NSUInteger)from {
+    let mut res_utf16: Utf16String = Vec::with_capacity(from as usize);
+
+    for_each_code_unit(env, this, |idx, c| {
+        if idx >= from {
+            res_utf16.push(c);
+        }
+    });
+
+    let res = msg_class![env; _touchHLE_NSString alloc];
+    *env.objc.borrow_mut(res) = StringHostObject::Utf16(res_utf16);
+    autorelease(env, res)
 }
 
 - (NSRange)rangeOfString:(id)search_string {
