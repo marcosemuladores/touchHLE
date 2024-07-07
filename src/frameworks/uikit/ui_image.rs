@@ -33,6 +33,13 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.alloc_object(this, host_object, &mut env.mem)
 }
 
++ (id)drawAtPoint {
+    let &UIImageHostObject { cg_image } = env.objc.borrow(this);
+    CGImageRelease(env, cg_image);
+
+    env.objc.dealloc_object(this, &mut env.mem)
+}
+
 + (id)imageWithCGImage:(CGImageRef)cg_image {
     let new: id = msg![env; this alloc];
     let new: id = msg![env; new initWithCGImage:cg_image];
