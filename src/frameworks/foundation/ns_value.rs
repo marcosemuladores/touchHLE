@@ -6,7 +6,7 @@
 //! The `NSValue` class cluster, including `NSNumber`.
 
 use super::{
-    NSComparisonResult, NSOrderedAscending, NSOrderedDescending, NSOrderedSame, NSInteger, NSUInteger,
+    NSComparisonResult, NSOrderedAscending, NSOrderedDescending, NSOrderedSame, NSUInteger,
 };
 use crate::frameworks::foundation::ns_string::from_rust_string;
 use crate::mem::ConstPtr;
@@ -18,7 +18,6 @@ use std::cmp::Ordering;
 
 enum NSNumberHostObject {
     Bool(bool),
-    Int(i32),
     UnsignedLongLong(u64),
     LongLong(i64),
     Double(f64),
@@ -72,14 +71,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, new)
 }
 
-+ (id)numberWithInteger:(NSInteger)value {
-    // TODO: for greater efficiency we could return a static-lifetime value
-
-    let new: id = msg![env; this alloc];
-    let new: id = msg![env; new initWithInteger:value];
-    autorelease(env, new)
-}
-
 + (id)numberWithInt:(i32)value {
     // TODO: for greater efficiency we could return a static-lifetime value
 
@@ -111,18 +102,12 @@ pub const CLASSES: ClassExports = objc_classes! {
     this
 }
 
-        NSNumberHostObject::Int(value) => from_rust_string(env, value.to_string()),
 - (id)initWithFloat:(f32)value {
     msg![env; this initWithDouble: (value as f64)]
 }
 
 - (id)initWithDouble:(f64)value {
     *env.objc.borrow_mut(this) = NSNumberHostObject::Double(value);
-    this
-}
-
-- (id)initWithInteger:(NSInteger)value {
-    *env.objc.borrow_mut::<NSNumberHostObject>(this) = NSNumberHostObject::Int(value);
     this
 }
 
