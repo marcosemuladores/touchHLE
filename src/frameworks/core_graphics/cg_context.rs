@@ -7,7 +7,7 @@
 
 use super::cg_affine_transform::CGAffineTransform;
 use super::cg_image::CGImageRef;
-use super::{cg_bitmap_context, CGFloat, CGPoint, CGRect};
+use super::{cg_bitmap_context, CGFloat, CGRect};
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::frameworks::core_foundation::{CFRelease, CFRetain, CFTypeRef};
 use crate::objc::{objc_classes, ClassExports, HostObject};
@@ -149,14 +149,13 @@ pub fn CGContextSetTextDrawingMode(env: &mut Environment, context: CGContextRef)
     log_dbg!("CGContextSetTextDrawingMode() => {:?}", res);
     res
 }
-pub fn CGContextDrawImage(env, context, point, /* CGRect */, image);
+pub fn CGContextDrawImage(
     env: &mut Environment,
     context: CGContextRef,
-    point: CGPoint,
     rect: CGRect,
     image: CGImageRef,
 ) {
-    cg_bitmap_context::draw_image(env, context, point, rect, image);
+    cg_bitmap_context::draw_image(env, context, rect, image);
 }
 
 fn CGContextSaveGState(env: &mut Environment, context: CGContextRef) {
