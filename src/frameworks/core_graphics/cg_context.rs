@@ -149,14 +149,14 @@ pub fn CGContextSetTextDrawingMode(env: &mut Environment, context: CGContextRef)
     log_dbg!("CGContextSetTextDrawingMode() => {:?}", res);
     res
 }
-pub fn CGContextDrawImage(
+pub fn CGContextDrawImage(CGContextDrawImage(env, context, point, /* CGRect */, image);
     env: &mut Environment,
     context: CGContextRef,
     point: CGPoint,
     rect: CGRect,
     image: CGImageRef,
 ) {
-    cg_bitmap_context::draw_image(env, context, rect, image);
+    cg_bitmap_context::draw_image(env, context, point, rect, image);
 }
 
 fn CGContextSaveGState(env: &mut Environment, context: CGContextRef) {
