@@ -387,7 +387,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.alloc_object(this, host_object, &mut env.mem)
 }
 
-+ (id)boolForKey {
+- (id)boolForKey {
     let new_dict: id = msg![env; this alloc];
     let new_dict: id = msg![env; new_dict init];
     autorelease(env, new_dict)
@@ -397,6 +397,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     std::mem::take(env.objc.borrow_mut::<DictionaryHostObject>(this)).release(env);
 
     env.objc.dealloc_object(this, &mut env.mem)
+}
+
+- (id)initWithCapacity:(NSUInteger)cap {
+    env.objc.borrow_mut::<DictionaryHostObject>(this).map.reserve(cap as usize);
+    this
 }
 
 - (id)initWithObjectsAndKeys:(id)first_object, ...dots {
