@@ -107,7 +107,6 @@ fn CFURLCreateStringByAddingPercentEscapes(
     url: CFURLRef,
     style: CFURLPathStyle,
 ) -> CFStringRef {
-    assert_eq!(style, kCFURLPOSIXPathStyle);
     let path: CFStringRef = msg![env; url path];
     msg![env; path copy]
 }
