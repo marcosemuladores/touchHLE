@@ -135,7 +135,7 @@ pub fn printf_inner<const NS_LOG: bool, F: Fn(&Mem, GuestUSize) -> u8>(
             }
             b's' => {
                 // TODO: support length modifier
-                assert!(length_modifier.is_none());
+                // assert!(length_modifier.is_none())
                 let c_string: ConstPtr<u8> = args.next(env);
                 assert!(pad_char == ' ' && pad_width == 0); // TODO
                 if !c_string.is_null() {
