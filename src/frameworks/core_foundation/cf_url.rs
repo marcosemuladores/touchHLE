@@ -135,7 +135,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFURLCreateFromFileSystemRepresentation(_, _, _, _)),
     export_c_func!(CFURLCopyPathExtension(_)),
     export_c_func!(CFURLCreateWithFileSystemPath(_, _, _, _)),
-    export_c_func!(CFURLCopyFileSystemPath
+    export_c_func!(CFURLCopyFileSystemPath(_, _)),
     export_c_func!(CFURLCreateStringByAddingPercentEscapes(_, _)),
     export_c_func!(SCNetworkReachabilityCreateWithAddress(_, _)),
     export_c_func!(SCNetworkReachabilityGetFlags(_, _)),
