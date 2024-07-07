@@ -383,6 +383,16 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, desc)
 }
 
+// FIXME: those are from NSUserDefaults!
+- (NSInteger)integerForKey:(id)defaultName {
+    let val: id = msg![env; this objectForKey:defaultName];
+    msg![env; val integerValue]
+}
+- (bool)boolForKey:(id)defaultName {
+    let val: id = msg![env; this objectForKey:defaultName];
+    msg![env; val boolValue]
+}
+
 @end
 
 // Our private subclass that is the single implementation of
@@ -392,12 +402,6 @@ pub const CLASSES: ClassExports = objc_classes! {
 + (id)allocWithZone:(NSZonePtr)_zone {
     let host_object = Box::<DictionaryHostObject>::default();
     env.objc.alloc_object(this, host_object, &mut env.mem)
-}
-
-- (id)boolForKey {
-    let new_dict: id = msg![env; this alloc];
-    let new_dict: id = msg![env; new_dict init];
-    autorelease(env, new_dict)
 }
 
 - (())dealloc {
