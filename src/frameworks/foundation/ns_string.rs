@@ -260,6 +260,20 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg_class![env; _touchHLE_NSString allocWithZone:zone]
 }
 
++ (id)pathWithComponents:(NSUInteger)from {
+    let mut res_utf16: Utf16String = Vec::with_capacity(from as usize);
+
+    for_each_code_unit(env, this, |idx, c| {
+        if idx >= from {
+            res_utf16.push(c);
+        }
+    });
+
+    let res = msg_class![env; _touchHLE_NSString alloc];
+    *env.objc.borrow_mut(res) = StringHostObject::Utf16(res_utf16);
+    autorelease(env, res)
+}
+
 + (id)stringWithString:(id)string { // NSString*
     let new: id = msg![env; this alloc];
     let new: id = msg![env; new initWithString:string];
@@ -334,20 +348,6 @@ pub const CLASSES: ClassExports = objc_classes! {
 
     // TODO: raise exception instead of panicking?
     utf16[index as usize]
-}
-
-- (id)pathWithComponents:(NSUInteger)from {
-    let mut res_utf16: Utf16String = Vec::with_capacity(from as usize);
-
-    for_each_code_unit(env, this, |idx, c| {
-        if idx >= from {
-            res_utf16.push(c);
-        }
-    });
-
-    let res = msg_class![env; _touchHLE_NSString alloc];
-    *env.objc.borrow_mut(res) = StringHostObject::Utf16(res_utf16);
-    autorelease(env, res)
 }
 
 - (NSRange)rangeOfString:(id)search_string {
