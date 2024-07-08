@@ -131,6 +131,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; text_label setFont:new_font]
 }
 
+- (())setEnablesReturnKeyAutomatically:(bool)enables {
+    log!("TODO: setEnablesReturnKeyAutomatically:{}", enables);
+}
+
 - (())setTextAlignment:(bool)text {
     log!("TODO: setTextAlignment:{}", text);
 }
