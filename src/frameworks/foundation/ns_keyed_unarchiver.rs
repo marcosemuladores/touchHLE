@@ -15,6 +15,7 @@ use super::ns_string::{from_rust_string, get_static_str, to_rust_string};
 use crate::dyld::{ConstantExports, HostConstant};
 use crate::frameworks::core_graphics::{CGPoint, CGRect, CGSize};
 use crate::frameworks::foundation::{NSInteger, NSUInteger};
+use crate::frameworks::foundation::ns_string;
 use crate::frameworks::uikit::ui_geometry::{
     CGPointFromString, CGRectFromString, CGSizeFromString,
 };
@@ -22,6 +23,7 @@ use crate::mem::ConstVoidPtr;
 use crate::objc::{
     autorelease, id, msg, nil, objc_classes, release, retain, ClassExports, HostObject, NSZonePtr,
 };
+use crate::msg_class;
 use crate::Environment;
 use plist::{Dictionary, Uid, Value};
 use std::io::Cursor;
@@ -54,6 +56,15 @@ pub const CLASSES: ClassExports = objc_classes! {
         already_unarchived: Vec::new(),
     });
     env.objc.alloc_object(this, unarchiver, &mut env.mem)
+}
+
++ (id)unarchiveObjectWithFile:(id)path { // NSString *
+    let file_manager: id = msg_class![env; NSFileManager defaultManager];
+    let file_exists: bool = msg![env; file_manager fileExistsAtPath:path];
+    if !file_exists {
+        return nil
+    }
+    todo!()
 }
 
 + (id)unarchiveObjectWithData:(id)data { // NSData *
@@ -191,6 +202,14 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (CGRect)decodeCGRectForKey:(id)key { // NSString*
     let string: id = msg![env; this decodeObjectForKey:key];
     CGRectFromString(env, string)
+}
+
+@end
+
+@implementation NSKeyedArchiver: NSCoder
+
++ (bool)archiveRootObject:(id)object toFile:(id)path {
+    false
 }
 
 @end
