@@ -319,12 +319,12 @@ fn feof(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
 }
 
 fn clearerr(env: &mut Environment, file_ptr: MutPtr<FILE>) {
-    let FILE { fd } = env.mem.read(file_ptr);
+    let FILE { fd, .. } = env.mem.read(file_ptr);
     posix_io::clearerr(env, fd)
 }
 
 fn fflush(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
-    let FILE { fd } = env.mem.read(file_ptr);
+    let FILE { fd, .. } = env.mem.read(file_ptr);
     posix_io::fflush(env, fd)
 }
 
