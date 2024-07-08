@@ -180,7 +180,11 @@ fn open_direct2(env: &mut Environment, path: ConstPtr<u8>, flags: i32) -> FileDe
     if flags & O_NOFOLLOW != 0 {
         log!("Ignoring O_NOFOLLOW when opening {:?}", path_string);
     }
-    let path_string = unwrap().to_owned();
+    let y = env.mem.cstr_at_utf8(path);
+    if y.is_err() {
+        return -1;
+    }
+    let path_string = y.unwrap().to_owned();
     let res = match env
         .fs
         .open_with_options(GuestPath::new(&path_string), options.clone())
