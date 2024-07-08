@@ -313,7 +313,7 @@ pub fn write(
     // if env.libc_state.posix_io.file_for_fd(fd).is_none() {
     //     return -1;
     // }
-    let file = env.libc_state.posix_io.file_for_fd(fd).value();
+    let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
 
     let buffer_slice = env.mem.bytes_at(buffer.cast(), size);
     match file.file.write(buffer_slice) {
