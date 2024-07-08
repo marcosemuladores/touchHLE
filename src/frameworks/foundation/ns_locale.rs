@@ -7,7 +7,7 @@
 
 use super::{ns_array, ns_string};
 use crate::dyld::{ConstantExports, HostConstant};
-use crate::objc::{id, objc_classes, ClassExports, HostObject};
+use crate::objc::{id, nil, objc_classes, ClassExports, HostObject};
 use crate::options::Options;
 use crate::Environment;
 use std::ffi::CStr;
@@ -151,6 +151,10 @@ pub const CLASSES: ClassExports = objc_classes! {
         State::get(env).current_locale = Some(new_locale);
         new_locale
     }
+}
+
++ (id)autoupdatingCurrentLocale {
+    nil
 }
 
 // TODO: constructors, more accessors
