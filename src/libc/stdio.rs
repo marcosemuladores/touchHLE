@@ -15,6 +15,7 @@ use crate::fs::GuestPath;
 use crate::libc::string::strlen;
 use crate::mem::{ConstPtr, ConstVoidPtr, GuestUSize, Mem, MutPtr, MutVoidPtr, Ptr, SafeRead};
 use crate::Environment;
+use std::collections::HashMap;
 use std::io::Write;
 
 // Standard C functions
@@ -23,11 +24,25 @@ pub mod printf;
 
 const EOF: i32 = -1;
 
+#[derive(Copy, Clone, Debug)]
+struct CookieFunc {
+    readfn: Option<GuestFunction>,
+    writefn: Option<GuestFunction>,
+    seekfn: Option<GuestFunction>,
+    closefn: Option<GuestFunction>,
+}
+
+#[derive(Default)]
+pub struct State {
+    stream_io_functions: HashMap<ConstVoidPtr, CookieFunc>,
+}
+
 #[allow(clippy::upper_case_acronyms)]
 /// C `FILE` struct. This is an opaque type in C, so the definition here is our
 /// own.
 pub struct FILE {
     fd: posix_io::FileDescriptor,
+    cookie: Option<ConstVoidPtr>,
 }
 unsafe impl SafeRead for FILE {}
 
@@ -72,8 +87,29 @@ fn fopen(env: &mut Environment, filename: ConstPtr<u8>, mode: ConstPtr<u8>) -> M
 
     match posix_io::open_direct(env, filename, flags) {
         -1 => Ptr::null(),
-        fd => env.mem.alloc_and_write(FILE { fd }),
+        fd => env.mem.alloc_and_write(FILE { fd, cookie: None }),
     }
+}
+
+fn funopen(
+    env: &mut Environment, cookie: ConstVoidPtr, readfn: GuestFunction, writefn: GuestFunction,
+    seekfn: GuestFunction, closefn: GuestFunction
+) -> MutPtr<FILE> {
+    //assert_eq!(readfn.addr_with_thumb_bit(), 0x0);
+    assert_eq!(writefn.addr_with_thumb_bit(), 0x0);
+    assert_eq!(seekfn.addr_with_thumb_bit(), 0x0);
+    //assert_eq!(closefn.addr_with_thumb_bit(), 0x0);
+
+    let funcs = CookieFunc {
+        readfn: Some(readfn),
+        writefn: None,
+        seekfn: None,
+        closefn: Some(closefn)
+    };
+    assert!(!env.libc_state.stream.stream_io_functions.contains_key(&cookie));
+    env.libc_state.stream.stream_io_functions.insert(cookie, funcs);
+
+    env.mem.alloc_and_write(FILE { fd: -1, cookie: Some(cookie) })
 }
 
 pub fn fread(
@@ -87,12 +123,20 @@ pub fn fread(
         return 0;
     }
 
-    let FILE { fd } = env.mem.read(file_ptr);
-
     // Yes, the item_size/n_items split doesn't mean anything. The C standard
     // really does expect you to just multiply and divide like this, with no
     // attempt being made to ensure a whole number are read or written!
     let total_size = item_size.checked_mul(n_items).unwrap();
+
+    let FILE { fd, cookie } = env.mem.read(file_ptr);
+
+    if let Some(cookie) = cookie {
+        assert_eq!(fd, -1);
+        let funcs = env.libc_state.stream.stream_io_functions.get(&cookie).unwrap();
+        let readfn = funcs.readfn.unwrap();
+        return readfn.call_from_host(env, (cookie, buffer, total_size));
+    }
+
     match posix_io::read(env, fd, buffer, total_size) {
         // TODO: ferror() support.
         -1 => 0,
@@ -104,7 +148,7 @@ pub fn fread(
 }
 
 fn fgetc(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
-    let FILE { fd } = env.mem.read(file_ptr);
+    let FILE { fd, .. } = env.mem.read(file_ptr);
     let buffer = env.mem.alloc(1);
 
     match posix_io::read(env, fd, buffer, 1) {
@@ -173,7 +217,7 @@ fn fwrite(
         return 0;
     }
 
-    let FILE { fd } = env.mem.read(file_ptr);
+    let FILE { fd, .. } = env.mem.read(file_ptr);
 
     let total_size = item_size.checked_mul(n_items).unwrap();
 
@@ -212,7 +256,7 @@ const SEEK_SET: i32 = posix_io::SEEK_SET;
 const SEEK_CUR: i32 = posix_io::SEEK_CUR;
 const SEEK_END: i32 = posix_io::SEEK_END;
 fn fseek(env: &mut Environment, file_ptr: MutPtr<FILE>, offset: i32, whence: i32) -> i32 {
-    let FILE { fd } = env.mem.read(file_ptr);
+    let FILE { fd, .. } = env.mem.read(file_ptr);
 
     assert!([SEEK_SET, SEEK_CUR, SEEK_END].contains(&whence));
     match posix_io::lseek(env, fd, offset.into(), whence) {
@@ -222,7 +266,7 @@ fn fseek(env: &mut Environment, file_ptr: MutPtr<FILE>, offset: i32, whence: i32
 }
 
 fn ftell(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
-    let FILE { fd } = env.mem.read(file_ptr);
+    let FILE { fd, .. } = env.mem.read(file_ptr);
 
     match posix_io::lseek(env, fd, 0, posix_io::SEEK_CUR) {
         -1 => -1,
@@ -236,7 +280,7 @@ fn rewind(env: &mut Environment, file_ptr: MutPtr<FILE>) {
 }
 
 fn fclose(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
-    let FILE { fd } = env.mem.read(file_ptr);
+    let FILE { fd, .. } = env.mem.read(file_ptr);
 
     env.mem.free(file_ptr.cast());
 
@@ -248,7 +292,7 @@ fn fclose(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
 }
 
 fn fsetpos(env: &mut Environment, file_ptr: MutPtr<FILE>, pos: ConstPtr<fpos_t>) -> i32 {
-    let FILE { fd } = env.mem.read(file_ptr);
+    let FILE { fd, .. } = env.mem.read(file_ptr);
 
     let res = posix_io::lseek(env, fd, env.mem.read(pos), SEEK_SET);
     if res == -1 {
@@ -259,7 +303,7 @@ fn fsetpos(env: &mut Environment, file_ptr: MutPtr<FILE>, pos: ConstPtr<fpos_t>)
 }
 
 fn fgetpos(env: &mut Environment, file_ptr: MutPtr<FILE>, pos: MutPtr<fpos_t>) -> i32 {
-    let FILE { fd } = env.mem.read(file_ptr);
+    let FILE { fd, .. } = env.mem.read(file_ptr);
 
     let res = posix_io::lseek(env, fd, 0, posix_io::SEEK_CUR);
     if res == -1 {
@@ -270,7 +314,7 @@ fn fgetpos(env: &mut Environment, file_ptr: MutPtr<FILE>, pos: MutPtr<fpos_t>) -
 }
 
 fn feof(env: &mut Environment, file_ptr: MutPtr<FILE>) -> i32 {
-    let FILE { fd } = env.mem.read(file_ptr);
+    let FILE { fd, .. } = env.mem.read(file_ptr);
     posix_io::eof(env, fd)
 }
 
@@ -331,7 +375,7 @@ fn setbuf(_env: &mut Environment, stream: MutPtr<FILE>, buf: ConstPtr<u8>) {
 // POSIX-specific functions
 
 fn fileno(env: &mut Environment, file_ptr: MutPtr<FILE>) -> posix_io::FileDescriptor {
-    let FILE { fd } = env.mem.read(file_ptr);
+    let FILE { fd, .. } = env.mem.read(file_ptr);
     fd
 }
 
@@ -349,21 +393,21 @@ pub const CONSTANTS: ConstantExports = &[
     (
         "___stdinp",
         HostConstant::Custom(|mem: &mut Mem| -> ConstVoidPtr {
-            let ptr = mem.alloc_and_write(FILE { fd: STDIN_FILENO });
+            let ptr = mem.alloc_and_write(FILE { fd: STDIN_FILENO, cookie: None });
             mem.alloc_and_write(ptr).cast().cast_const()
         }),
     ),
     (
         "___stdoutp",
         HostConstant::Custom(|mem: &mut Mem| -> ConstVoidPtr {
-            let ptr = mem.alloc_and_write(FILE { fd: STDOUT_FILENO });
+            let ptr = mem.alloc_and_write(FILE { fd: STDIN_FILENO, cookie: None });
             mem.alloc_and_write(ptr).cast().cast_const()
         }),
     ),
     (
         "___stderrp",
         HostConstant::Custom(|mem: &mut Mem| -> ConstVoidPtr {
-            let ptr = mem.alloc_and_write(FILE { fd: STDERR_FILENO });
+            let ptr = mem.alloc_and_write(FILE { fd: STDIN_FILENO, cookie: None });
             mem.alloc_and_write(ptr).cast().cast_const()
         }),
     ),
@@ -372,6 +416,7 @@ pub const CONSTANTS: ConstantExports = &[
 pub const FUNCTIONS: FunctionExports = &[
     // Standard C functions
     export_c_func!(fopen(_, _)),
+    export_c_func!(funopen(_, _, _, _, _)),
     export_c_func!(fread(_, _, _, _)),
     export_c_func!(fgetc(_)),
     export_c_func!(fgets(_, _, _)),
