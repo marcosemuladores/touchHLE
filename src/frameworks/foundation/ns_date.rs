@@ -5,7 +5,7 @@
  */
 //! `NSDate`.
 
-use super::NSTimeInterval;
+use super::{ns_string, NSComparisonResult, NSTimeInterval};
 use crate::frameworks::core_foundation::time::apple_epoch;
 use crate::objc::{autorelease, id, msg, msg_class, objc_classes, ClassExports, HostObject};
 
@@ -72,6 +72,24 @@ pub const CLASSES: ClassExports = objc_classes! {
     let result =  host_object.time_interval-another_date_host_object.time_interval;
     log_dbg!("[(NSDate*){:?} ({:?}s) timeIntervalSinceDate:{:?} ({:?}s)] => {}", this, host_object.time_interval, anotherDate, another_date_host_object.time_interval, result);
     result
+}
+
+- (id)addTimeInterval:(NSTimeInterval)seconds {
+    let curr = env.objc.borrow::<NSDateHostObject>(this).instant;
+    let host_object = Box::new(NSDateHostObject {
+        instant: curr + seconds,
+    });
+    let isa = env
+        .objc
+        .get_known_class("NSDate", &mut env.mem);
+    let new = env.objc.alloc_object(isa, host_object, &mut env.mem);
+    autorelease(env, new)
+}
+
+- (NSComparisonResult)compare:(id)other { // NSDate *
+    let a = env.objc.borrow::<NSDateHostObject>(this).instant;
+    let b = env.objc.borrow::<NSDateHostObject>(other).instant;
+    return ns_string::from_rust_ordering(a.total_cmp(&b));
 }
 
 - (NSTimeInterval)timeIntervalSinceReferenceDate {
