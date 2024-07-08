@@ -256,7 +256,7 @@ pub const CLASSES: ClassExports = objc_classes! {
             .renderbuffer_drawable_bindings
         .get(&renderbuffer);
     if tmp.is_none() {
-        return false;
+        return (false);
     }
     let &drawable = tmp
             .expect("Can't present a renderbuffer not bound to a drawable!");
