@@ -51,9 +51,9 @@ where
         }
     );
 
-    //panic_on_gl_errors(&mut **gles);
+    panic_on_gl_errors(&mut **gles);
     //let
-    //panic_on_gl_errors(&mut **gles);
+    panic_on_gl_errors(&mut **gles);
     //#[allow(clippy::let_and_return)]
     res.unwrap()
 }
