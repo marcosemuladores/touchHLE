@@ -395,6 +395,20 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 @end
 
+@implementation NSMutableDictionary: _touchHLE_NSDictionary
+
++ (id)dictionaryWithCapacity:(NSUInteger)_capacity {
+    msg_class![env; NSMutableDictionary dictionary]
+}
+
+- (())setValue:(id)value
+        forKey:(id)key { // NSString*
+    assert!(!key.is_null());
+    let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+    host_obj.insert(env, key, value, false);
+    *env.objc.borrow_mut(this) = host_obj;
+}
+
 // Our private subclass that is the single implementation of
 // NSMutableDictionary for the time being.
 @implementation _touchHLE_NSMutableDictionary: NSMutableDictionary
