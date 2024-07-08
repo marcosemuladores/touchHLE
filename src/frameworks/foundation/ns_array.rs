@@ -322,6 +322,46 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.borrow::<ArrayHostObject>(this).array[index as usize]
 }
 
+// NSFastEnumeration implementation
+- (NSUInteger)countByEnumeratingWithState:(MutPtr<NSFastEnumerationState>)state
+                                  objects:(MutPtr<id>)stackbuf
+                                    count:(NSUInteger)len {
+    let host_object = env.objc.borrow::<ArrayHostObject>(this);
+
+    if host_object.array.len() == 0 {
+        return 0;
+    }
+
+    // TODO: handle size > 1
+    assert!(host_object.array.len() == 1);
+    assert!(len >= host_object.array.len().try_into().unwrap());
+
+    let NSFastEnumerationState {
+        state: is_first_round,
+        ..
+    } = env.mem.read(state);
+
+    match is_first_round {
+        0 => {
+            let object = host_object.array.iter().next().unwrap();
+            env.mem.write(stackbuf, *object);
+            env.mem.write(state, NSFastEnumerationState {
+                state: 1,
+                items_ptr: stackbuf,
+                // can be anything as long as it's dereferenceable and the same
+                // each iteration
+                mutations_ptr: stackbuf.cast(),
+                extra: Default::default(),
+            });
+            1 // returned object count
+        },
+        1 => {
+            0 // end of iteration
+        },
+        _ => panic!(), // app failed to initialize the buffer?
+    }
+}
+
 @end
 
 @implementation _touchHLE_NSArray_ObjectEnumerator: NSEnumerator
