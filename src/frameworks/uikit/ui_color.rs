@@ -143,6 +143,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     true
 }
 
+- (id)CGColor {
+    this
+}
+
 - (())set {
     msg![env; this setFill]
     // TODO: set stroke color as well
