@@ -89,6 +89,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.sleep(Duration::from_secs_f64(ti), /* tail_call: */ true);
 }
 
++ (bool)isCancelled {
+    false
+}
+
 + (())detachNewThreadSelector:(SEL)selector
                        toTarget:(id)target
                      withObject:(id)object {
