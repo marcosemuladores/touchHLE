@@ -468,6 +468,12 @@ pub const CLASSES: ClassExports = objc_classes! {
     *env.objc.borrow_mut(this) = host_obj;
 }
 
+// FIXME: those are from NSUserDefaults!
+- (NSInteger)integerForKey:(id)defaultName {
+    let val: id = msg![env; this objectForKey:defaultName];
+    msg![env; val integerValue]
+}
+
 - (bool)boolForKey:(id)defaultName {
     let val: id = msg![env; this objectForKey:defaultName];
     msg![env; val boolValue]
