@@ -17,6 +17,7 @@ pub const CONSTANT_LISTS: &[super::ConstantExports] = &[
     libc::stdio::CONSTANTS,
     libc::mach_init::CONSTANTS,
     core_animation::ca_layer::CONSTANTS,
+    core_animation::ca_transform_3d::CONSTANTS,
     core_foundation::cf_allocator::CONSTANTS,
     core_foundation::cf_bundle::CONSTANTS,
     core_foundation::cf_run_loop::CONSTANTS,
