@@ -10,6 +10,7 @@
 
 pub mod ca_eagl_layer;
 pub mod ca_layer;
+pub mod ca_transform_3d;
 
 mod composition;
 pub use composition::recomposite_if_necessary;
