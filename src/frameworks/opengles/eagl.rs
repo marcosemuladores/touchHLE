@@ -20,11 +20,9 @@ use crate::gles::{create_gles1_ctx, gles1_on_gl2, GLES};
 use crate::objc::{id, msg, nil, objc_classes, release, retain, ClassExports, HostObject};
 use crate::options::Options;
 use crate::window::Window;
-use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
-use crate::gles;
 
 // These are used by the EAGLDrawable protocol implemented by CAEAGLayer.
 // Since these have the ABI of constant symbols rather than literal constants,
@@ -252,14 +250,10 @@ pub const CLASSES: ClassExports = objc_classes! {
             renderbuffer as _
         };
 
-        let tmp = env
-             .objc.borrow::<EAGLContextHostObject>(this)
+        let &drawable = objc
+            .borrow::<EAGLContextHostObject>(this)
             .renderbuffer_drawable_bindings
-        .get(&renderbuffer);
-    if tmp.is_none() {
-        return bool;
-    }
-    let &drawable = tmp
+            .get(&renderbuffer)
             .expect("Can't present a renderbuffer not bound to a drawable!");
 
         // We're presenting to the opaque CAEAGLLayer that covers the screen.
@@ -729,5 +723,5 @@ unsafe fn present_renderbuffer(gles: &mut dyn GLES, window: &mut Window) {
     gles.BindTexture(gles11::TEXTURE_2D, old_texture_2d);
     gles.BindFramebufferOES(gles11::FRAMEBUFFER_OES, old_framebuffer);
 
-    { let err = gles.GetError(); if err != 0 { panic!("{:#x}", err); } }
+    //{ let err = gl21::GetError(); if err != 0 { panic!("{:#x}", err); } }
 }
