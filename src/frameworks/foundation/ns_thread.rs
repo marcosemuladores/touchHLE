@@ -196,6 +196,9 @@ object:(id)object {
     env.objc.dealloc_object(this, &mut env.mem)
 }
 
++ (())setName:(id)_name {
+}
+
 @end
 
 };
