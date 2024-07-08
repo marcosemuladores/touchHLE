@@ -183,9 +183,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.alloc_static_object(this, host_object, &mut env.mem)
 }
 
-- (id)colorWithAlphaComponent:(CGFloat)a {
-    let (r, g, b, a_) = env.objc.borrow::<UIColorHostObject>(this).cg_color;
-    msg_class![env; UIColor colorWithRed:r green:g blue:b alpha:a]
+- (id)colorWithAlphaComponent:(NSZonePtr)_zone {
+    let host_object = Box::new(UIColorHostObject {
+        cg_color: nil,
+    });
+    env.objc.alloc_static_object(this, host_object, &mut env.mem)
 }
 
 - (id) retain { this }
