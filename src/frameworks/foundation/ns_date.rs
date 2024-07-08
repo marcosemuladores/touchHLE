@@ -75,9 +75,9 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (id)addTimeInterval:(NSTimeInterval)seconds {
-    let curr = env.objc.borrow::<NSDateHostObject>(this).instant;
+    let curr = env.objc.borrow::<NSDateHostObject>(this).time_interval;
     let host_object = Box::new(NSDateHostObject {
-        instant: curr + seconds,
+        time_interval: curr + seconds,
     });
     let isa = env
         .objc
@@ -87,8 +87,8 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (NSComparisonResult)compare:(id)other { // NSDate *
-    let a = env.objc.borrow::<NSDateHostObject>(this).instant;
-    let b = env.objc.borrow::<NSDateHostObject>(other).instant;
+    let a = env.objc.borrow::<NSDateHostObject>(this).time_interval;
+    let b = env.objc.borrow::<NSDateHostObject>(other).time_interval;
     return ns_string::from_rust_ordering(a.total_cmp(&b));
 }
 
