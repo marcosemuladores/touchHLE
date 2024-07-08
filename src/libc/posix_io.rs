@@ -312,7 +312,7 @@ pub fn write(
     // if env.libc_state.posix_io.file_for_fd(fd).is_none() {
     //     return -1;
     // }
-    let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
+    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
 
     let buffer_slice = env.mem.bytes_at(buffer.cast(), size);
     match file.file.write(buffer_slice) {
@@ -357,7 +357,7 @@ pub const SEEK_CUR: i32 = 1;
 pub const SEEK_END: i32 = 2;
 pub fn lseek(env: &mut Environment, fd: FileDescriptor, offset: off_t, whence: i32) -> off_t {
     // TODO: error handling for unknown fd?
-    let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
+    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
 
     let from = match whence {
         // not sure whether offset is treated as signed or unsigned when using
@@ -391,10 +391,10 @@ pub fn close(env: &mut Environment, fd: FileDescriptor) -> i32 {
 
     let result = match env.libc_state.posix_io.files[fd_to_file_idx(fd)].take() {
         Some(file) => {
-            // The actual closing of the file happens implicitly when `file`
-            // falls out of scope. The return value is about whether flushing
-            // succeeds.
-            if !file.options.write {
+            // The actual closing of the file happens implicitly when `file` falls out
+            // of scope. The return value is about whether flushing succeeds.
+            match Rc::into_inner(file).map(|f| f.into_inner().file.sync_all()) {
+                Some(Ok(())) => {
                 0
             } else {
                 match file.file.sync_all() {
@@ -515,6 +515,29 @@ fn ftruncate(env: &mut Environment, fd: FileDescriptor, len: off_t) -> i32 {
     }
 }
 
+fn fcntl(env: &mut Environment, fd: FileDescriptor, operation: i32, args: DotDotDot) -> i32 {
+    match operation {
+        F_GETLK => {
+            let ptr = args.start().next::<MutPtr<FLockInfo>>(env);
+            let mut data = env.mem.read(ptr);
+            data.type_ = F_UNLCK;
+            env.mem.write(ptr, data);
+            0
+        },
+        F_SETLK => {
+            let ptr = args.start().next::<MutPtr<FLockInfo>>(env);
+            let data = env.mem.read(ptr);
+            log!("TODO: fcntl({:?}, {:?}, {:?})", fd, operation, data);
+            0
+        }
+        F_NOCACHE => {
+            log!("Ignoring F_NOCACHE for {} fd", fd);
+            0
+        }
+        _ => unimplemented!("fcntl({}, {})", fd, operation)
+    }
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(open(_, _, _)),
     export_c_func!(read(_, _, _)),
@@ -529,4 +552,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(unlink(_)),
     export_c_func!(fsync(_)),
     export_c_func!(ftruncate(_, _)),
+    export_c_func!(fcntl(_, _, _)),
 ];
