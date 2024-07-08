@@ -7,7 +7,7 @@
 
 use crate::dyld::{ConstantExports, HostConstant};
 use crate::frameworks::core_animation::ca_transform_3d::{
-    CATransform3D, CATransform3DGetAffineTransform, CATransform3DInvert,
+    CATransform3D as OtherCATransform3D, CATransform3DGetAffineTransform, CATransform3DInvert,
     CATransform3DMakeAffineTransform,
 };
 use crate::frameworks::core_graphics::cg_bitmap_context::{
