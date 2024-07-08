@@ -515,7 +515,7 @@ fn ftruncate(env: &mut Environment, fd: FileDescriptor, len: off_t) -> i32 {
     }
 }
 
-fn fcntl(env: &mut Environment, fd: FileDescriptor, operation: i32, args: DotDotDot) -> i32 {
+fn fcntl<FLockInfo>(env: &mut Environment, fd: FileDescriptor, operation: i32, args: DotDotDot) -> i32 {
     match operation {
         F_GETLK => {
             let ptr = args.start().next::<MutPtr<FLockInfo>>(env);
