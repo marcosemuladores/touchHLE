@@ -391,10 +391,10 @@ pub fn close(env: &mut Environment, fd: FileDescriptor) -> i32 {
 
     let result = match env.libc_state.posix_io.files[fd_to_file_idx(fd)].take() {
         Some(file) => {
-            // The actual closing of the file happens implicitly when `file` falls out
-            // of scope. The return value is about whether flushing succeeds.
-            match Rc::into_inner(file).map(|f| f.into_inner().file.sync_all()) {
-                Some(Ok(())) => {
+            // The actual closing of the file happens implicitly when `file`
+            // falls out of scope. The return value is about whether flushing
+            // succeeds.
+            if !file.options.write {
                 0
             } else {
                 match file.file.sync_all() {
