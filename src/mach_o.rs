@@ -452,7 +452,7 @@ impl MachO {
                             // itself, e.g. to "__Znwm". might be a PIC thing
                             Some(Symbol::Defined { name: Some(n), .. }) => Some(String::from(n)),
                             None => None,
-                            _ => panic!("Unexpected symbol kind {:?}", sym),
+                            _ => log!("Unexpected symbol kind {:?}", sym),
                         })
                     }
 
