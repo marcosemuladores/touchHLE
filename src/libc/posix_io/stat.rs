@@ -110,7 +110,7 @@ fn mkdir(env: &mut Environment, path: ConstPtr<u8>, mode: mode_t) -> i32 {
 /// Helper for [stat()] and [fstat()] that fills the data in the stat struct
 fn fstat_inner(env: &mut Environment, fd: FileDescriptor, buf: MutPtr<stat>) -> i32 {
     // TODO: error handling for unknown fd?
-    let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
+    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
 
     // FIXME: This implementation is highly incomplete. fstat() returns a huge
     // struct with many kinds of data in it. This code is assuming the caller
