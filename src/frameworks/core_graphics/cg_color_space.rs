@@ -136,6 +136,14 @@ pub fn CGColorGetColorSpace(env: &mut Environment, _color: CGColorRef) -> CGColo
     CGColorSpaceCreateWithName(env, srgb_name)
 }
 
+pub fn CGGradientCreateWithColorComponents(env: &mut Environment, cs: CGColorSpaceRef) -> CGColorSpaceRef {
+    if !cs.is_null() {
+        CFRetain(env, cs)
+    } else {
+        cs
+    }
+}
+
 pub const kCGColorSpaceGenericRGB: &str = "kCGColorSpaceGenericRGB";
 pub const kCGColorSpaceGenericGray: &str = "kCGColorSpaceGenericGray";
 
@@ -159,4 +167,5 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGColorSpaceGetModel(_)),
     export_c_func!(CGColorGetComponents(_)),
     export_c_func!(CGColorGetColorSpace(_)),
+    export_c_func!(CGGradientCreateWithColorComponents(_)),
 ];
