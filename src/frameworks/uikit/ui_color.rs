@@ -188,7 +188,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg_class![env; UIColor colorWithRed:r green:g blue:b alpha:a]
 }
 
-
 - (id) retain { this }
 - (()) release {}
 - (id) autorelease { this }
