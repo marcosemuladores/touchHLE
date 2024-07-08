@@ -193,12 +193,11 @@ pub fn read(
     size: GuestUSize,
 ) -> GuestISize {
     if buffer.is_null() {
-        // TODO: set errno to EFAULT
         return 0;
     }
 
     // TODO: error handling for unknown fd?
-    let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
+    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
 
     let buffer_slice = env.mem.bytes_at_mut(buffer.cast(), size);
     match file.file.read(buffer_slice) {
