@@ -160,6 +160,10 @@ fn CGRectEqualToRect(_env: &mut Environment, a: CGRect, b: CGRect) -> bool {
     a == b
 }
 
+fn CGRectOffset(_env: &mut Environment, a: CGRect, b: CGRect) -> bool {
+    a == b
+}
+
 fn CGRectGetWidth(_env: &mut Environment, rect: CGRect) -> CGFloat {
     rect.size.width
 }
@@ -202,6 +206,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CGPointEqualToPoint(_, _)),
     export_c_func!(CGSizeEqualToSize(_, _)),
     export_c_func!(CGRectEqualToRect(_, _)),
+    export_c_func!(CGRectOffset(_, _)),
     export_c_func!(CGRectContainsPoint(_, _)),
     export_c_func!(CGRectGetWidth(_)),
     export_c_func!(CGRectGetMidY(_)),
