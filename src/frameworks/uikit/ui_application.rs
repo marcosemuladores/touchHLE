@@ -79,7 +79,14 @@ pub const CLASSES: ClassExports = objc_classes! {
     }
 }
 
-// TODO: statusBarHidden getter
+- (UIInterfaceOrientation)statusBarOrientation {
+    match env.window_mut().device_orientation {
+        DeviceOrientation::Portrait => UIDeviceOrientationPortrait,
+        DeviceOrientation::LandscapeLeft => UIDeviceOrientationLandscapeLeft,
+        DeviceOrientation::LandscapeRight => UIDeviceOrientationLandscapeRight,
+    }
+}
+
 - (())setStatusBarHidden:(bool)hidden {
     env.framework_state.uikit.ui_application.status_bar_hidden = hidden;
 }
@@ -162,6 +169,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 - (())registerForRemoteNotificationTypes:(UIRemoteNotificationType)types {
     log!("TODO: ignoring registerForRemoteNotificationTypes:{}", types);
+}
+
+- (id)keyWindow {
+    nil
 }
 
 @end
