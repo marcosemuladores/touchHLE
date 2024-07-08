@@ -116,6 +116,9 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (bool)fileExistsAtPath:(id)path { // NSString*
+    if path == nil {
+        return false
+    }
     let res_exists = if path == nil {
         false
     } else {
