@@ -20,6 +20,7 @@ use crate::gles::{create_gles1_ctx, gles1_on_gl2, GLES};
 use crate::objc::{id, msg, nil, objc_classes, release, retain, ClassExports, HostObject};
 use crate::options::Options;
 use crate::window::Window;
+use std::borrow::Borrow;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::{Duration, Instant};
@@ -251,7 +252,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         };
 
         let tmp = env
-            .borrow::<EAGLContextHostObject>(this)
+             .objc.borrow::<EAGLContextHostObject>(this)
             .renderbuffer_drawable_bindings
         .get(&renderbuffer);
     if tmp.is_none() {
