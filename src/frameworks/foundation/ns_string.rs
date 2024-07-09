@@ -580,6 +580,12 @@ pub const CLASSES: ClassExports = objc_classes! {
     retain(env, this)
 }
 
+- (ConstPtr<u8>)fileSystemRepresentation {
+    let src = to_rust_string(env, this);
+    log!("fsr {}", src);
+    msg![env; this UTF8String]
+}
+
 - (bool)getCString:(MutPtr<u8>)buffer
          maxLength:(NSUInteger)buffer_size
           encoding:(NSStringEncoding)encoding {
@@ -1174,7 +1180,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 - (id)initWithCString:(ConstPtr<u8>)c_string
              encoding:(NSStringEncoding)encoding {
-    assert!(C_STRING_FRIENDLY_ENCODINGS.contains(&encoding));
+    //assert!(C_STRING_FRIENDLY_ENCODINGS.contains(&encoding), "{}", encoding);
+    if !C_STRING_FRIENDLY_ENCODINGS.contains(&encoding) {
+        return nil;
+    }
     let len: NSUInteger = env.mem.cstr_at(c_string).len().try_into().unwrap();
     msg![env; this initWithBytes:c_string length:len encoding:encoding]
 }
@@ -1215,6 +1224,11 @@ pub const CLASSES: ClassExports = objc_classes! {
         .next()
         .map(|c| matching_values.contains(c))
         .unwrap_or(false)
+}
+
+- (id)dataUsingEncoding:(NSStringEncoding)encoding
+   allowLossyConversion:(bool)_lossy {
+    msg![env; this dataUsingEncoding:encoding]
 }
 
 - (id)dataUsingEncoding:(NSStringEncoding)encoding {
