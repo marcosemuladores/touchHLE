@@ -261,6 +261,13 @@ pub fn AudioQueueEnqueueBuffer(
     _in_packet_descs: MutVoidPtr,
 ) -> OSStatus {
     return_if_null!(in_aq);
+    log!(
+        "{:?} {:?} {:?} {:?}",
+        in_aq,
+        in_buffer,
+        _in_num_packet_descs,
+        _in_packet_descs
+    );
 
     // Variable packet size unimplemented (no formats supported that need it).
     // We don't assert the count is 0 because we might get a useless one even
@@ -847,10 +854,9 @@ fn AudioQueueReset(env: &mut Environment, in_aq: AudioQueueRef) -> OSStatus {
     0 // success
 }
 
-fn AudioQueueFlush(env: &mut Environment, in_aq: AudioQueueRef) -> OSStatus {
-    return_if_null!(in_aq);
-    // TODO
-    0 // success
+pub fn AudioQueueFlush(_env: &mut Environment, _in_aq: AudioQueueRef) -> OSStatus {
+    log!("stub: AudioQueueFlush");
+    0
 }
 
 fn AudioQueueFreeBuffer(
