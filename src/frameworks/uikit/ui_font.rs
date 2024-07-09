@@ -66,10 +66,26 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 @implementation UIFont: NSObject
 
-+ (id)fontWithName:(id)name
-              size:(CGFloat)size {
-    msg_class![env; UIFont systemFontOfSize:size]
+// IMM: Me when i lie really bad
++ (id)fontWithName:(id)_name size:(CGFloat)size {
+    log!("{}", to_rust_string(env,_name));
+    // Cache for later use
+    if env.framework_state.uikit.ui_font.regular.is_none() {
+        env.framework_state.uikit.ui_font.regular = Some(Font::sans_regular());
+    }
+    let host_object = UIFontHostObject {
+        size,
+        kind: FontKind::Regular,
+    };
+    let new = env.objc.alloc_object(this, Box::new(host_object), &mut env.mem);
+    autorelease(env, new)
 }
+
+// IMM: verify
+- (CGFloat)pointSize {
+    env.objc.borrow::<UIFontHostObject>(this).size
+}
+
 + (id)systemFontOfSize:(CGFloat)size {
     // Cache for later use
     if env.framework_state.uikit.ui_font.regular.is_none() {
