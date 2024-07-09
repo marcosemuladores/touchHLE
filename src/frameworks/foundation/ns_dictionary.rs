@@ -412,15 +412,15 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.alloc_object(this, host_object, &mut env.mem)
 }
 
-+ (id)dictionaryRepresentation:(NSUInteger)cap {
-    env.objc.borrow_mut::<DictionaryHostObject>(this).map.reserve(cap as usize);
-    this
-}
-
 - (())dealloc {
     std::mem::take(env.objc.borrow_mut::<DictionaryHostObject>(this)).release(env);
 
     env.objc.dealloc_object(this, &mut env.mem)
+}
+
+- (id)dictionaryRepresentation:(NSUInteger)cap {
+    env.objc.borrow_mut::<DictionaryHostObject>(this).map.reserve(cap as usize);
+    this
 }
 
 - (id)initWithCapacity:(NSUInteger)cap {
