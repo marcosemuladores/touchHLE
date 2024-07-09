@@ -352,6 +352,14 @@ pub const CLASSES: ClassExports = objc_classes! {
     res
 }
 
+- (NSInteger)fileSize {
+    let file_size_key = ns_string::get_static_str(env, "fileSize");
+    let host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+    let res = host_obj.lookup(env, file_size_key);
+    *env.objc.borrow_mut(this) = host_obj;
+    msg![env; res intValue]
+}
+
 -(())setObject:(id)value forKey:(id)key {
     let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
     host_obj.insert(env, key, value, true);
