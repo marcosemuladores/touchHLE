@@ -269,6 +269,10 @@ fn pthread_testcancel(_env: &mut Environment) {
     log!("TODO: pthread_testcancel()");
 }
 
+fn pthread_cancel(_env: &mut Environment) {
+    log!("TODO: pthread_cancel()");
+}
+
 type mach_port_t = u32;
 
 /// Undocumented Darwin function that returns a `mach_port_t`, which in practice
@@ -322,6 +326,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_join(_, _)),
     export_c_func!(pthread_setcanceltype(_, _)),
     export_c_func!(pthread_testcancel()),
+    export_c_func!(pthread_cancel()),
     export_c_func!(pthread_mach_thread_np(_)),
     export_c_func!(pthread_getschedparam(_, _, _)),
     export_c_func!(pthread_setschedparam(_, _, _)),
