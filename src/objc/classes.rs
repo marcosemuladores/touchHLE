@@ -783,15 +783,20 @@ impl ObjC {
     }
 
     pub fn get_class_name(&self, class: Class) -> &str {
-        let host_object = self.get_host_object(class).unwrap();
+        self.try_get_class_name(class)
+            .expect("Could not get class name!")
+    }
+
+    pub fn try_get_class_name(&self, class: Class) -> Option<&str> {
+        let host_object = self.get_host_object(class)?;
         if let Some(ClassHostObject { name, .. }) = host_object.as_any().downcast_ref() {
-            name
+            Some(name)
         } else if let Some(UnimplementedClass { name, .. }) = host_object.as_any().downcast_ref() {
-            name
+            Some(name)
         } else if let Some(FakeClass { name, .. }) = host_object.as_any().downcast_ref() {
-            name
+            Some(name)
         } else {
-            panic!();
+            None
         }
     }
 }
