@@ -131,6 +131,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; text_label setFont:new_font]
 }
 
+- (())setTag:(bool)tag {
+    log!("TODO: setTag:{}", tag);
+}
+
 - (())setEnablesReturnKeyAutomatically:(bool)enables {
     log!("TODO: setEnablesReturnKeyAutomatically:{}", enables);
 }
