@@ -582,6 +582,7 @@ fn prime_audio_queue(
 
 fn unqueue_buffers<F: FnMut(ALuint)>(al_source: ALuint, mut callback: F) {
     loop {
+        log!("aa!");
         let mut al_buffers_processed = 0;
         unsafe {
             al::alGetSourcei(
