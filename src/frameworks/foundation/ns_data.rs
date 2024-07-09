@@ -122,6 +122,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     this
 }
 
+- (id)initWithContentsOfMappedFile:(id)path {
+    // IMM?: This is ok, right?
+    msg![env; this initWithContentsOfFile:path]
+}
+
 // FIXME: writes should be atomic
 - (bool)writeToFile:(id)path // NSString*
          atomically:(bool)_use_aux_file {
