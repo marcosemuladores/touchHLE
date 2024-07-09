@@ -338,6 +338,10 @@ impl Environment {
             log_dbg!("Static initialization done");
         }
 
+        if env.options.dump_classes {
+            env.objc.dump_classes();
+        }
+
         env.cpu.branch(entry_point_addr);
 
         Ok(env)
