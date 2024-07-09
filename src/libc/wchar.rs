@@ -156,7 +156,7 @@ fn wcslcpy(
 fn wcstol(env: &mut Environment, nptr: ConstPtr<wchar_t>, endptr: MutPtr<MutPtr<wchar_t>>, base: i32) -> i32 {
     assert_eq!(base, 10);
     assert!(endptr.is_null());
-    let x = env.mem.wcstr_at_utf16(nptr);
+    let x = env.mem.wcstr_at(nptr);
     log!("wcstol {}", x);
     x.parse().unwrap_or(0)
 }
