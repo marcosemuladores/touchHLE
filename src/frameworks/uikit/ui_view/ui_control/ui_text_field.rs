@@ -135,6 +135,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     log!("TODO: setTag:{}", tag);
 }
 
+- (())setSecureTextEntry:(bool)secure {
+    log!("TODO: setSecureTextEntry:{}", secure);
+}
+
 - (())setEnablesReturnKeyAutomatically:(bool)enables {
     log!("TODO: setEnablesReturnKeyAutomatically:{}", enables);
 }
