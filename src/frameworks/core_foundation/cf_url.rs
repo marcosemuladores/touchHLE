@@ -71,6 +71,12 @@ pub fn CFURLCreateFromFileSystemRepresentation(
     msg![env; url initFileURLWithPath:string isDirectory:is_directory]
 }
 
+pub fn CFURLCreateCopyAppendingPathComponent(env: &mut Environment, url: CFURLRef) -> CFStringRef {
+    let path = msg![env; url path];
+    let ext = msg![env; path pathExtension];
+    msg![env; ext copy]
+}
+
 pub fn CFURLCopyPathExtension(env: &mut Environment, url: CFURLRef) -> CFStringRef {
     let path = msg![env; url path];
     let ext = msg![env; path pathExtension];
@@ -133,6 +139,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFURLGetFileSystemRepresentation(_, _, _, _)),
     export_c_func!(CFURLCreateFromFileSystemRepresentation(_, _, _, _)),
     export_c_func!(CFURLCopyPathExtension(_)),
+    export_c_func!(CFURLCreateCopyAppendingPathComponent(_)),
     export_c_func!(CFURLCreateWithFileSystemPath(_, _, _, _)),
     export_c_func!(CFURLCopyFileSystemPath(_, _)),
     export_c_func!(CFURLCreateStringByAddingPercentEscapes(_, _)),
