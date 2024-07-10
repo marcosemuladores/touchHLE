@@ -1212,7 +1212,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     path.starts_with('/') || path.starts_with('~')
 }
 
-
 - (bool)boolValue {
     let string = to_rust_string(env, this);
     let string = string.trim_start_matches(|c: char| {
@@ -1232,6 +1231,17 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (id)dataUsingEncoding:(NSStringEncoding)encoding {
+    assert!(encoding == NSUTF8StringEncoding || encoding == NSASCIIStringEncoding);
+
+    // TODO: refactor with UTF8String method
+    let string = to_rust_string(env, this);
+    let c_string = env.mem.alloc_and_write_cstr(string.as_bytes());
+    let length: NSUInteger = (string.len() + 1).try_into().unwrap();
+
+    msg_class![env; NSData dataWithBytesNoCopy:(c_string.cast_void()) length:length]
+}
+
+- (id)lengthOfBytesUsingEncoding:(NSStringEncoding)encoding {
     assert!(encoding == NSUTF8StringEncoding || encoding == NSASCIIStringEncoding);
 
     // TODO: refactor with UTF8String method
