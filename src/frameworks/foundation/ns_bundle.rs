@@ -104,6 +104,9 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.dealloc_object(this, &mut env.mem)
 }
 
+- (id)bundleForClass {
+    env.objc.borrow::<NSBundleHostObject>(this).bundle_path
+}
 - (id)bundlePath {
     env.objc.borrow::<NSBundleHostObject>(this).bundle_path
 }
