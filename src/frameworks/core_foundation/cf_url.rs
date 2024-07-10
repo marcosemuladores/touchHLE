@@ -131,6 +131,10 @@ fn SCNetworkReachabilityCreateWithAddress(_env: &mut Environment, _allocator: CF
     MutVoidPtr::null()
 }
 
+fn SCNetworkReachabilityCreateWithName(_env: &mut Environment, _allocator: CFAllocatorRef, _addr: ConstVoidPtr) -> MutVoidPtr {
+    MutVoidPtr::null()
+}
+
 fn SCNetworkReachabilityGetFlags(_env: &mut Environment, _target: MutVoidPtr, _flags: MutVoidPtr) -> bool {
     false
 }
@@ -144,5 +148,6 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFURLCopyFileSystemPath(_, _)),
     export_c_func!(CFURLCreateStringByAddingPercentEscapes(_, _)),
     export_c_func!(SCNetworkReachabilityCreateWithAddress(_, _)),
+    export_c_func!(SCNetworkReachabilityCreateWithName(_, _)),
     export_c_func!(SCNetworkReachabilityGetFlags(_, _)),
 ];
