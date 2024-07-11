@@ -88,7 +88,7 @@ pub fn AudioFileOpenURL(
 
     // The hint is optional and is supposed to only be used for certain file
     // formats that can't be uniquely identified, which we don't support so far.
-    assert!(in_file_type_hint == 0);
+    // assert!(in_file_type_hint == 0);
     audio_file_open_inner(env, in_file_ref, out_audio_file)
 }
 
