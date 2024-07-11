@@ -467,11 +467,11 @@ pub fn close(env: &mut Environment, fd: FileDescriptor) -> i32 {
             // The actual closing of the file happens implicitly when `file` falls out
             // of scope. The return value is about whether flushing succeeds.
             match Rc::into_inner(file).map(|f| f.into_inner().file.sync_all()) {
-                Some(Ok(()) => {
+                Ok(()) => {
                     log_dbg!("close({:?}) => 0", fd);
                     0
                 }
-                Some(Err(_)) => {
+                Err(_) => {
                     // TODO: set errno
                     log!("Warning: close({:?}) failed, returning -1", fd);
                     -1
