@@ -467,16 +467,14 @@ pub fn close(env: &mut Environment, fd: FileDescriptor) -> i32 {
             // The actual closing of the file happens implicitly when `file` falls out
             // of scope. The return value is about whether flushing succeeds.
             match Rc::into_inner(file).map(|f| f.into_inner().file.sync_all()) {
-                Some(Ok(())) => {
+                Some(Ok(()) => {
+                    log_dbg!("close({:?}) => 0", fd);
+                    0
                 }
                 Some(Err(_)) => {
                     // TODO: set errno
                     log!("Warning: close({:?}) failed, returning -1", fd);
                     -1
-                },
-                None => {
-                    log_dbg!("close({:?}) => 0, references remaining", fd);
-                    0
                 }
             }
         }
@@ -485,14 +483,7 @@ pub fn close(env: &mut Environment, fd: FileDescriptor) -> i32 {
             log!("Warning: close({:?}) failed, returning -1", fd);
             -1
         }
-    };
-
-    if result == 0 {
-        log_dbg!("close({:?}) => 0", fd);
-    } else {
-        log!("Warning: close({:?}) failed, returning -1", fd);
     }
-    result
 }
 
 pub fn getcwd(env: &mut Environment, buf_ptr: MutPtr<u8>, buf_size: GuestUSize) -> MutPtr<u8> {
