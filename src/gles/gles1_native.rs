@@ -365,6 +365,14 @@ impl GLES for GLES1Native {
         gles11::ClearStencil(s)
     }
 
+    unsafe fn LogicOp(&mut self, opcode: GLenum) {
+        gles11::LogicOp(opcode);
+    }
+
+    unsafe fn StencilFunc(&mut self, func: GLenum, ref_: GLint, mask: GLuint) {
+        gles11::StencilFunc(func, ref_, mask);
+    }
+
     // Textures
     unsafe fn PixelStorei(&mut self, pname: GLenum, param: GLint) {
         gles11::PixelStorei(pname, param)
