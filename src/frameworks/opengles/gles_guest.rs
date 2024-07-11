@@ -638,6 +638,14 @@ fn glClearStencil(env: &mut Environment, s: GLint) {
     with_ctx_and_mem(env, |gles, _mem| unsafe { gles.ClearStencil(s) });
 }
 
+fn glLogicOp(env: &mut Environment, opcode: GLenum) {
+    with_ctx_and_mem(env, |gles, _mem| unsafe { gles.LogicOp(opcode) });
+}
+
+fn glStencilFunc(env: &mut Environment, func: GLenum, ref_: GLint, mask: GLuint) {
+    with_ctx_and_mem(env, |gles, _mem| unsafe { gles.StencilFunc(func, ref_, mask) });
+}
+
 // Matrix stack operations
 fn glMatrixMode(env: &mut Environment, mode: GLenum) {
     with_ctx_and_mem(env, |gles, _mem| {
@@ -1340,6 +1348,8 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glClearDepthf(_)),
     export_c_func!(glClearDepthx(_)),
     export_c_func!(glClearStencil(_)),
+    export_c_func!(glLogicOp(_)),
+    export_c_func!(glStencilFunc(_, _, _)),
     // Matrix stack operations
     export_c_func!(glMatrixMode(_)),
     export_c_func!(glLoadIdentity()),
