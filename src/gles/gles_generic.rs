@@ -191,6 +191,8 @@ pub trait GLES {
     unsafe fn ClearDepthf(&mut self, depth: GLclampf);
     unsafe fn ClearDepthx(&mut self, depth: GLclampx);
     unsafe fn ClearStencil(&mut self, s: GLint);
+    unsafe fn LogicOp(&mut self, opcode: GLenum);
+    unsafe fn StencilFunc(&mut self, func: GLenum, ref_: GLint, mask: GLuint);
 
     // Textures
     unsafe fn PixelStorei(&mut self, pname: GLenum, param: GLint);
