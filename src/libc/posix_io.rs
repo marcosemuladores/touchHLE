@@ -468,8 +468,6 @@ pub fn close(env: &mut Environment, fd: FileDescriptor) -> i32 {
             // of scope. The return value is about whether flushing succeeds.
             match Rc::into_inner(file).map(|f| f.into_inner().file.sync_all()) {
                 Some(Ok(())) => {
-                    log_dbg!("close({:?}) => 0", fd);
-                    0
                 }
                 Some(Err(_)) => {
                     // TODO: set errno
