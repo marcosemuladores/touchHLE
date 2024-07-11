@@ -1131,9 +1131,18 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 // TODO: more init methods
 
-- (())getCharacters:(NSZonePtr)_zone {
-    let host_object = Box::new(StringHostObject::Utf8(Cow::Borrowed("")));
-    env.objc.alloc_object(this, host_object, &mut env.mem)
+- (id)getCharacters:(NSUInteger)from {
+    let mut res_utf16: Utf16String = Vec::with_capacity(from as usize);
+
+    for_each_code_unit(env, this, |idx, c| {
+        if idx >= from {
+            res_utf16.push(c);
+        }
+    });
+
+    let res = msg_class![env; _touchHLE_NSString alloc];
+    *env.objc.borrow_mut(res) = StringHostObject::Utf16(res_utf16);
+    autorelease(env, res)
 }
 
 - (id)initWithFormat:(id)format, // NSString*
