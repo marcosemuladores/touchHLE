@@ -425,6 +425,7 @@ fn strftime(
     tm: ConstPtr<tm>) -> GuestUSize {
     let fmt = env.mem.cstr_at_utf8(format).unwrap();
     log!("strftime fmt {}", fmt);
+    // assert_eq!(fmt, "%Z");    
     env.mem.write(s, b'\0');
     0
 }
