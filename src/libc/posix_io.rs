@@ -483,7 +483,7 @@ pub fn close(env: &mut Environment, fd: FileDescriptor) -> i32 {
             log!("Warning: close({:?}) failed, returning -1", fd);
             -1
         }
-    }
+    };
 }
 
 pub fn getcwd(env: &mut Environment, buf_ptr: MutPtr<u8>, buf_size: GuestUSize) -> MutPtr<u8> {
