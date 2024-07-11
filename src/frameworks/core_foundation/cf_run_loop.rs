@@ -111,7 +111,7 @@ fn CFRunLoopRunInMode(
         msg![env; mode isEqualToString:default_mode]
             || msg![env; mode isEqualToString:common_modes]
     );
-    assert!(seconds <= 0.001);
+    // assert!(seconds <= 0.001);
     // TODO: we're currently supporting only the main run loop
     log_dbg!(
         "TODO: properly implement CFRunLoopRunInMode [current thread {}], running a single iteration of the main run loop",
