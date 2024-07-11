@@ -1131,6 +1131,11 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 // TODO: more init methods
 
+- (())getCharacters:(NSZonePtr)_zone {
+    let host_object = Box::new(StringHostObject::Utf8(Cow::Borrowed("")));
+    env.objc.alloc_object(this, host_object, &mut env.mem)
+}
+
 - (id)initWithFormat:(id)format, // NSString*
                      ...args {
     let res = with_format(env, format, args.start());
