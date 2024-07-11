@@ -127,6 +127,16 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; this initWithContentsOfFile:path]
 }
 
+- (bool)writeToFile:(id)path // NSString*
+            options:(NSUInteger)_options_mask
+              error:(MutPtr<id>)error { // NSError**
+    let success: bool = msg![env; this writeToFile:path atomically:true];
+    if !success && !error.is_null() {
+        todo!(); // TODO: create an NSError if requested
+    }
+    success
+}
+
 // FIXME: writes should be atomic
 - (bool)writeToFile:(id)path // NSString*
          atomically:(bool)_use_aux_file {
