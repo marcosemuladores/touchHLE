@@ -49,6 +49,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 + (id)sharedApplication {
+    // assert!(env.framework_state.uikit.ui_application.shared_application.is_none());
     env.framework_state.uikit.ui_application.shared_application.unwrap_or(nil)
 }
 
