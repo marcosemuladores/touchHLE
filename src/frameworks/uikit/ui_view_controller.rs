@@ -30,7 +30,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 // TODO: this should be the designated initializer
 - (id)initWithNibName:(id)nibNameOrNil // NSString *
                bundle:(id)nibBundleOrNil { // NSBundle *
-    assert!(nibBundleOrNil == nil);
+    // assert!(nibBundleOrNil == nil);
     let x = to_rust_string(env, nibNameOrNil);
     log!("initWithNibName: {}", x);
     let bundle: id = msg_class![env; NSBundle mainBundle];
