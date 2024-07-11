@@ -93,6 +93,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     false
 }
 
++ (())exit {
+
+}
+
 + (())detachNewThreadSelector:(SEL)selector
                        toTarget:(id)target
                      withObject:(id)object {
