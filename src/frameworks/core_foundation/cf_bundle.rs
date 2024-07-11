@@ -77,6 +77,11 @@ fn CFBundleCopyExecutableURL(env: &mut Environment, bundle: CFBundleRef) -> CFUR
     msg![env; url copy]
 }
 
+fn CFBundleCopyResourceURLForLocalization(env: &mut Environment, bundle: CFBundleRef) -> CFURLRef {
+    let url: id = msg![env; bundle executableURL];
+    msg![env; url copy]
+}
+
 fn CFBundleCopyResourcesDirectoryURL(env: &mut Environment, bundle: CFBundleRef) -> CFURLRef {
     let url: CFURLRef = msg![env; bundle resourceURL];
     msg![env; url copy]
@@ -165,6 +170,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(CFBundleGetVersionNumber(_)),
     export_c_func!(CFBundleCopyBundleURL(_)),
     export_c_func!(CFBundleCopyExecutableURL(_)),
+    export_c_func!(CFBundleCopyResourceURLForLocalization(_)),
     export_c_func!(CFBundleCopyResourcesDirectoryURL(_)),
     export_c_func!(CFBundleCopyResourceURL(_, _, _, _)),
     export_c_func!(CFBundleCopyBundleLocalizations(_)),
