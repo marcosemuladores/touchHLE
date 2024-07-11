@@ -1204,6 +1204,14 @@ impl GLES for GLES1OnGL2 {
         gl21::ClearStencil(s)
     }
 
+    unsafe fn LogicOp(&mut self, opcode: GLenum) {
+        gl21::LogicOp(opcode);
+    }
+
+    unsafe fn StencilFunc(&mut self, func: GLenum, ref_: GLint, mask: GLuint) {
+        gl21::StencilFunc(func, ref_, mask);
+    }
+
     // Textures
     unsafe fn PixelStorei(&mut self, pname: GLenum, param: GLint) {
         assert!(pname == gl21::PACK_ALIGNMENT || pname == gl21::UNPACK_ALIGNMENT);
