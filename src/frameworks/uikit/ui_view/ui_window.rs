@@ -91,6 +91,13 @@ pub const CLASSES: ClassExports = objc_classes! {
     }
 }
 
+- (())makeKeyWindow {
+    // TODO: Set the "key" window once it's relevant. We don't currently have
+    // send any non-touch events to windows, so there's no meaning in it yet.
+
+    msg![env; this setHidden:false]
+}
+
 - (())makeKeyAndVisible {
     // TODO: Set the "key" window once it's relevant. We don't currently have
     // send any non-touch events to windows, so there's no meaning in it yet.
