@@ -419,7 +419,7 @@ fn glDeleteBuffers(env: &mut Environment, n: GLsizei, buffers: ConstPtr<GLuint>)
 fn glBindBuffer(env: &mut Environment, target: GLenum, buffer: GLuint) {
     with_ctx_and_mem(env, |gles, _mem| unsafe { gles.BindBuffer(target, buffer) })
 }
-fn glBindRenderBuffer(env: &mut Environment, target: GLenum, buffer: GLuint) {
+fn glBindRenderbuffer(env: &mut Environment, target: GLenum, buffer: GLuint) {
     with_ctx_and_mem(env, |gles, _mem| unsafe { gles.BindRenderBuffer(target, buffer) })
 }
 fn glBufferData(
@@ -1336,7 +1336,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glGenBuffers(_, _)),
     export_c_func!(glDeleteBuffers(_, _)),
     export_c_func!(glBindBuffer(_, _)),
-    export_c_func!(glBindRenderBuffer(_, _)),
+    export_c_func!(glBindRenderbuffer(_, _)),
     export_c_func!(glBufferData(_, _, _, _)),
     export_c_func!(glBufferSubData(_, _, _, _)),
     // Non-pointers
