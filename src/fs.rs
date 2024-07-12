@@ -517,22 +517,6 @@ impl Fs {
             .with_child(
                 "libxml2.dylib",
                 FsNode::resource_file(format!("{}/libxml2.2.dylib", DYLIBS_DIR)),
-            )
-            .with_child(
-                "libz.1.2.5.dylib",
-                FsNode::resource_file(format!("{}/libz.1.2.5.dylib", DYLIBS_DIR)),
-            )
-            .with_child(
-                "libz.1.1.3.dylib",
-                FsNode::resource_file(format!("{}/libz.1.2.5.dylib", DYLIBS_DIR)),
-            )
-            .with_child(
-                "libz.1.dylib",
-                FsNode::resource_file(format!("{}/libz.1.2.5.dylib", DYLIBS_DIR)),
-            )
-            .with_child(
-                "libz.dylib",
-                FsNode::resource_file(format!("{}/libz.1.2.5.dylib", DYLIBS_DIR)),
             );
 
         let mut app_dir_children = HashMap::new();
