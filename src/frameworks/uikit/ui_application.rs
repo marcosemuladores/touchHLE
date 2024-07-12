@@ -224,7 +224,7 @@ pub(super) fn UIApplicationMain(
             retain(env, delegate);
         } else {
             // We have to construct the delegate.
-            assert!(delegate_class_name != nil);
+            // assert!(delegate_class_name != nil);
             let name = ns_string::to_rust_string(env, delegate_class_name);
             let class = env.objc.get_known_class(&name, &mut env.mem);
             let delegate: id = msg![env; class new];
