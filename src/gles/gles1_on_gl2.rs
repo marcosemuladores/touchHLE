@@ -933,7 +933,7 @@ impl GLES for GLES1OnGL2 {
 
     // Buffers
     unsafe fn GenRenderbuffers(&mut self, n: GLsizei, buffers: *mut GLuint) {
-        gl21::GenRenderbuffers(n, buffers)
+        gl21::GenRenderbuffersEXT(n, buffers)
     }
     unsafe fn GenBuffers(&mut self, n: GLsizei, buffers: *mut GLuint) {
         gl21::GenBuffers(n, buffers)
