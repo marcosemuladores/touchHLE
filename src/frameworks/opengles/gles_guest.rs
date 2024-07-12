@@ -402,6 +402,13 @@ fn glGenRenderbuffers(env: &mut Environment, n: GLsizei, buffers: MutPtr<GLuint>
         unsafe { gles.GenRenderbuffers(n, buffers) }
     })
 }
+fn glRenderbufferStorage(env: &mut Environment, n: GLsizei, buffers: MutPtr<GLuint>) {
+    with_ctx_and_mem(env, |gles, mem| {
+        let n_usize: GuestUSize = n.try_into().unwrap();
+        let buffers = mem.ptr_at_mut(buffers, n_usize);
+        unsafe { gles.RenderbufferStorage(n, buffers) }
+    })
+}
 fn glGenBuffers(env: &mut Environment, n: GLsizei, buffers: MutPtr<GLuint>) {
     with_ctx_and_mem(env, |gles, mem| {
         let n_usize: GuestUSize = n.try_into().unwrap();
@@ -734,7 +741,7 @@ fn glFrustumf(
     bottom: GLfloat,
     top: GLfloat,
     near: GLfloat,
-    far: GLfloat,
+    far: GLfloat,0
 ) {
     with_ctx_and_mem(env, |gles, _mem| {
         unsafe { gles.Frustumf(left, right, bottom, top, near, far) };
@@ -1333,6 +1340,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glMaterialxv(_, _, _)),
     // Buffers
     export_c_func!(glGenRenderbuffers(_, _)),
+    export_c_func!(glRenderbufferStorage(_, _)),
     export_c_func!(glGenBuffers(_, _)),
     export_c_func!(glDeleteBuffers(_, _)),
     export_c_func!(glBindBuffer(_, _)),
