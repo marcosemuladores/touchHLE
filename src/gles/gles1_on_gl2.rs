@@ -769,9 +769,6 @@ impl GLES for GLES1OnGL2 {
     unsafe fn DepthRangex(&mut self, near: GLclampx, far: GLclampx) {
         gl21::DepthRange(fixed_to_float(near).into(), fixed_to_float(far).into())
     }
-    unsafe fn GenRenderbuffers(&mut self, factor: GLfloat, units: GLfloat) {
-        gl21::GenRenderbuffers(factor, units)
-    }
     unsafe fn PolygonOffset(&mut self, factor: GLfloat, units: GLfloat) {
         gl21::PolygonOffset(factor, units)
     }
@@ -935,6 +932,9 @@ impl GLES for GLES1OnGL2 {
     }
 
     // Buffers
+    unsafe fn GenRenderbuffers(&mut self, n: GLsizei, buffers: *mut GLuint) {
+        gl21::GenRenderbuffers(n, buffers)
+    }
     unsafe fn GenBuffers(&mut self, n: GLsizei, buffers: *mut GLuint) {
         gl21::GenBuffers(n, buffers)
     }
