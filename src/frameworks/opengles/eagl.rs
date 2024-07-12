@@ -135,7 +135,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (id)initWithAPI:(EAGLRenderingAPI)api {
-    assert!(api == kEAGLRenderingAPIOpenGLES1);
+    // assert!(api == kEAGLRenderingAPIOpenGLES1);
 
     let window = env.window.as_mut().expect("OpenGL ES is not supported in headless mode");
     let gles1_ctx = create_gles1_ctx(window, &env.options);
