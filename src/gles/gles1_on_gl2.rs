@@ -945,6 +945,10 @@ impl GLES for GLES1OnGL2 {
         assert!(target == gl21::ARRAY_BUFFER || target == gl21::ELEMENT_ARRAY_BUFFER);
         gl21::BindBuffer(target, buffer)
     }
+    unsafe fn BindRenderBuffer(&mut self, target: GLenum, buffer: GLuint) {
+        assert!(target == gl21::ARRAY_BUFFER || target == gl21::ELEMENT_ARRAY_BUFFER);
+        gl21::BindRenderBuffer(target, buffer)
+    }
     unsafe fn BufferData(
         &mut self,
         target: GLenum,
