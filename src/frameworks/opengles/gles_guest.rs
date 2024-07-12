@@ -236,9 +236,6 @@ fn glDepthRangex(env: &mut Environment, near: GLclampx, far: GLclampx) {
 fn glFrontFace(env: &mut Environment, mode: GLenum) {
     with_ctx_and_mem(env, |gles, _mem| unsafe { gles.FrontFace(mode) })
 }
-fn glGenRenderbuffers(env: &mut Environment, mode: GLenum) {
-    with_ctx_and_mem(env, |gles, _mem| unsafe { gles.GenRenderbuffers(mode) })
-}
 fn glPolygonOffset(env: &mut Environment, factor: GLfloat, units: GLfloat) {
     with_ctx_and_mem(env, |gles, _mem| unsafe {
         gles.PolygonOffset(factor, units)
@@ -398,6 +395,13 @@ fn glMaterialxv(env: &mut Environment, face: GLenum, pname: GLenum, params: Cons
 }
 
 // Textures
+fn glGenRenderbuffers(env: &mut Environment, n: GLsizei, buffers: MutPtr<GLuint>) {
+    with_ctx_and_mem(env, |gles, mem| {
+        let n_usize: GuestUSize = n.try_into().unwrap();
+        let buffers = mem.ptr_at_mut(buffers, n_usize);
+        unsafe { gles.glGenRenderbuffers(n, buffers) }
+    })
+}
 fn glGenBuffers(env: &mut Environment, n: GLsizei, buffers: MutPtr<GLuint>) {
     with_ctx_and_mem(env, |gles, mem| {
         let n_usize: GuestUSize = n.try_into().unwrap();
@@ -1292,7 +1296,6 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glDepthRangef(_, _)),
     export_c_func!(glDepthRangex(_, _)),
     export_c_func!(glFrontFace(_)),
-    export_c_func!(GenRenderbuffers(_)),
     export_c_func!(glPolygonOffset(_, _)),
     export_c_func!(glPolygonOffsetx(_, _)),
     export_c_func!(glShadeModel(_)),
@@ -1326,6 +1329,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glMaterialfv(_, _, _)),
     export_c_func!(glMaterialxv(_, _, _)),
     // Buffers
+    export_c_func!(glGenRenderbuffers(_, _)),
     export_c_func!(glGenBuffers(_, _)),
     export_c_func!(glDeleteBuffers(_, _)),
     export_c_func!(glBindBuffer(_, _)),
