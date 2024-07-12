@@ -239,7 +239,7 @@ impl GLES for GLES1Native {
 
     // Buffers
     unsafe fn GenRenderbuffers(&mut self, n: GLsizei, buffers: *mut GLuint) {
-        gles11::GenRenderbuffers(n, buffers)
+        gles11::GenRenderbuffersOES(n, buffers)
     }
     unsafe fn GenBuffers(&mut self, n: GLsizei, buffers: *mut GLuint) {
         gles11::GenBuffers(n, buffers)
