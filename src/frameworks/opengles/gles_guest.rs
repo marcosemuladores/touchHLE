@@ -741,7 +741,7 @@ fn glFrustumf(
     bottom: GLfloat,
     top: GLfloat,
     near: GLfloat,
-    far: GLfloat,0
+    far: GLfloat,
 ) {
     with_ctx_and_mem(env, |gles, _mem| {
         unsafe { gles.Frustumf(left, right, bottom, top, near, far) };
