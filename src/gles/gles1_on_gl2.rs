@@ -932,9 +932,6 @@ impl GLES for GLES1OnGL2 {
     }
 
     // Buffers
-    unsafe fn RenderbufferStorage(&mut self, n: GLsizei, buffers: *mut GLuint) {
-        gl21::RenderbufferStorageEXT(n, buffers)
-    }
     unsafe fn GenRenderbuffers(&mut self, n: GLsizei, buffers: *mut GLuint) {
         gl21::GenRenderbuffersEXT(n, buffers)
     }
