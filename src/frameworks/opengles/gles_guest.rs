@@ -399,7 +399,7 @@ fn glGenRenderbuffers(env: &mut Environment, n: GLsizei, buffers: MutPtr<GLuint>
     with_ctx_and_mem(env, |gles, mem| {
         let n_usize: GuestUSize = n.try_into().unwrap();
         let buffers = mem.ptr_at_mut(buffers, n_usize);
-        unsafe { gles.glGenRenderbuffers(n, buffers) }
+        unsafe { gles.GenRenderbuffers(n, buffers) }
     })
 }
 fn glGenBuffers(env: &mut Environment, n: GLsizei, buffers: MutPtr<GLuint>) {
