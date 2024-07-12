@@ -420,7 +420,7 @@ fn glBindBuffer(env: &mut Environment, target: GLenum, buffer: GLuint) {
     with_ctx_and_mem(env, |gles, _mem| unsafe { gles.BindBuffer(target, buffer) })
 }
 fn glBindRenderbuffer(env: &mut Environment, target: GLenum, buffer: GLuint) {
-    with_ctx_and_mem(env, |gles, _mem| unsafe { gles.BindRenderBuffer(target, buffer) })
+    with_ctx_and_mem(env, |gles, _mem| unsafe { gles.BindRenderbuffer(target, buffer) })
 }
 fn glBufferData(
     env: &mut Environment,
