@@ -253,7 +253,7 @@ impl GLES for GLES1Native {
     }
     unsafe fn BindRenderBuffer(&mut self, target: GLenum, buffer: GLuint) {
         assert!(target == gles11::ARRAY_BUFFER || target == gles11::ELEMENT_ARRAY_BUFFER);
-        gles11::BindRenderBuffer(target, buffer)
+        gles11::BindRenderBufferOES(target, buffer)
     }
     unsafe fn BufferData(
         &mut self,
