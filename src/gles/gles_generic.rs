@@ -117,6 +117,7 @@ pub trait GLES {
     unsafe fn GenBuffers(&mut self, n: GLsizei, buffers: *mut GLuint);
     unsafe fn DeleteBuffers(&mut self, n: GLsizei, buffers: *const GLuint);
     unsafe fn BindBuffer(&mut self, target: GLenum, buffer: GLuint);
+    unsafe fn BindRenderBuffer(&mut self, target: GLenum, buffer: GLuint);
     unsafe fn BufferData(
         &mut self,
         target: GLenum,
