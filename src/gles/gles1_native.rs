@@ -136,9 +136,6 @@ impl GLES for GLES1Native {
     unsafe fn FrontFace(&mut self, mode: GLenum) {
         gles11::FrontFace(mode)
     }
-    unsafe fn GenRenderbuffers(&mut self, near: GLclampf, far: GLclampf) {
-        gles11::GenRenderbuffers(near, far)
-    }
     unsafe fn DepthRangef(&mut self, near: GLclampf, far: GLclampf) {
         gles11::DepthRangef(near, far)
     }
@@ -241,6 +238,9 @@ impl GLES for GLES1Native {
     }
 
     // Buffers
+    unsafe fn GenRenderbuffers(&mut self, n: GLsizei, buffers: *mut GLuint) {
+        gles11::GenRenderbuffers(n, buffers)
+    }
     unsafe fn GenBuffers(&mut self, n: GLsizei, buffers: *mut GLuint) {
         gles11::GenBuffers(n, buffers)
     }
