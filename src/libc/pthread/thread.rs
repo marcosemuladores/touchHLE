@@ -261,6 +261,10 @@ fn pthread_join(env: &mut Environment, thread: pthread_t, retval: MutPtr<MutVoid
     0
 }
 
+fn pthread_exit(_env: &mut Environment) {
+    log!("TODO: pthread_exit()");
+}
+
 fn pthread_setcanceltype(_env: &mut Environment, type_: i32, oldtype: MutPtr<i32>) -> i32 {
     log!("TODO: pthread_setcanceltype({}, {:?})", type_, oldtype);
     0
@@ -328,6 +332,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_equal(_, _)),
     export_c_func!(pthread_self()),
     export_c_func!(pthread_join(_, _)),
+    export_c_func!(pthread_exit(_, _)),
     export_c_func!(pthread_setcanceltype(_, _)),
     export_c_func!(pthread_testcancel()),
     export_c_func!(pthread_cancel()),
