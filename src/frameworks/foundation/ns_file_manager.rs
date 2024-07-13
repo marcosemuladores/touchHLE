@@ -191,12 +191,12 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 - (bool)createDirectoryAtPath:(id)attributes // NSString *
   withIntermediateDirectories:(bool)createIntermediates
-                   attributes:(id)attributes // NSDictionary*
+                   path:(id)path // NSDictionary*
                         error:(id)error { // NSError **
     assert!(attributes == nil); // TODO
     assert!(createIntermediates);
 
-    let path_str = ns_string::to_rust_string(env, path); // TODO: avoid copy
+    let path_str = ns_string::to_rust_string(env, attributes); // TODO: avoid copy
     match env
         .fs
         .create_dir(GuestPath::new(&path_str))
