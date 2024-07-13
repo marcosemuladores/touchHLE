@@ -120,7 +120,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (id)initWithInteger:(NSUInteger)value {
-    *env.objc.borrow_mut::<NSNumberHostObject>(this) = NSNumberHostObject::LongLong(value);
+    *env.objc.borrow_mut::<NSNumberHostObject>(this) = NSNumberHostObject::LongLong(value.into());
     this
 }
 
