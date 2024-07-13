@@ -156,7 +156,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     let &NSURLHostObject::OtherURL { .. } = env.objc.borrow(this) else {
         unimplemented!(); // TODO
     };
-    this
+    true
 }
 
 - (bool)getFileSystemRepresentation:(MutPtr<u8>)buffer
