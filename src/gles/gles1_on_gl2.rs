@@ -1803,9 +1803,6 @@ impl GLES for GLES1OnGL2 {
     ) {
         gl21::GetRenderbufferParameterivEXT(target, pname, params)
     }
-    unsafe fn PointSizePointerOES(&mut self, target: GLenum) -> GLenum {
-        gl21::PointSizePointerEXT(target)
-    }
     unsafe fn CheckFramebufferStatusOES(&mut self, target: GLenum) -> GLenum {
         gl21::CheckFramebufferStatusEXT(target)
     }
