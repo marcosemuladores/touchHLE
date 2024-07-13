@@ -375,7 +375,6 @@ pub trait GLES {
         pname: GLenum,
         params: *mut GLint,
     );
-    unsafe fn PointSizePointerOES(&mut self, target: GLenum) -> GLenum;
     unsafe fn CheckFramebufferStatusOES(&mut self, target: GLenum) -> GLenum;
     unsafe fn DeleteFramebuffersOES(&mut self, n: GLsizei, framebuffers: *const GLuint);
     unsafe fn DeleteRenderbuffersOES(&mut self, n: GLsizei, renderbuffers: *const GLuint);
