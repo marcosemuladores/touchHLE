@@ -796,6 +796,9 @@ impl GLES for GLES1OnGL2 {
     unsafe fn PointSize(&mut self, size: GLfloat) {
         gl21::PointSize(size)
     }
+    unsafe fn PointSizePointerOES(&mut self, size: GLfloat) {
+        gl21::PointSizePointerOES(size)
+    }
     unsafe fn PointSizex(&mut self, size: GLfixed) {
         gl21::PointSize(fixed_to_float(size))
     }
