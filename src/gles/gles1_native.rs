@@ -168,9 +168,6 @@ impl GLES for GLES1Native {
     unsafe fn PointSize(&mut self, size: GLfloat) {
         gles11::PointSize(size)
     }
-    unsafe fn PointSizePointerOES(&mut self, size: GLfloat) {
-        gles11::PointSizePointerOES(size)
-    }
     unsafe fn PointSizex(&mut self, size: GLfixed) {
         gles11::PointSizex(size)
     }
@@ -718,6 +715,9 @@ impl GLES for GLES1Native {
         params: *mut GLint,
     ) {
         gles11::GetRenderbufferParameterivOES(target, pname, params)
+    }
+    unsafe fn PointSizePointerOES(&mut self, target: GLenum) -> GLenum {
+        gles11::PointSizePointerOES(target)
     }
     unsafe fn CheckFramebufferStatusOES(&mut self, target: GLenum) -> GLenum {
         gles11::CheckFramebufferStatusOES(target)
