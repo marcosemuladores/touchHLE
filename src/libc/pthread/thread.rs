@@ -332,7 +332,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_equal(_, _)),
     export_c_func!(pthread_self()),
     export_c_func!(pthread_join(_, _)),
-    export_c_func!(pthread_exit(_, _)),
+    export_c_func!(pthread_exit()),
     export_c_func!(pthread_setcanceltype(_, _)),
     export_c_func!(pthread_testcancel()),
     export_c_func!(pthread_cancel()),
