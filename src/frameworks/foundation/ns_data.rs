@@ -71,7 +71,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 // Calling the standard `init` is also allowed, in which case we just get data
 // of size 0.
 
-- (id)initWithBytesNoCopy:length:freeWhenDone:(MutVoidPtr)bytes
+- (id)initWithBytesNoCopy:(length)freeWhenDone
                    length:(NSUInteger)length {
     let host_object = env.objc.borrow_mut::<NSDataHostObject>(this);
     assert!(host_object.bytes.is_null() && host_object.length == 0);
