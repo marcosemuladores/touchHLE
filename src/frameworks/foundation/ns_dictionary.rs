@@ -266,11 +266,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     host_obj.remove(env, defaultName);
     *env.objc.borrow_mut(this) = host_obj;
 }
-- (id)dictionaryRepresentation {
-    this
-}
-- (())synchronize {
-}
     
 // TODO
 
@@ -473,9 +468,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.dealloc_object(this, &mut env.mem)
 }
 
-- (id)dictionaryRepresentation:(NSUInteger)cap {
-    env.objc.borrow_mut::<DictionaryHostObject>(this).map.reserve(cap as usize);
+- (id)dictionaryRepresentation {
     this
+}
+- (())synchronize {
 }
 
 - (id)initWithCapacity:(NSUInteger)cap {
