@@ -279,6 +279,9 @@ fn glLineWidthx(env: &mut Environment, val: GLfixed) {
 fn glPointSize(env: &mut Environment, size: GLfloat) {
     with_ctx_and_mem(env, |gles, _mem| unsafe { gles.PointSize(size) })
 }
+fn glPointSizePointerOES(env: &mut Environment, size: GLfloat) {
+    with_ctx_and_mem(env, |gles, _mem| unsafe { gles.PointSizePointerOES(size) })
+}
 fn glPointSizex(env: &mut Environment, size: GLfixed) {
     with_ctx_and_mem(env, |gles, _mem| unsafe { gles.PointSizex(size) })
 }
@@ -1308,6 +1311,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glLineWidthx(_)),
     // Points
     export_c_func!(glPointSize(_)),
+    export_c_func!(glPointSizePointerOES(_)),
     export_c_func!(glPointSizex(_)),
     export_c_func!(glPointParameterf(_, _)),
     export_c_func!(glPointParameterx(_, _)),
