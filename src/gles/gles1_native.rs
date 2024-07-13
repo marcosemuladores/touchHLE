@@ -168,6 +168,9 @@ impl GLES for GLES1Native {
     unsafe fn PointSize(&mut self, size: GLfloat) {
         gles11::PointSize(size)
     }
+    unsafe fn PointSizePointerOES(&mut self, size: GLfloat) {
+        gles11::PointSizePointerOES(size)
+    }
     unsafe fn PointSizex(&mut self, size: GLfixed) {
         gles11::PointSizex(size)
     }
