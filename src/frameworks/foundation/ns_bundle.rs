@@ -84,7 +84,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 + (id)preferredLocalizations:(id)localizations {
-    let preferredLocalizations = CFBundleCopyPreferredLocalizations(env, localizations);
+    let preferredLocalizations = CFBundleCopyBundleLocalizations(env, localizations);
     autorelease(env, preferredLocalizations)
 }
 
