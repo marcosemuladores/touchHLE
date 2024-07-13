@@ -6,7 +6,7 @@
 //! The `NSValue` class cluster, including `NSNumber`.
 
 use super::{
-    NSComparisonResult, NSOrderedAscending, NSOrderedDescending, NSOrderedSame, NSUInteger,
+    NSComparisonResult, NSOrderedAscending, NSOrderedDescending, NSOrderedSame, NSInteger, NSUInteger,
 };
 use crate::frameworks::foundation::ns_string::from_rust_string;
 use crate::mem::ConstPtr;
@@ -71,7 +71,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, new)
 }
 
-+ (id)numberWithInteger:(NSInteger)value {
++ (id)numberWithInteger:(NSUInteger)value {
     // TODO: for greater efficiency we could return a static-lifetime value
 
     let new: id = msg![env; this alloc];
@@ -119,7 +119,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     this
 }
 
-- (id)initWithInteger:(NSInteger)value {
+- (id)initWithInteger:(NSUInteger)value {
     *env.objc.borrow_mut::<NSNumberHostObject>(this) = NSNumberHostObject::LongLong(value);
     this
 }
