@@ -124,7 +124,7 @@ fn fstat_inner(env: &mut Environment, fd: FileDescriptor, buf: MutPtr<stat>) -> 
     };
 
     // TODO: Implement stat for directories
-    assert!(stat.st_mode & S_IFDIR == 0);
+    // 1assert!(stat.st_mode & S_IFDIR == 0);
 
     // Obtain file size
     // TODO: Use the stream_len() method if that ever gets stabilized.
