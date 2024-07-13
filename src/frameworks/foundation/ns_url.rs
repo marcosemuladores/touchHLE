@@ -151,6 +151,14 @@ pub const CLASSES: ClassExports = objc_classes! {
     this
 }
 
+- (())host {
+    // FIXME: don't assume URL is already absolute
+    let &NSURLHostObject::OtherURL { .. } = env.objc.borrow(this) else {
+        unimplemented!(); // TODO
+    };
+    this
+}
+
 - (bool)getFileSystemRepresentation:(MutPtr<u8>)buffer
                           maxLength:(NSUInteger)buffer_size {
     let &NSURLHostObject::FileURL { ns_string, .. } = env.objc.borrow(this) else {
