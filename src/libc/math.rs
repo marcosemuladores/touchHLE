@@ -253,6 +253,9 @@ fn rename(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
 fn setsockopt(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
+fn strcasestr(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+    arg1.min(arg2)
+}
 fn getsockname(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
@@ -460,6 +463,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(inflateInit_(_, _)),
     export_c_func!(rename(_, _)),
     export_c_func!(setsockopt(_, _)),
+    export_c_func!(strcasestr(_, _)),
     export_c_func!(getsockname(_, _)),
     export_c_func!(socket(_, _)),
     export_c_func!(ioctl(_, _)),
