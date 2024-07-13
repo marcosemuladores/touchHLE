@@ -74,8 +74,8 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (id)initWithBytesNoCopy:(length)freeWhenDone
                    length:(NSUInteger)length {
     let host_object = env.objc.borrow_mut::<NSDataHostObject>(this);
-    assert!(host_object.bytes.is_null() && host_object.length == 0);
-    host_object.bytes = bytes;
+    assert!(host_object.freeWhenDone.is_null() && host_object.length == 0);
+    host_object.freeWhenDone = freeWhenDone;
     host_object.length = length;
     this
 }
