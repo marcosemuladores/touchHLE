@@ -492,6 +492,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; val boolValue]
 }
 
+- (id)stringForKey:(id)defaultName {
+    msg![env; this objectForKey:defaultName]
+}
+
 @end
 
 };
