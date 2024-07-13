@@ -487,9 +487,18 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; val integerValue]
 }
 
+- (f32)floatForKey:(id)defaultName {
+    let val: id = msg![env; this objectForKey:defaultName];
+    msg![env; val floatValue]
+}
+
 - (bool)boolForKey:(id)defaultName {
     let val: id = msg![env; this objectForKey:defaultName];
     msg![env; val boolValue]
+}
+
+- (id)stringForKey:(id)defaultName {
+    msg![env; this objectForKey:defaultName]
 }
 
 @end
