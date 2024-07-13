@@ -716,9 +716,6 @@ impl GLES for GLES1Native {
     ) {
         gles11::GetRenderbufferParameterivOES(target, pname, params)
     }
-    unsafe fn PointSizePointerOES(&mut self, target: GLenum) -> GLenum {
-        gles11::PointSizePointerOES(target)
-    }
     unsafe fn CheckFramebufferStatusOES(&mut self, target: GLenum) -> GLenum {
         gles11::CheckFramebufferStatusOES(target)
     }
