@@ -290,6 +290,10 @@ fn pthread_setschedparam(env: &mut Environment, thread: pthread_t, policy: i32, 
     0
 }
 
+fn pthread_attr_setschedparam(env: &mut Environment, thread: pthread_t, policy: i32, param: ConstVoidPtr) -> i32 {
+    0
+}
+
 fn pthread_get_stackaddr_np(env: &mut Environment, thread: pthread_t) -> MutVoidPtr {
     let x = env.libc_state.pthread.thread.threads.get_mut(&thread).unwrap();
     let y = *env.threads.get(x.thread_id).unwrap().stack.clone().unwrap().end();// + 1;
@@ -330,6 +334,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_mach_thread_np(_)),
     export_c_func!(pthread_getschedparam(_, _, _)),
     export_c_func!(pthread_setschedparam(_, _, _)),
+    export_c_func!(pthread_attr_setschedparam(_, _, _)),
     export_c_func!(pthread_get_stackaddr_np(_)),
     export_c_func!(pthread_attr_getstacksize(_, _)),
     export_c_func!(pthread_attr_setstacksize(_, _)),
