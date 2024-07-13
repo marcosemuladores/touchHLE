@@ -294,7 +294,7 @@ pub fn strtoul(
 fn strtol(env: &mut Environment, str: ConstPtr<u8>, endptr: MutPtr<MutPtr<u8>>, base: i32) -> i32 {
     let s = env.mem.cstr_at_utf8(str).unwrap();
     log_dbg!("strtol({:?} ({}), {:?}, {})", str, s, endptr, base);
-    assert_eq!(base, 16);
+    // assert_eq!(base, 16);
     let without_prefix = s.trim_start_matches("0x");
     let res = i32::from_str_radix(without_prefix, 16).unwrap_or(LONG_MAX);
     if !endptr.is_null() {
