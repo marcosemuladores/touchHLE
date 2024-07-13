@@ -27,7 +27,7 @@ fn mmap(
     offset: off_t,
 ) -> MutVoidPtr {
     //assert!(addr.is_null());
-    assert_eq!(offset, 0);
+    // assert_eq!(offset, 0);
     //assert_eq!((flags & MAP_ANON), 0);
     let mut ptr = env.mem.alloc(len);
     if (flags & MAP_ANON) != 0 {
