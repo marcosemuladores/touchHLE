@@ -16,7 +16,7 @@ use crate::{msg_class, Environment};
 
 struct NSDataHostObject {
     bytes: MutVoidPtr,
-    freeWhenDone: MutVoidPtr
+    freeWhenDone: MutVoidPtr,
     length: NSUInteger,
 }
 impl HostObject for NSDataHostObject {}
