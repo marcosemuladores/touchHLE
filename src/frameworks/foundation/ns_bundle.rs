@@ -83,6 +83,11 @@ pub const CLASSES: ClassExports = objc_classes! {
    }
 }
 
++ (id)preferredLocalizations:(id)localizations {
+    let preferredLocalizations = CFBundleCopyPreferredLocalizations(env, localizations);
+    autorelease(env, preferredLocalizations)
+}
+
 + (id)preferredLocalizationsFromArray:(id)localizations_array { // NSArray<NSString *> *
     let preferredLocalizations = CFBundleCopyPreferredLocalizationsFromArray(env, localizations_array);
     autorelease(env, preferredLocalizations)
