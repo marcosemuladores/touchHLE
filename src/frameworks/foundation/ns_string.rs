@@ -1076,12 +1076,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg_class![env; _touchHLE_NSMutableString allocWithZone:zone]
 }
 
-+ (id)string:(id)String { // NSString*
-    let str = to_rust_string(env, aString);
-    let host_object = StringHostObject::Utf8(str);
-    *env.objc.borrow_mut(this) = host_object;
-}
-
 + (id)stringWithCapacity:(NSUInteger)_capacity {
     msg_class![env; NSMutableString new]
 }
