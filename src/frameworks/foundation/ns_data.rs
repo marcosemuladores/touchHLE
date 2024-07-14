@@ -16,7 +16,7 @@ use crate::{msg_class, Environment};
 
 struct NSDataHostObject {
     bytes: MutVoidPtr,
-    freeWhenDone: MutVoidPtr,
+    freeWhenDone: Bool,
     length: NSUInteger,
 }
 impl HostObject for NSDataHostObject {}
@@ -31,7 +31,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 + (id)allocWithZone:(NSZonePtr)_zone {
     let host_object = Box::new(NSDataHostObject {
         bytes: Ptr::null(),
-        freeWhenDone: Ptr::null(),
+        freeWhenDone: Bool,
         length: 0,
     });
     env.objc.alloc_object(this, host_object, &mut env.mem)
@@ -73,8 +73,8 @@ pub const CLASSES: ClassExports = objc_classes! {
 // Calling the standard `init` is also allowed, in which case we just get data
 // of size 0.
 
-- (id)initWithBytesNoCopy:(MutVoidPtr)freeWhenDone
-                   length:(NSUInteger)length {
+- (id)initWithBytesNoCopy:(NSUInteger)length:(Bool)freeWhenDone
+                   bytes:(MutVoidPtr)bytes {
     let host_object = env.objc.borrow_mut::<NSDataHostObject>(this);
     assert!(host_object.freeWhenDone.is_null() && host_object.length == 0);
     host_object.freeWhenDone = freeWhenDone;
@@ -271,4 +271,4 @@ pub fn to_rust_slice(env: &mut Environment, data: id) -> &[u8] {
     assert!(!borrowed_data.bytes.is_null() && borrowed_data.length != 0);
     env.mem
         .bytes_at(borrowed_data.bytes.cast(), borrowed_data.length)
-}
+    }
