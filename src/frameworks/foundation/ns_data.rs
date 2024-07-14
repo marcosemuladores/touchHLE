@@ -8,6 +8,7 @@
 use super::ns_string::to_rust_string;
 use super::{NSRange, NSUInteger};
 use crate::fs::GuestPath;
+use crate::frameworks::foundation::ns_value::NSNumberHostObject,
 use crate::mem::{ConstPtr, ConstVoidPtr, MutPtr, MutVoidPtr, Ptr};
 use crate::objc::{
     autorelease, id, msg, nil, objc_classes, release, retain, ClassExports, HostObject, NSZonePtr,
@@ -16,7 +17,7 @@ use crate::{msg_class, Environment};
 
 struct NSDataHostObject {
     bytes: MutVoidPtr,
-    freeWhenDone: Bool,
+    freeWhenDone: bool,
     length: NSUInteger,
 }
 impl HostObject for NSDataHostObject {}
