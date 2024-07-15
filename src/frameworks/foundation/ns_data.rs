@@ -192,6 +192,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.borrow::<NSDataHostObject>(this).length
 }
 
+- (bool)freeWhenDone {
+    env.objc.borrow::<NSDataHostObject>(this).freeWhenDone
+}
+
 - (bool)isEqualToData:(id)other {
     // FIXME: Avoid allocation
     let a = to_rust_slice(env, this).to_owned();
