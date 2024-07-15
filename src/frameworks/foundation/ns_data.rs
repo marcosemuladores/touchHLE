@@ -191,7 +191,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.borrow::<NSDataHostObject>(this).length
 }
 
-- (bool)freeWhenDone {
+- (ConstVoidPtr)freeWhenDone {
     env.objc.borrow::<NSDataHostObject>(this).freeWhenDone
 }
 
