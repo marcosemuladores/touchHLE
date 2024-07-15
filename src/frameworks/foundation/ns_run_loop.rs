@@ -122,7 +122,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (())size {
-    size_run_loop(env, this, /* single_iteration: */ false);
+    run_run_loop(env, this, /* single_iteration: */ false);
 }
 
 - (())runMode:(NSRunLoopMode)mode
