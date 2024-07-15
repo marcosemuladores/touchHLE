@@ -7,7 +7,7 @@
 
 use super::ui_device::*;
 use crate::dyld::{export_c_func, ConstantExports, FunctionExports, HostConstant};
-use crate::frameworks::foundation::{ns_array, ns_string, NSUInteger, NSTimeInterval};
+use crate::frameworks::foundation::{ns_array, ns_string, NSUInteger, NSInteger, NSTimeInterval};
 use crate::frameworks::uikit::ui_nib::load_main_nib_file;
 use crate::mem::MutPtr;
 use crate::objc::{
