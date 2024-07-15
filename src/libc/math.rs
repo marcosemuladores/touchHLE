@@ -280,6 +280,9 @@ fn inet_addr(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
 fn listen(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
+fn _exit(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+    arg1.min(arg2)
+}
 fn __sprintf_chk(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
@@ -484,6 +487,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(ioctl(_, _)),
     export_c_func!(inet_addr(_, _)),
     export_c_func!(listen(_, _)),
+    export_c_func!(_exit(_, _)),
     export_c_func!(__sprintf_chk(_, _)),
     export_c_func!(putc(_, _)),
     export_c_func!(hypot(_, _)),
