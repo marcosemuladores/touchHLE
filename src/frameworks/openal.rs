@@ -102,7 +102,7 @@ fn alcCreateContext(
     device: MutPtr<GuestALCdevice>,
     attrlist: ConstPtr<i32>,
 ) -> MutPtr<GuestALCcontext> {
-    assert!(attrlist.is_null()); // unimplemented
+    // assert!(attrlist.is_null()); // unimplemented
 
     let &host_device = State::get(env).devices.get(&device).unwrap();
 
