@@ -121,6 +121,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     // TODO
 }
 
+- (())setStatusBarStyle  {
+    // assert!(env.framework_state.uikit.ui_application.shared_application.is_none());
+    env.framework_state.uikit.ui_application.shared_application.unwrap_or(nil)
+}
+
 - (NSTimeInterval)statusBarOrientationAnimationDuration {
     0.0
 }
