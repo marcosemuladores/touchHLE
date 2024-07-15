@@ -32,7 +32,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 + (id)allocWithZone:(NSZonePtr)_zone {
     let host_object = Box::new(NSDataHostObject {
         bytes: Ptr::null(),
-        freeWhenDone: Bool,
+        freeWhenDone: bool,
         length: 0,
     });
     env.objc.alloc_object(this, host_object, &mut env.mem)
@@ -77,7 +77,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (id)initWithBytesNoCopy:(NSUInteger)length
                      freeWhenDone:(bool)freeWhenDone {
     let host_object = env.objc.borrow_mut::<NSDataHostObject>(this);
-    assert!(host_object.freeWhenDone.is_null() && host_object.length == 0);
+    assert!(host_object.freeWhenDone.bool() && host_object.length == 0);
     host_object.freeWhenDone = freeWhenDone;
     host_object.length = length;
     this
