@@ -121,6 +121,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     run_run_loop(env, this, /* single_iteration: */ false);
 }
 
+- (())size {
+    size_run_loop(env, this, /* single_iteration: */ false);
+}
+
 - (())runMode:(NSRunLoopMode)mode
    beforeDate:(id)limit_date { // NSDate *
     let default_mode = ns_string::get_static_str(env, NSDefaultRunLoopMode);
