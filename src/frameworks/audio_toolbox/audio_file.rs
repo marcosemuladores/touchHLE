@@ -100,6 +100,14 @@ fn ExtAudioFileOpenURL(
     audio_file_open_inner(env, in_file_ref, out_audio_file)
 }
 
+fn ExtAudioFileWrapAudioFileID(
+    env: &mut Environment,
+    in_file_ref: CFURLRef,
+    out_audio_file: MutPtr<AudioFileID>,
+) -> OSStatus {
+    audio_file_open_inner(env, in_file_ref, out_audio_file)
+}
+
 fn audio_file_open_inner(
     env: &mut Environment,
     in_file_ref: CFURLRef,
@@ -485,6 +493,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(AudioFileReadPackets(_, _, _, _, _, _, _)),
     export_c_func!(AudioFileClose(_)),
     export_c_func!(ExtAudioFileOpenURL(_, _)),
+    export_c_func!(ExtAudioFileWrapAudioFileID(_, _)),
     export_c_func!(ExtAudioFileGetProperty(_, _, _, _)),
     export_c_func!(ExtAudioFileSetProperty(_, _, _, _)),
     export_c_func!(ExtAudioFileRead(_, _, _)),
