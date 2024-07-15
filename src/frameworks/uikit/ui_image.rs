@@ -135,7 +135,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         blendMode:(i32)blend_mode // CGBlendMode
             alpha:(CGFloat)alpha {
     log!("drawAtPoint p {} bm {} al {}", point, blend_mode, alpha);
-    assert_eq!(alpha, 0.0);
+    // assert_eq!(alpha, 0.0);
 }
 
 - (())drawInRect:(CGRect)rect {
