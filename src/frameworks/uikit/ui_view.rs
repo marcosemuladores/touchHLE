@@ -114,6 +114,11 @@ pub const CLASSES: ClassExports = objc_classes! {
 + (())setAnimationDelegate:(id)delegate {
     log!("WARNING: Ignoring setAnimationDelegate:");
 }
+
++ (())setAnimationsEnabled:(id)enabled {
+    log!("WARNING: Ignoring setAnimationsEnabled:");
+}
+
 + (())setAnimationDidStopSelector:(SEL)selector {
     log!("WARNING: Ignoring setAnimationDidStopSelector:");
 }
