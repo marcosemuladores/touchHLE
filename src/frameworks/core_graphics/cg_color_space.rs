@@ -23,11 +23,6 @@ pub const CLASSES: ClassExports = objc_classes! {
 // those are just Objective-C types, so we need a class for it, but its name is
 // not visible anywhere.
 @implementation _touchHLE_CGColorSpace: NSObject
-
-- (())size {
-    run_run_loop(env, this, /* single_iteration: */ false);
-}
-
 @end
 
 };
