@@ -33,7 +33,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 + (id)allocWithZone:(NSZonePtr)_zone {
     let host_object = Box::new(NSDataHostObject {
         bytes: Ptr::null(),
-        freeWhenDone: BOOL,
+        freeWhenDone: u32,
         length: 0,
     });
     env.objc.alloc_object(this, host_object, &mut env.mem)
