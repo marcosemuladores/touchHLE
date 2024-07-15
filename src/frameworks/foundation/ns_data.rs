@@ -5,11 +5,9 @@
  */
 //! `NSData` and `NSMutableData`.
 
-use touchHLE_gl_bindings::gl21compat::BOOL;
 use super::ns_string::to_rust_string;
 use super::{NSRange, NSUInteger};
 use crate::fs::GuestPath;
-use crate::frameworks::foundation::ns_value::NSNumberHostObject::Bool;
 use crate::mem::{ConstPtr, ConstVoidPtr, MutPtr, MutVoidPtr, Ptr};
 use crate::objc::{
     autorelease, id, msg, nil, objc_classes, release, retain, ClassExports, HostObject, NSZonePtr,
@@ -18,7 +16,7 @@ use crate::{msg_class, Environment};
 
 struct NSDataHostObject {
     bytes: MutVoidPtr,
-    freeWhenDone: bool,
+    freeWhenDone: MutVoidPtr,
     length: NSUInteger,
 }
 impl HostObject for NSDataHostObject {}
@@ -33,7 +31,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 + (id)allocWithZone:(NSZonePtr)_zone {
     let host_object = Box::new(NSDataHostObject {
         bytes: Ptr::null(),
-        freeWhenDone: u32,
+        freeWhenDone: Ptr::null(),
         length: 0,
     });
     env.objc.alloc_object(this, host_object, &mut env.mem)
@@ -76,9 +74,9 @@ pub const CLASSES: ClassExports = objc_classes! {
 // of size 0.
 
 - (id)initWithBytesNoCopy:(NSUInteger)length
-                     freeWhenDone:(bool)freeWhenDone {
+                     freeWhenDone:(MutVoidPtr)freeWhenDone {
     let host_object = env.objc.borrow_mut::<NSDataHostObject>(this);
-        assert!(host_object.freeWhenDone.u32 && host_object.length == 0);
+    assert!(host_object.freeWhenDone.is_null() && host_object.length == 0);
     host_object.freeWhenDone = freeWhenDone;
     host_object.length = length;
     this
