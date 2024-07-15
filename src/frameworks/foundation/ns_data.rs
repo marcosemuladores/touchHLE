@@ -192,7 +192,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (ConstVoidPtr)freeWhenDone {
-    env.objc.borrow::<NSDataHostObject>(this).freeWhenDone
+    env.objc.borrow::<NSDataHostObject>(this).freeWhenDone.cast_const()
 }
 
 - (bool)isEqualToData:(id)other {
