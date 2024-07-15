@@ -5,6 +5,7 @@
  */
 //! `NSData` and `NSMutableData`.
 
+use touchHLE_gl_bindings::gl21compat::BOOL;
 use super::ns_string::to_rust_string;
 use super::{NSRange, NSUInteger};
 use crate::fs::GuestPath;
