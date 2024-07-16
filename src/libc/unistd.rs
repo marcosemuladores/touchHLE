@@ -38,7 +38,7 @@ fn usleep(env: &mut Environment, useconds: useconds_t) -> i32 {
 fn chdir(env: &mut Environment, path: ConstPtr<u8>) -> i32 {
     let str = env.mem.cstr_at_utf8(path).unwrap();
     log_dbg!("chdir {}", str);
-    env.fs.change_working_directory(str);
+    env.fs.change_working_directory(GuestPath);
     // TODO: error handling
     0
 }
