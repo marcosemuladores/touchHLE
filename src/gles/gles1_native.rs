@@ -101,8 +101,8 @@ impl GLES for GLES1Native {
     unsafe fn Finish(&mut self) {
         gles11::Finish()
     }
-    unsafe fn SampleCoverage(&mut self) {
-        gles11::SampleCoverage(/* f32 */ /* u8 */)
+    unsafe fn SampleCoverage(&mut self, name: GLenum) -> *const GLubyte {
+        gles11::SampleCoverage(name)
     }
     unsafe fn GetString(&mut self, name: GLenum) -> *const GLubyte {
         gles11::GetString(name)
