@@ -414,6 +414,41 @@ int test_realloc() {
   return res == 0 ? 0 : -1;
 }
 
+int test_eof() {
+  CFBundleRef mainBundle = CFBundleGetMainBundle();
+  CFURLRef fileURL =
+      CFBundleCopyResourceURL(mainBundle, (CFStringRef) @"waffle.txt", NULL,
+                              (CFStringRef) @"uwu_folder");
+  char path[256];
+  bool res =
+      CFURLGetFileSystemRepresentation(fileURL, TRUE, (UInt8 *)path, 256);
+  CFRelease(fileURL);
+  if (!res)
+    return -1;
+
+  FILE *file;
+  int c, i;
+  char buf[8];
+
+  file = fopen(path, "r");
+  if (file == NULL)
+    return -1;
+
+  i = 0;
+  while (true) {
+    c = fgetc(file);
+    if (feof(file)) {
+      break;
+    }
+    buf[i] = c;
+    i++;
+  }
+  buf[i] = '\0';
+  fclose(file);
+
+  return strcmp(buf, "WAFFLE\n");
+}
+
 int test_atof() {
   if (atof("1") != 1)
     return -1;
@@ -1065,6 +1100,7 @@ struct {
     FUNC_DEF(test_swscanf),
     FUNC_DEF(test_errno),
     FUNC_DEF(test_realloc),
+    FUNC_DEF(test_eof),
     FUNC_DEF(test_atof),
     FUNC_DEF(test_strtof),
     FUNC_DEF(test_getcwd_chdir),
