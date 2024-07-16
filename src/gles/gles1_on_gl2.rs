@@ -674,6 +674,9 @@ impl GLES for GLES1OnGL2 {
     unsafe fn Finish(&mut self) {
         gl21::Finish();
     }
+    unsafe fn SampleCoverage(&mut self) {
+        gl21::SampleCoverage();
+    }
     unsafe fn GetString(&mut self, name: GLenum) -> *const GLubyte {
         gl21::GetString(name)
     }
