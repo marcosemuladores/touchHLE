@@ -55,6 +55,7 @@ pub trait GLES {
     unsafe fn Hint(&mut self, target: GLenum, mode: GLenum);
     unsafe fn Flush(&mut self);
     unsafe fn Finish(&mut self);
+    unsafe fn SampleCoverage(&mut self);
     #[allow(dead_code)]
     unsafe fn GetString(&mut self, name: GLenum) -> *const GLubyte;
 
