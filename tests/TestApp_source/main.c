@@ -58,6 +58,7 @@ char *realpath(const char *, char *);
 size_t mbstowcs(wchar_t *, const char *, size_t);
 size_t wcstombs(char *, const wchar_t *, size_t);
 
+#include <CoreFoundation/CoreFoundation.h>
 #include <Foundation/Foundation.h>
 
 // <string.h>
@@ -434,6 +435,33 @@ int test_NSString_compare() {
   if ([@"abc123" compare:@"abc123" options:NSNumericSearch] != NSOrderedSame)
     return -1;
   return 0;
+}
+
+int test_chdir() {
+  CFBundleRef mainBundle = CFBundleGetMainBundle();
+  CFURLRef resourceURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
+  char path[256];
+  bool res =
+      CFURLGetFileSystemRepresentation(resourceURL, TRUE, (UInt8 *)path, 256);
+  CFRelease(resourceURL);
+  if (!res) {
+    return -1;
+  }
+  // absolute path
+  if (chdir(path) != 0) {
+    return -1;
+  }
+  // relative path
+  if (chdir("uwu_folder") != 0) {
+    return -1;
+  }
+  FILE *file;
+  file = fopen("waffle.txt", "r");
+  if (file) {
+    fclose(file);
+    return 0;
+  }
+  return -1;
 }
 
 int test_eof() {
@@ -1123,6 +1151,7 @@ struct {
     FUNC_DEF(test_errno),
     FUNC_DEF(test_realloc),
     FUNC_DEF(test_NSString_compare),
+    FUNC_DEF(test_chdir),
     FUNC_DEF(test_eof),
     FUNC_DEF(test_atof),
     FUNC_DEF(test_strtof),
