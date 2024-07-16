@@ -35,6 +35,14 @@ fn usleep(env: &mut Environment, useconds: useconds_t) -> i32 {
     0 // success
 }
 
+fn chdir(env: &mut Environment, path: ConstPtr<u8>) -> i32 {
+    let str = env.mem.cstr_at_utf8(path).unwrap();
+    log_dbg!("chdir {}", str);
+    env.fs.change_current_directory(str);
+    // TODO: error handling
+    0
+}
+
 #[allow(non_camel_case_types)]
 type pid_t = i32;
 
@@ -161,6 +169,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(get_end()),
     export_c_func!(sleep(_)),
     export_c_func!(usleep(_)),
+    export_c_func!(chdir(_)),
     export_c_func!(getpid()),
     export_c_func!(getppid()),
     export_c_func!(isatty(_)),
