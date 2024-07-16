@@ -58,6 +58,8 @@ char *realpath(const char *, char *);
 size_t mbstowcs(wchar_t *, const char *, size_t);
 size_t wcstombs(char *, const wchar_t *, size_t);
 
+#include <Foundation/Foundation.h>
+
 // <string.h>
 void *memset(void *, int, size_t);
 int memcmp(const void *, const void *, size_t);
@@ -412,6 +414,26 @@ int test_realloc() {
   int res = memcmp(ptr, "abcd", 4);
   free(ptr);
   return res == 0 ? 0 : -1;
+}
+
+int test_NSString_compare() {
+  if ([@"abcd" compare:@"abcd"] != NSOrderedSame)
+    return -1;
+  if ([@"abcd" compare:@"ABCD"] != NSOrderedDescending)
+    return -1;
+  if ([@"Name2.txt" compare:@"Name7.txt"
+                    options:NSNumericSearch] != NSOrderedAscending)
+    return -1;
+  if ([@"Name7.txt" compare:@"Name25.txt"
+                    options:NSNumericSearch] != NSOrderedAscending)
+    return -1;
+  if ([@"abc" compare:@"123" options:NSNumericSearch] != NSOrderedDescending)
+    return -1;
+  if ([@"abc" compare:@"abc123" options:NSNumericSearch] != NSOrderedAscending)
+    return -1;
+  if ([@"abc123" compare:@"abc123" options:NSNumericSearch] != NSOrderedSame)
+    return -1;
+  return 0;
 }
 
 int test_eof() {
@@ -1100,6 +1122,7 @@ struct {
     FUNC_DEF(test_swscanf),
     FUNC_DEF(test_errno),
     FUNC_DEF(test_realloc),
+    FUNC_DEF(test_NSString_compare),
     FUNC_DEF(test_eof),
     FUNC_DEF(test_atof),
     FUNC_DEF(test_strtof),
