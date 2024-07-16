@@ -437,6 +437,29 @@ int test_NSString_compare() {
   return 0;
 }
 
+int test_NSFileManager() {
+  NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+  NSString *resourcePath = [[NSBundle mainBundle] resourcePath];
+  NSString *folderPath =
+      [resourcePath stringByAppendingPathComponent:@"uwu_folder"];
+  NSFileManager *manager = [NSFileManager defaultManager];
+  NSArray *contents = [manager directoryContentsAtPath:folderPath];
+  if ([contents count] != 1)
+    return -1;
+  NSString *first = [contents objectAtIndex:0];
+  if (![first isEqualToString:@"waffle.txt"])
+    return -1;
+  NSString *filePath = [folderPath stringByAppendingPathComponent:first];
+  BOOL isDirectory = TRUE;
+  BOOL res = [manager fileExistsAtPath:filePath isDirectory:&isDirectory];
+  if (!res)
+    return -1;
+  if (isDirectory)
+    return -1;
+  [pool release];
+  return 0;
+}
+
 int test_chdir() {
   CFBundleRef mainBundle = CFBundleGetMainBundle();
   CFURLRef resourceURL = CFBundleCopyResourcesDirectoryURL(mainBundle);
@@ -1151,6 +1174,7 @@ struct {
     FUNC_DEF(test_errno),
     FUNC_DEF(test_realloc),
     FUNC_DEF(test_NSString_compare),
+    FUNC_DEF(test_NSFileManager),
     FUNC_DEF(test_chdir),
     FUNC_DEF(test_eof),
     FUNC_DEF(test_atof),
