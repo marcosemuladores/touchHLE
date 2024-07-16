@@ -162,8 +162,37 @@ fn glFlush(env: &mut Environment) {
 fn glFinish(env: &mut Environment) {
     with_ctx_and_mem(env, |gles, _mem| unsafe { gles.Finish() })
 }
-fn glSampleCoverage(env: &mut Environment) {
-    with_ctx_and_mem(env, |gles, _mem| unsafe { gles.SampleCoverage() })
+fn glSampleCoverage(env: &mut Environment, name: GLenum) -> ConstPtr<GLubyte> {
+    let res = if let Some(&str) = env.framework_state.opengles.strings_cache.get(&name) {
+        str
+    } else {
+        let new_str = with_ctx_and_mem(env, |_gles, mem| {
+            // Those values are extracted from the iPod touch 2nd gen, iOS 4.2.1
+            let s: &[u8] = match name {
+                gles11::VENDOR => {
+                    b"Imagination Technologies"
+                }
+                gles11::RENDERER => {
+                    b"PowerVR MBXLite with VGPLite"
+                }
+                gles11::VERSION => {
+                    b"OpenGL ES-CM 1.1 (76)"
+                }
+                gles11::EXTENSIONS => {
+                    b"GL_APPLE_framebuffer_multisample GL_APPLE_texture_max_level GL_EXT_discard_framebuffer GL_EXT_texture_filter_anisotropic GL_EXT_texture_lod_bias GL_IMG_read_format GL_IMG_texture_compression_pvrtc GL_IMG_texture_format_BGRA8888 GL_OES_blend_subtract GL_OES_compressed_paletted_texture GL_OES_depth24 GL_OES_draw_texture GL_OES_framebuffer_object GL_OES_mapbuffer GL_OES_matrix_palette GL_OES_point_size_array GL_OES_point_sprite GL_OES_read_format GL_OES_rgb8_rgba8 GL_OES_texture_mirrored_repeat GL_OES_vertex_array_object "
+                }
+                _ => unreachable!(),
+            };
+            mem.alloc_and_write_cstr(s).cast_const()
+        });
+        env.framework_state
+            .opengles
+            .strings_cache
+            .insert(name, new_str);
+        new_str
+    };
+    log_dbg!("glSampleCoverage({}) => {:?}", name, res);
+    res
 }
 fn glGetString(env: &mut Environment, name: GLenum) -> ConstPtr<GLubyte> {
     let res = if let Some(&str) = env.framework_state.opengles.strings_cache.get(&name) {
@@ -1290,7 +1319,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glHint(_, _)),
     export_c_func!(glFlush()),
     export_c_func!(glFinish()),
-    export_c_func!(glSampleCoverage()),
+    export_c_func!(glSampleCoverage(_)),
     export_c_func!(glGetString(_)),
     // Other state manipulation
     export_c_func!(glAlphaFunc(_, _)),
