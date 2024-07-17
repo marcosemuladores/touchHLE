@@ -376,6 +376,7 @@ pub trait GLES {
         params: *mut GLint,
     );
     unsafe fn CheckFramebufferStatusOES(&mut self, target: GLenum) -> GLenum;
+    unsafe fn DrawTexiOES(&mut self, n: GLsizei, framebuffers: *const GLuint);
     unsafe fn DeleteFramebuffersOES(&mut self, n: GLsizei, framebuffers: *const GLuint);
     unsafe fn DeleteRenderbuffersOES(&mut self, n: GLsizei, renderbuffers: *const GLuint);
     unsafe fn GenerateMipmapOES(&mut self, target: GLenum);
