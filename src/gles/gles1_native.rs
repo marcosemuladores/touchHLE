@@ -719,6 +719,9 @@ impl GLES for GLES1Native {
     unsafe fn CheckFramebufferStatusOES(&mut self, target: GLenum) -> GLenum {
         gles11::CheckFramebufferStatusOES(target)
     }
+    unsafe fn DrawTexiOES(&mut self, n: GLsizei, framebuffers: *const GLuint) {
+        gles11::DrawTexiOES(n, framebuffers)
+    }
     unsafe fn DeleteFramebuffersOES(&mut self, n: GLsizei, framebuffers: *const GLuint) {
         gles11::DeleteFramebuffersOES(n, framebuffers)
     }
