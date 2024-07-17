@@ -167,6 +167,20 @@ pub const CLASSES: ClassExports = objc_classes! {
     };
     msg_super![env; this setBackgroundColor:color]
 }
+
+- (())setShadowColor:(id)color { // UIColor*
+    // This overrides the standard setShadowColor: accessor on UIView.
+    // UILabel seems to default to white, and setting the Shadow color to
+    // nil also just gives white, rather than the normal transparency. I don't
+    // know how or why it does that, but overriding this setter seems like a
+    // reasonable way to match that behavior.
+    let color: id = if color == nil {
+        msg_class![env; UIColor whiteColor]
+    } else {
+        color
+    };
+    msg_super![env; this setShadowColor:color]
+}
 - (())setOpaque:(bool)_opaque {
     // Built-in views don't have user-controlled opaqueness.
 }
