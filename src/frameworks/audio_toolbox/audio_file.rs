@@ -326,10 +326,10 @@ fn ExtAudioFileSetProperty(
             assert!(format.bits_per_channel == 16);
             // assert!(format.bytes_per_frame == 2);
             // assert!(format.channels_per_frame == 1);
-            assert!(format.bytes_per_packet == 2);
-            assert!(format.frames_per_packet == 1);
-            assert!(format.format_id == kAudioFormatLinearPCM);
-            assert!(format.sample_rate == host_object.audio_file.audio_description().sample_rate);
+            // assert!(format.bytes_per_packet == 2);
+            // assert!(format.frames_per_packet == 1);
+            // assert!(format.format_id == kAudioFormatLinearPCM);
+            // assert!(format.sample_rate == host_object.audio_file.audio_description().sample_rate);
         }
         _ => unreachable!(),
     }
