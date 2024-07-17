@@ -577,7 +577,7 @@ fn unlink(env: &mut Environment, path: ConstPtr<u8>) -> i32 {
 }
 
 fn fsync(env: &mut Environment, fd: FileDescriptor) -> i32 {
-    let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
+    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
     match file.file.sync_all() {
         Ok(()) => 0,
         Err(_) => -1, // TODO: set errno
@@ -585,7 +585,7 @@ fn fsync(env: &mut Environment, fd: FileDescriptor) -> i32 {
 }
 
 fn ftruncate(env: &mut Environment, fd: FileDescriptor, len: off_t) -> i32 {
-    let file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
+    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
     match file.file.set_len(len as u64) {
         Ok(()) => 0,
         Err(_) => -1, // TODO: set errno
