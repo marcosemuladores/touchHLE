@@ -1146,6 +1146,11 @@ fn glCheckFramebufferStatusOES(env: &mut Environment, target: GLenum) -> GLenum 
         gles.CheckFramebufferStatusOES(target)
     })
 }
+fn glDrawTexiOES(env: &mut Environment, target: GLenum) -> GLenum {
+    with_ctx_and_mem(env, |gles, _mem| unsafe {
+        gles.DrawTexiOES(target)
+    })
+}
 fn glDeleteFramebuffersOES(env: &mut Environment, n: GLsizei, framebuffers: ConstPtr<GLuint>) {
     with_ctx_and_mem(env, |gles, mem| {
         let n_usize: GuestUSize = n.try_into().unwrap();
@@ -1416,6 +1421,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glGetFramebufferAttachmentParameterivOES(_, _, _, _)),
     export_c_func!(glGetRenderbufferParameterivOES(_, _, _)),
     export_c_func!(glCheckFramebufferStatusOES(_)),
+    export_c_func!(glDrawTexiOES(_, _)),
     export_c_func!(glDeleteFramebuffersOES(_, _)),
     export_c_func!(glDeleteRenderbuffersOES(_, _)),
     export_c_func!(glGenerateMipmapOES(_)),
