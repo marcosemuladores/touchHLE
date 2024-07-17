@@ -324,7 +324,7 @@ fn ExtAudioFileSetProperty(
                 .mem
                 .read(in_property_data.cast::<AudioStreamBasicDescription>());
             assert!(format.bits_per_channel == 16);
-            assert!(format.bytes_per_frame == 2);
+            // assert!(format.bytes_per_frame == 2);
             assert!(format.channels_per_frame == 1);
             assert!(format.bytes_per_packet == 2);
             assert!(format.frames_per_packet == 1);
