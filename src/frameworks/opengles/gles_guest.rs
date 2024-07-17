@@ -1421,7 +1421,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glGetFramebufferAttachmentParameterivOES(_, _, _, _)),
     export_c_func!(glGetRenderbufferParameterivOES(_, _, _)),
     export_c_func!(glCheckFramebufferStatusOES(_)),
-    export_c_func!(glDrawTexiOES(_, _)),
+    export_c_func!(glDrawTexiOES(_)),
     export_c_func!(glDeleteFramebuffersOES(_, _)),
     export_c_func!(glDeleteRenderbuffersOES(_, _)),
     export_c_func!(glGenerateMipmapOES(_)),
