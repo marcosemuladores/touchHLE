@@ -391,7 +391,7 @@ pub fn write(
     match file.file.write(buffer_slice) {
         Ok(bytes_written) => {
             if bytes_written < buffer_slice.len() {
-                log!(
+                panic!(
                     "Warning: write({:?}, {:?}, {:#x}) wrote only {:#x} bytes",
                     fd,
                     buffer,
