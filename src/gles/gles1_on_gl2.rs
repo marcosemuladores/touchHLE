@@ -1806,9 +1806,6 @@ impl GLES for GLES1OnGL2 {
     unsafe fn CheckFramebufferStatusOES(&mut self, target: GLenum) -> GLenum {
         gl21::CheckFramebufferStatusEXT(target)
     }
-    unsafe fn DrawTexiOES(&mut self, n: GLsizei, framebuffers: *const GLuint) {
-        gl21::DrawTexiEXT(n, framebuffers)
-    }
     unsafe fn DeleteFramebuffersOES(&mut self, n: GLsizei, framebuffers: *const GLuint) {
         gl21::DeleteFramebuffersEXT(n, framebuffers)
     }
