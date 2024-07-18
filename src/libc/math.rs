@@ -298,6 +298,9 @@ fn sqlite3_open(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
 fn sqlite3_errcode(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
+fn sqlite3_errmsg(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+    arg1.min(arg2)
+}
 fn putc(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
