@@ -10,10 +10,10 @@ use crate::dyld::{export_c_func, FunctionExports};
 use crate::frameworks::foundation::{ns_string, unichar};
 use crate::libc::clocale::{setlocale, LC_CTYPE};
 use crate::libc::posix_io::{STDERR_FILENO, STDOUT_FILENO};
-use crate::libc::stdio::{EOF, fgetc, FILE, fputc, fwrite};
+use crate::libc::stdio::{FILE, fwrite};
 use crate::libc::stdlib::{atof_inner, atoi_inner, strtoul};
 use crate::libc::string::strlen;
-use crate::libc::wchar::{wchar_t, wmemcpy};
+use crate::libc::wchar::wchar_t;
 use crate::mem::{ConstPtr, guest_size_of, GuestUSize, Mem, MutPtr, MutVoidPtr, Ptr};
 use crate::objc::{id, msg, nil};
 use crate::Environment;
@@ -171,20 +171,6 @@ pub fn printf_inner<const NS_LOG: bool, F: Fn(&Mem, GuestUSize) -> u8>(
                     } else {
                         write!(&mut res, "{:>1$}", int_with_precision, pad_width).unwrap();
                     }
-                 if specifier == b'g' {
-                    while let Some(&c) = res.last() {
-                        if c == b'0' {
-                            res.pop();
-                        } else {
-                            break;
-                        }
-                    }
-                    if let Some(&c) = res.last() {
-                        if c == b'.' {
-                            res.pop();
-                        }
-                    }
-                 }
                 } else {
                     res.extend_from_slice(int_with_precision.as_bytes());
                 }
@@ -542,106 +528,6 @@ fn printf(env: &mut Environment, format: ConstPtr<u8>, args: DotDotDot) -> i32 {
 
 // TODO: more printf variants
 
-fn fscanf(env: &mut Environment, stream: MutPtr<FILE>, format: ConstPtr<u8>, args: DotDotDot) -> i32 {
-    log_dbg!(
-        "fscanf({:?}, {:?} ({:?}), ...)",
-        stream,
-        format,
-        env.mem.cstr_at_utf8(format)
-    );
-
-    let mut args = args.start();
-
-    let mut format_char_idx = 0;
-
-    let mut matched_args = 0;
-
-    loop {
-        let c = env.mem.read(format + format_char_idx);
-        format_char_idx += 1;
-
-        if c == b'\0' {
-            break;
-        }
-        if c != b'%' {
-            //let cc = env.mem.read(src_ptr);
-            let cc = fgetc(env, stream);
-            if (cc == EOF) {
-                panic!("EOF");
-            }
-            let cc: u8 = cc.try_into().unwrap();
-            if c != cc {
-                log_dbg!("fscanf c '{}' cc '{}'", c as char, cc as char);
-                return matched_args - 1;
-            }
-            //src_ptr += 1;
-            continue;
-        }
-
-        let length_modifier = if env.mem.read(format + format_char_idx) == b'h' {
-            format_char_idx += 1;
-            Some(b'h')
-        } else {
-            None
-        };
-
-        let specifier = env.mem.read(format + format_char_idx);
-        format_char_idx += 1;
-
-        match specifier {
-            b'd' | b'i' => {
-                if specifier == b'i' {
-                    // TODO: hexs and octals
-                    //assert_ne!(env.mem.read(src_ptr), b'0');
-                    //assert_ne!(fgetc(env, stream) as u8, b'0');
-                }
-
-                match length_modifier {
-                    Some(lm) => {
-                        match lm {
-                            b'h' => {
-                                // signed short* or unsigned short*
-                                let mut val: i16 = 0;
-                                while let c @ b'0'..=b'9' = fgetc(env, stream).try_into().unwrap() {
-                                    val = val * 10 + (c - b'0') as i16;
-                                    //src_ptr += 1;
-                                }
-                                let c_short_ptr: ConstPtr<i16> = args.next(env);
-                                env.mem.write(c_short_ptr.cast_mut(), val);
-                            }
-                            _ => unimplemented!(),
-                        }
-                    }
-                    _ => {
-                        let mut val: i32 = 0;
-                        let mut sign = 1;
-                        if let c = fgetc(env, stream).try_into().unwrap() {
-                            if c == b'-' {
-                                sign = -1;
-                            } else {
-                                ungetc(env, c, stream);
-                            }
-                        }
-                        while let c @ b'0'..=b'9' = fgetc(env, stream).try_into().unwrap() {
-                            val = val * 10 + (c - b'0') as i32;
-                        }
-                        val *= sign;
-                        log_dbg!("fscanf i32 '{}'", val);
-                        let c_int_ptr: ConstPtr<i32> = args.next(env);
-                        env.mem.write(c_int_ptr.cast_mut(), val);
-                    }
-                }
-            }
-            // TODO: more specifiers
-            _ => unimplemented!("Format character '{}'", specifier as char),
-        }
-
-        matched_args += 1;
-    }
-
-    matched_args
-}
-
 fn sscanf_common(
     env: &mut Environment,
     src: ConstPtr<u8>,
@@ -931,7 +817,6 @@ fn vswprintf(env: &mut Environment, stream: MutPtr<FILE>, format: ConstPtr<u8>, 
 }
 
 pub const FUNCTIONS: FunctionExports = &[
-    export_c_func!(fscanf(_, _, _)),
     export_c_func!(sscanf(_, _, _)),
     export_c_func!(swscanf(_, _, _)),
     export_c_func!(vsscanf(_, _, _)),
