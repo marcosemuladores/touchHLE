@@ -508,6 +508,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(__sprintf_chk(_, _)),
     export_c_func!(sqlite3_open(_, _)),
     export_c_func!(sqlite3_errcode(_, _)),
+    export_c_func!(sqlite3_errmsg(_, _)),
     export_c_func!(putc(_, _)),
     export_c_func!(hypot(_, _)),
     export_c_func!(lrint(_)),
