@@ -5,6 +5,7 @@
  */
 //! POSIX `sys/stat.h`
 
+use std::any::Any;
 use super::{close, off_t, open_direct, FileDescriptor};
 use crate::dyld::{export_c_func, FunctionExports};
 use crate::fs::{GuestFile, GuestPath};
@@ -12,6 +13,10 @@ use crate::libc::time::timespec;
 use crate::mem::{ConstPtr, MutPtr, MutVoidPtr, SafeRead};
 use crate::Environment;
 use std::io::{Seek, SeekFrom};
+use sdl2::libc::fclose;
+use crate::fs::GuestFile::File;
+use crate::libc::posix_io;
+use crate::libc::posix_io::O_RDONLY;
 
 #[allow(non_camel_case_types)]
 pub type dev_t = u32;
@@ -107,48 +112,6 @@ fn mkdir(env: &mut Environment, path: ConstPtr<u8>, mode: mode_t) -> i32 {
     }
 }
 
-/// Helper for [stat()] and [fstat()] that fills the data in the stat struct
-fn fstat_inner(env: &mut Environment, fd: FileDescriptor, buf: MutPtr<stat>) -> i32 {
-    // TODO: error handling for unknown fd?
-    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
-
-    // FIXME: This implementation is highly incomplete. fstat() returns a huge
-    // struct with many kinds of data in it. This code is assuming the caller
-    // only wants a small part of it.
-
-    let mut stat = stat::default();
-
-    stat.st_mode |= match file.file {
-        GuestFile::File(_) | GuestFile::IpaBundleFile(_) | GuestFile::ResourceFile(_) => S_IFREG,
-        GuestFile::Directory => S_IFDIR,
-    };
-
-    // TODO: Implement stat for directories
-    // 1assert!(stat.st_mode & S_IFDIR == 0);
-
-    // Obtain file size
-    // TODO: Use the stream_len() method if that ever gets stabilized.
-    let old_pos = file.file.stream_position().unwrap();
-    stat.st_size = file
-        .file
-        .seek(SeekFrom::End(0))
-        .unwrap()
-        .try_into()
-        .unwrap();
-    file.file.seek(SeekFrom::Start(old_pos)).unwrap();
-
-    env.mem.write(buf, stat);
-
-    0 // success
-}
-
-fn fstat(env: &mut Environment, fd: FileDescriptor, buf: MutPtr<stat>) -> i32 {
-    log!("Warning: fstat() call, this function is mostly unimplemented");
-    let result = fstat_inner(env, fd, buf);
-    log_dbg!("fstat({:?}, {:?}) -> {}", fd, buf, result);
-    result
-}
-
 fn stat(env: &mut Environment, path: ConstPtr<u8>, buf: MutPtr<stat>) -> i32 {
     log!("Warning: stat() call, this function is mostly unimplemented");
 
@@ -198,9 +161,70 @@ fn statfs(_: &mut Environment, _: MutVoidPtr, _: MutVoidPtr) -> i32 {
     -1
 }
 
+fn lstat(env: &mut Environment, path: ConstPtr<u8>, buf: MutVoidPtr) -> i32 {
+    let path_string = env.mem.cstr_at_utf8(path).unwrap().to_owned();
+    //log!("lstat {}", path_string);
+    let guest_path = GuestPath::new(&path_string);
+    if env.fs.exists(guest_path) {
+        0
+    } else {
+        -1
+    }
+}
+
+fn fstat_inner (env: &mut Environment, fd: FileDescriptor, buf: MutPtr<stat>) -> i32 {
+    // TODO: error handling for unknown fd?
+    let mut file = env.libc_state.posix_io.file_for_fd(fd).unwrap();
+
+    // FIXME: This implementation is highly incomplete. fstat() returns a huge
+    // struct with many kinds of data in it. This code is assuming the caller
+    // only wants a small part of it.
+
+    let mut stat = stat::default();
+
+    stat.st_mode |= S_IFREG;
+
+    // Obtain file size
+    // TODO: Use the stream_len() method if that ever gets stabilized.
+    let old_pos = file.file.stream_position().unwrap();
+    stat.st_size = file
+        .file
+        .seek(SeekFrom::End(0))
+        .unwrap()
+        .try_into()
+        .unwrap();
+    file.file.seek(SeekFrom::Start(old_pos)).unwrap();
+
+    env.mem.write(buf, stat);
+
+    // let is_dir = match &file.file {
+    //     File(file_) => {
+    //         file_.metadata().unwrap().is_dir()
+    //     },
+    //     _ => unimplemented!()
+    // };
+    // let st_mode_ptr = (buf + 0x4).cast::<mode_t>();
+    // let mode: mode_t = if is_dir {
+    //     0x4000
+    // } else {
+    //     0x8000
+    // };
+    // env.mem.write(st_mode_ptr, mode.try_into().unwrap());
+
+    0 // success
+}
+
+fn fstat(env: &mut Environment, fd: FileDescriptor, buf: MutPtr<stat>) -> i32 {
+    log!("Warning: fstat() call, this function is mostly unimplemented");
+    let result = fstat_inner(env, fd, buf);
+    log_dbg!("fstat({:?}, {:?}) -> {}", fd, buf, result);
+    result
+}
+
 pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(mkdir(_, _)),
-    export_c_func!(fstat(_, _)),
     export_c_func!(stat(_, _)),
     export_c_func!(statfs(_, _)),
+    export_c_func!(lstat(_, _)),
+    export_c_func!(fstat(_, _))
 ];
