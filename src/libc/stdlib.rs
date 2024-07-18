@@ -10,10 +10,11 @@ use crate::dyld::{export_c_func, export_c_func_aliased, FunctionExports};
 use crate::fs::{resolve_path, GuestPath};
 use crate::libc::clocale::{setlocale as other_setlocale, LC_CTYPE};
 use crate::libc::string::strlen;
-use crate::libc::wchar::wchar_t;
+use crate::libc::wchar::{wchar_t, wmemcpy};
 use crate::mem::{ConstPtr, ConstVoidPtr, GuestUSize, MutPtr, MutVoidPtr, Ptr};
 use crate::Environment;
 use std::collections::HashMap;
+use std::io::Write;
 use std::str::FromStr;
 
 pub mod qsort;
