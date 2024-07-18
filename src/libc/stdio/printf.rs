@@ -10,7 +10,7 @@ use crate::dyld::{export_c_func, FunctionExports};
 use crate::frameworks::foundation::{ns_string, unichar};
 use crate::libc::clocale::{setlocale, LC_CTYPE};
 use crate::libc::posix_io::{STDERR_FILENO, STDOUT_FILENO};
-use crate::libc::stdio::{EOF, fgetc, FILE, fputc, fwrite, ungetc};
+use crate::libc::stdio::{EOF, fgetc, FILE, fputc, fwrite};
 use crate::libc::stdlib::{atof_inner, atoi_inner, strtoul};
 use crate::libc::string::strlen;
 use crate::libc::wchar::{wchar_t, wmemcpy};
