@@ -307,6 +307,9 @@ fn sqlite3_prepare_v2(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
 fn sqlite3_step(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
+fn sqlite3_finalize(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+    arg1.min(arg2)
+}
 fn putc(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
@@ -517,6 +520,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(sqlite3_errmsg(_, _)),
     export_c_func!(sqlite3_prepare_v2(_, _)),
     export_c_func!(sqlite3_step(_, _)),
+    export_c_func!(sqlite3_finalize(_, _)),
     export_c_func!(putc(_, _)),
     export_c_func!(hypot(_, _)),
     export_c_func!(lrint(_)),
