@@ -217,6 +217,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     () = msg_super![env; this setHighlighted:highlighted];
     update(env, this);
 }
+- (())setTag:(bool)tag {
+    () = msg_super![env; this setTag:tag];
+    update(env, this);
+}
 - (())setFont:(id)_font {
 }
 - (())setShowsTouchWhenHighlighted:(bool)shows {
