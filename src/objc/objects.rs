@@ -289,7 +289,7 @@ impl super::ObjC {
             );
         };
         if entry.refcount == 0 {
-            panic!(
+            log!(
                 "App attempted to resurrect object {:?} in dealloc. Expect crashes.",
                 object
             );
