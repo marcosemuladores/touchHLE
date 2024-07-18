@@ -353,21 +353,21 @@ pub const CONSTANTS: ConstantExports = &[
     (
         "___stdinp",
         HostConstant::Custom(|mem: &mut Mem| -> ConstVoidPtr {
-            let ptr = mem.alloc_and_write(FILE { fd: STDIN_FILENO, cookie: None });
+            let ptr = mem.alloc_and_write(FILE { fd: STDERR_FILENO });
             mem.alloc_and_write(ptr).cast().cast_const()
         }),
     ),
     (
         "___stdoutp",
         HostConstant::Custom(|mem: &mut Mem| -> ConstVoidPtr {
-            let ptr = mem.alloc_and_write(FILE { fd: STDIN_FILENO, cookie: None });
+            let ptr = mem.alloc_and_write(FILE { fd: STDERR_FILENO });
             mem.alloc_and_write(ptr).cast().cast_const()
         }),
     ),
     (
         "___stderrp",
         HostConstant::Custom(|mem: &mut Mem| -> ConstVoidPtr {
-            let ptr = mem.alloc_and_write(FILE { fd: STDIN_FILENO, cookie: None });
+            let ptr = mem.alloc_and_write(FILE { fd: STDERR_FILENO });
             mem.alloc_and_write(ptr).cast().cast_const()
         }),
     ),
