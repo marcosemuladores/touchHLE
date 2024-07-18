@@ -316,6 +316,9 @@ fn putc(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
 fn getc(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
+fn ungetc(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+    arg1.min(arg2)
+}
 fn hypot(env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     sqrt(env, arg1*arg1 + arg2*arg2)
 }
@@ -526,6 +529,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(sqlite3_finalize(_, _)),
     export_c_func!(putc(_, _)),
     export_c_func!(getc(_, _)),
+    export_c_func!(ungetc(_, _)),
     export_c_func!(hypot(_, _)),
     export_c_func!(lrint(_)),
     export_c_func!(lrintf(_)),
