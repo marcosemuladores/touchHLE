@@ -41,7 +41,7 @@ pub struct State {
 /// C `FILE` struct. This is an opaque type in C, so the definition here is our
 /// own.
 pub struct FILE {
-    fd: posix_io::FileDescriptor,
+    pub fd: posix_io::FileDescriptor,
     cookie: Option<ConstVoidPtr>,
 }
 unsafe impl SafeRead for FILE {}
@@ -50,6 +50,9 @@ unsafe impl SafeRead for FILE {}
 type fpos_t = off_t;
 
 fn fopen(env: &mut Environment, filename: ConstPtr<u8>, mode: ConstPtr<u8>) -> MutPtr<FILE> {
+    if filename.is_null() {
+        return Ptr::null();
+    }
     // Some testing on macOS suggests Apple's implementation will just ignore
     // flags it doesn't know about, and unfortunately real-world apps seem to
     // rely on this, e.g. using "wt" to mean open for writing in text mode,
@@ -198,7 +201,8 @@ fn fputs(env: &mut Environment, str: ConstPtr<u8>, stream: MutPtr<FILE>) -> i32 
 }
 
 fn fputc(env: &mut Environment, c: i32, stream: MutPtr<FILE>) -> i32 {
-    let ptr: MutPtr<u8> = env.mem.alloc_and_write(c.try_into().unwrap());
+    let cc: u8 = c as u8;
+    let ptr = env.mem.alloc_and_write(cc);
     let res = fwrite(env, ptr.cast_const().cast(), 1, 1, stream)
         .try_into()
         .unwrap();
