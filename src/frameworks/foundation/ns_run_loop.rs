@@ -121,9 +121,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     run_run_loop(env, this, /* single_iteration: */ false);
 }
 
-- (())runUntilDate {
-    run_run_loop(env, this, /* single_iteration: */ false);
-}
 - (())size {
     run_run_loop(env, this, /* single_iteration: */ false);
 }
@@ -134,6 +131,16 @@ pub const CLASSES: ClassExports = objc_classes! {
     assert!(msg![env; mode isEqualToString:default_mode]);
     let distant_future: id = msg_class![env; NSDate distantFuture];
     let delta: NSTimeInterval = msg![env; limit_date timeIntervalSinceDate:distant_future];
+    assert!(delta < 10.0);
+    run_run_loop(env, this, /* single_iteration: */ false);
+}
+
+- (())runUntilDate:(NSRunLoopUntilDate)untildate
+   beforeDate:(id)limit_date { // NSDate *
+    let default_mode = ns_string::get_static_str(env, NSDefaultRunLoopUntilDate);
+    assert!(msg![env; mode isEqualToString:default_mode]);
+    let distant_future: id = msg_class![env; NSDate distantPast];
+    let delta: NSTimeInterval = msg![env; limit_date timeIntervalSinceDate:distant_past];
     assert!(delta < 10.0);
     run_run_loop(env, this, /* single_iteration: */ false);
 }
