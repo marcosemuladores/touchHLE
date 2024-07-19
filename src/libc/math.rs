@@ -531,6 +531,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(fminf(_, _)),
     export_c_func!(glDrawTexiOES(_, _)),
     export_c_func!(glBindFramebuffer(_, _)),
+    export_c_func!(glCheckFramebufferStatus(_, _)),
     export_c_func!(glFramebufferRenderbuffer(_, _)),
     export_c_func!(glFramebufferTexture2D(_, _)),
     export_c_func!(glGenFramebuffers(_, _)),
