@@ -241,6 +241,9 @@ fn glDrawTexiOES(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
 fn glBindFramebuffer(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
     arg1.min(arg2)
 }
+fn glCheckFramebufferStatus(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
+    arg1.min(arg2)
+}
 fn glFramebufferRenderbuffer(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
     arg1.min(arg2)
 }
