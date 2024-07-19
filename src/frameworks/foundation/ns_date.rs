@@ -60,6 +60,21 @@ pub const CLASSES: ClassExports = objc_classes! {
     autorelease(env, new)
 }
 
++ (id)distantPast {
+    let time_interval = SystemTime::now()
+        .duration_since(apple_epoch())
+        .unwrap()
+        .as_secs_f64() * 2.0;
+    let host_object = Box::new(NSDateHostObject {
+        time_interval
+    });
+    let new = env.objc.alloc_object(this, host_object, &mut env.mem);
+
+    log_dbg!("[(NSDate*){:?} distantPast]: date {:?}", this, new);
+
+    autorelease(env, new)
+}
+
 + (NSTimeInterval)timeIntervalSinceReferenceDate {
     let now: id = msg_class![env; NSDate date];
     msg![env; now timeIntervalSinceReferenceDate]
