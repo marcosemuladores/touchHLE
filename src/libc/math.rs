@@ -238,6 +238,9 @@ fn fminf(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
 fn glDrawTexiOES(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
     arg1.min(arg2)
 }
+fn glBindFramebuffer(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
+    arg1.min(arg2)
+}
 fn glGenFramebuffers(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
     arg1.min(arg2)
 }
@@ -521,6 +524,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(fmin(_, _)),
     export_c_func!(fminf(_, _)),
     export_c_func!(glDrawTexiOES(_, _)),
+    export_c_func!(glBindFramebuffer(_, _)),
     export_c_func!(glGenFramebuffers(_, _)),
     export_c_func!(glRenderbufferStorage(_, _)),
     export_c_func!(glSampleCoverage(_, _)),
