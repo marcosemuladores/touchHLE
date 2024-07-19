@@ -271,6 +271,9 @@ fn glCompileShader(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
 fn glGetShaderiv(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
     arg1.min(arg2)
 }
+fn glCreateProgram(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
+    arg1.min(arg2)
+}
 fn abort(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
     arg1.min(arg2)
 }
@@ -556,6 +559,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glSampleCoverage(_, _)),
     export_c_func!(glCompileShader(_, _)),
     export_c_func!(glGetShaderiv(_, _)),
+    export_c_func!(glCreateProgram(_, _)),
     export_c_func!(abort(_, _)),
     export_c_func!(gzopen(_, _)),
     export_c_func!(gzread(_, _)),
