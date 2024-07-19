@@ -121,6 +121,9 @@ pub const CLASSES: ClassExports = objc_classes! {
     run_run_loop(env, this, /* single_iteration: */ false);
 }
 
+- (())runUntilDate {
+    run_run_loop(env, this, /* single_iteration: */ false);
+}
 - (())size {
     run_run_loop(env, this, /* single_iteration: */ false);
 }
