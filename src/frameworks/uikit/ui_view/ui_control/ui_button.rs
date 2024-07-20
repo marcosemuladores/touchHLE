@@ -220,6 +220,9 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())setTag:(bool)tag {
     log!("TODO: setTag:{}", tag);
 }
+- (())Tag:(bool)tag {
+    log!("TODO: Tag:{}", tag);
+}
 - (())setFont:(id)_font {
 }
 - (())setShowsTouchWhenHighlighted:(bool)shows {
