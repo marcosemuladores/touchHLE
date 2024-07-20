@@ -217,10 +217,13 @@ pub const CLASSES: ClassExports = objc_classes! {
     () = msg_super![env; this setHighlighted:highlighted];
     update(env, this);
 }
+
 - (())setTag:(bool)tag {
     log!("TODO: setTag:{}", tag);
 }
-
+- (())tag:(bool)tag {
+    log!("TODO: tag:{}", tag);
+}
 - (())setFont:(id)_font {
 }
 - (())setShowsTouchWhenHighlighted:(bool)shows {
