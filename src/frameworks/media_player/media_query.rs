@@ -18,7 +18,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     nil
 }
 
-+ (id)songsQuery:(bool)query {
+- (())songsQuery:(bool)query {
     log!("TODO: songsQuery:{}", query);
 }
 
