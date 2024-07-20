@@ -220,8 +220,8 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())setTag:(bool)tag {
     log!("TODO: setTag:{}", tag);
 }
-- (())Tag:(bool)tag {
-    log!("TODO: Tag:{}", tag);
+- (bool)tag {
+
 }
 - (())setFont:(id)_font {
 }
