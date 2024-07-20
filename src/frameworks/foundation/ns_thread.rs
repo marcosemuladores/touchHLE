@@ -97,6 +97,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 }
 
++ (())setStackSize {
+
+}
+
 + (())detachNewThreadSelector:(SEL)selector
                        toTarget:(id)target
                      withObject:(id)object {
