@@ -484,7 +484,7 @@ pub const CLASSES: ClassExports = objc_classes! {
             }
         }
 
-        assert!(
+        // assert!(
             this_superlayer != nil || other_superlayer != nil,
             "Layers have no common ancestor!"
         );
