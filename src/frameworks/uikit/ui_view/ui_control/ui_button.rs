@@ -218,8 +218,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     update(env, this);
 }
 - (())setTag:(bool)tag {
-    () = msg_super![env; this setTag:tag];
-    update(env, this);
+    log!("TODO: setTag:{}", tag);
 }
 - (())setFont:(id)_font {
 }
