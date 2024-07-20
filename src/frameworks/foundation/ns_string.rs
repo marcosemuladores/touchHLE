@@ -1320,7 +1320,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     out
 }
 
--(id) substringWithRange:(NSRange)range {
+- (id)substringWithRange:(NSRange)range {
     let host_object = env.objc.borrow_mut::<StringHostObject>(this);
     let (orig_string, _) = host_object.convert_to_utf16_inplace();
     let host_string =
@@ -1346,6 +1346,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (id) retain { this }
 - (()) release {}
 - (id) autorelease { this }
+- (id) addObject { this }
 
 @end
 
