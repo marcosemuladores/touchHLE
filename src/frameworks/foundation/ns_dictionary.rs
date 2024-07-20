@@ -474,6 +474,11 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())synchronize {
 }
 
+- (bool)dataForKey:(id)defaultName {
+    let val: id = msg![env; this objectForKey:defaultName];
+    msg![env; val boolValue]
+}
+
 - (id)initWithCapacity:(NSUInteger)cap {
     env.objc.borrow_mut::<DictionaryHostObject>(this).map.reserve(cap as usize);
     this
