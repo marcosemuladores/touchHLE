@@ -301,6 +301,9 @@ fn glGetAttribLocation(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
 fn glGetUniformLocation(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
     arg1.min(arg2)
 }
+fn glGetTexParameteriv(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
+    arg1.min(arg2)
+}
 fn glReadPixels(_env: &mut Environment, arg1: f32, arg2: f32) -> f32 {
     arg1.min(arg2)
 }
@@ -602,6 +605,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(glGetProgramiv(_, _)),
     export_c_func!(glGetAttribLocation(_, _)),
     export_c_func!(glGetUniformLocation(_, _)),
+    export_c_func!(glGetTexParameteriv(_, _)),
     export_c_func!(glReadPixels(_, _)),
     export_c_func!(abort(_, _)),
     export_c_func!(gzopen(_, _)),
