@@ -66,11 +66,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     log!("TODO: endGeneratingDeviceOrientationNotifications");
 }
 
-- (())setOrientation {
-    // TODO: Hardcoded to iPhone for now
-    ns_string::get_static_str(env, "iPhone")
-}
-
 - (id)model {
     // TODO: Hardcoded to iPhone for now
     ns_string::get_static_str(env, "iPhone")
