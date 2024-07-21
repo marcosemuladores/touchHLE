@@ -53,6 +53,7 @@ impl Default for UIButtonHostObject {
             superclass: Default::default(),
             type_: UIButtonTypeCustom,
             title_label: nil,
+            tag: nil,
             image_view: nil,
             background_image_view: nil,
             titles_for_states: HashMap::new(),
