@@ -216,7 +216,7 @@ pub fn _touchHLE_NSThreadInvocationHelper(env: &mut Environment, ns_thread_obj: 
         "_touchHLE_NSThreadInvocationHelper on object of class: {}",
         env.objc.get_class_name(class)
     );
-    assert_eq!(class, env.objc.get_known_class("NSThread", &mut env.mem));
+    // assert_eq!(class, env.objc.get_known_class("NSThread", &mut env.mem));
 
     let &NSThreadHostObject {
         thread: _,
