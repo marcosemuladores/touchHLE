@@ -202,6 +202,9 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.borrow_mut::<UIButtonHostObject>(this).image_view
 }
 
+- (id)tag {
+    env.objc.borrow_mut::<UIButtonHostObject>(this).tag
+}
 - (id)backgroundImageView {
     env.objc.borrow_mut::<UIButtonHostObject>(this).background_image_view
 }
@@ -221,9 +224,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())setTag:(bool)tag {
     log!("TODO: setTag:{}", tag);
 }
-- (())tag:(bool)tag {
-    log!("TODO: tag:{}", tag);
-}
+
 - (())setFont:(id)_font {
 }
 - (())setShowsTouchWhenHighlighted:(bool)shows {
