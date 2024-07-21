@@ -25,6 +25,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     false
 }
 
+- (())setDelegate:(bool)delegate {
+    log!("TODO: setDelegate:{}", delegate);
+}
+
 @end
 
 @implementation UIBarButtonItem: NSObject
