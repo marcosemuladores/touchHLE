@@ -157,6 +157,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     nil
 }
 
++ (id)localeIdentifier {
+    nil
+}
+
 // TODO: constructors, more accessors
 
 - (id)objectForKey:(id)key {
