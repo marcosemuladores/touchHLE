@@ -34,8 +34,6 @@ pub struct UIButtonHostObject {
     /// `UILabel*`
     title_label: id,
     /// `UIImageView*`
-    tag: id,
-    /// `UIImageView*`
     image_view: id,
     /// `UIImageView*`
     background_image_view: id,
@@ -55,7 +53,6 @@ impl Default for UIButtonHostObject {
             superclass: Default::default(),
             type_: UIButtonTypeCustom,
             title_label: nil,
-            tag: nil,
             image_view: nil,
             background_image_view: nil,
             titles_for_states: HashMap::new(),
@@ -205,9 +202,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.borrow_mut::<UIButtonHostObject>(this).image_view
 }
 
-- (id)tag {
-    env.objc.borrow_mut::<UIButtonHostObject>(this).tag
-}
 - (id)backgroundImageView {
     env.objc.borrow_mut::<UIButtonHostObject>(this).background_image_view
 }
