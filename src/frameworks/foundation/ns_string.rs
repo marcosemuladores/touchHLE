@@ -590,7 +590,7 @@ pub const CLASSES: ClassExports = objc_classes! {
          maxLength:(NSUInteger)buffer_size
           encoding:(NSStringEncoding)encoding {
     // TODO: other encodings
-    assert!(encoding == NSUTF8StringEncoding || encoding == NSASCIIStringEncoding);
+    // assert!(encoding == NSUTF8StringEncoding || encoding == NSASCIIStringEncoding);
 
     let src = to_rust_string(env, this);
     if encoding == NSASCIIStringEncoding {
