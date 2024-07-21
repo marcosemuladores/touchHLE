@@ -34,6 +34,8 @@ pub struct UIButtonHostObject {
     /// `UILabel*`
     title_label: id,
     /// `UIImageView*`
+    tag: id,
+    /// `UIImageView*`
     image_view: id,
     /// `UIImageView*`
     background_image_view: id,
