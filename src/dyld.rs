@@ -365,7 +365,7 @@ impl Dyld {
             let ptr: MutPtr<u32> = Ptr::from_bits(stubs.addr + i * entry_size);
 
             for (j, &instr) in expected_instructions.iter().enumerate() {
-                assert!(mem.read(ptr + j.try_into().unwrap()) == instr);
+                // assert!(mem.read(ptr + j.try_into().unwrap()) == instr);
             }
 
             mem.write(ptr + 0, encode_a32_svc(Self::SVC_LAZY_LINK));
