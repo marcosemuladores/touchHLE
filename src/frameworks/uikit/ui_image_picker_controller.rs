@@ -29,6 +29,9 @@ pub const CLASSES: ClassExports = objc_classes! {
     log!("TODO: setDelegate:{}", delegate);
 }
 
+- (())setSourceType:(bool)type {
+    log!("TODO: setSourceType:{}", type);
+}
 @end
 
 @implementation UIBarButtonItem: NSObject
