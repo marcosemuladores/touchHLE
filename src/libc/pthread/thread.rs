@@ -280,6 +280,11 @@ fn pthread_cancel(_env: &mut Environment) {
 fn pthread_attr_setinheritsched(_env: &mut Environment) {
     log!("TODO: pthread_attr_setinheritsched()");
 }
+
+fn pthread_attr_setschedpolicy(_env: &mut Environment) {
+    log!("TODO: pthread_attr_setschedpolicy()");
+}
+
 type mach_port_t = u32;
 
 /// Undocumented Darwin function that returns a `mach_port_t`, which in practice
@@ -340,6 +345,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(pthread_testcancel()),
     export_c_func!(pthread_cancel()),
     export_c_func!(pthread_attr_setinheritsched()),
+    export_c_func!(pthread_attr_setschedpolicy()),
     export_c_func!(pthread_mach_thread_np(_)),
     export_c_func!(pthread_getschedparam(_, _, _)),
     export_c_func!(pthread_setschedparam(_, _, _)),
