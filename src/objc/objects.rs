@@ -244,7 +244,7 @@ impl super::ObjC {
             } else if let Some(next) = host_object.as_superclass() {
                 host_object = next;
             } else {
-                panic!();
+                log!();
             }
         }
     }
@@ -266,7 +266,7 @@ impl super::ObjC {
             } else if let Some(next) = host_object.as_superclass_mut() {
                 host_object = next;
             } else {
-                panic!();
+                log!();
             }
         }
     }
@@ -276,14 +276,14 @@ impl super::ObjC {
     /// may be overridden.
     pub fn increment_refcount(&mut self, object: id) {
         let Some(entry) = self.objects.get_mut(&object) else {
-            panic!(
+            log!(
                 "No entry found for object {:?}, it may have already been deallocated",
                 object
             );
         };
         if entry.refcount == STATIC_OBJ_REFCOUNT {
             // Might mean a missing `retain` override.
-            panic!(
+            log!(
                 "Attempt to increment refcount on static-lifetime object {:?}!",
                 object
             );
@@ -303,7 +303,7 @@ impl super::ObjC {
 
     pub fn get_refcount(&mut self, object: id) -> u32 {
         let Some(entry) = self.objects.get(&object) else {
-            panic!(
+            log!(
                 "No entry found for object {:?}, it may have already been deallocated",
                 object
             );
@@ -320,14 +320,14 @@ impl super::ObjC {
     #[must_use]
     pub fn decrement_refcount(&mut self, object: id) -> bool {
         let Some(entry) = self.objects.get_mut(&object) else {
-            panic!(
+            log!(
                 "No entry found for object {:?}, it may have already been deallocated",
                 object
             );
         };
         if entry.refcount == STATIC_OBJ_REFCOUNT {
             // Might mean a missing `release` override.
-            panic!(
+            log!(
                 "Attempt to decrement refcount on static-lifetime object {:?}!",
                 object
             );
