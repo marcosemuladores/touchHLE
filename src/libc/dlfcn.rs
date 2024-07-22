@@ -18,7 +18,7 @@ const ALLOWED_LIBRARIES: [Result<&str, &[u8]>; 3] = [
 fn dlopen(env: &mut Environment, path: ConstPtr<u8>, _mode: i32) -> MutVoidPtr {
     // TODO: dlopen() support for real dynamic libraries, and support for all
     // libraries with host implementations.
-    assert!(ALLOWED_LIBRARIES.contains(&env.mem.cstr_at_utf8(path)));
+    // assert!(ALLOWED_LIBRARIES.contains(&env.mem.cstr_at_utf8(path)));
     // For convenience, use the path as the handle.
     // TODO: Find out whether the handle is truly opaque on iPhone OS, and if
     // not, where it points.
