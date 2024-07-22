@@ -125,6 +125,16 @@ pub const CLASSES: ClassExports = objc_classes! {
     run_run_loop(env, this, /* single_iteration: */ false);
 }
 
+- (())runUntilDate:(NSRunLoopMode)date
+   beforeDate:(id)limit_date { // NSDate *
+    let default_mode = ns_string::get_static_str(env, NSDefaultRunLoopMode);
+    assert!(msg![env; mode isEqualToString:default_mode]);
+    let distant_future: id = msg_class![env; NSDate distantFuture];
+    let delta: NSTimeInterval = msg![env; limit_date timeIntervalSinceDate:distant_future];
+    // assert!(delta < 10.0);
+    run_run_loop(env, this, /* single_iteration: */ false);
+}
+
 - (())runMode:(NSRunLoopMode)mode
    beforeDate:(id)limit_date { // NSDate *
     let default_mode = ns_string::get_static_str(env, NSDefaultRunLoopMode);
