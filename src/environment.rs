@@ -185,7 +185,17 @@ impl Environment {
             };
 
             Some(window::Window::new(
-                &format!("{} (touchHLE {})", bundle.display_name(), super::VERSION),
+                &format!(
+                    "{} (touchHLE {}{}{})",
+                    bundle.display_name(),
+                    super::branding(),
+                    if super::branding().is_empty() {
+                        ""
+                    } else {
+                        " "
+                    },
+                    super::VERSION
+                ),
                 icon.ok(),
                 launch_image,
                 &options,
@@ -365,7 +375,16 @@ impl Environment {
 
         assert!(!options.headless);
         let window = Some(window::Window::new(
-            &format!("touchHLE {}", super::VERSION),
+            &format!(
+                "touchHLE {}{}{}",
+                super::branding(),
+                if super::branding().is_empty() {
+                    ""
+                } else {
+                    " "
+                },
+                super::VERSION
+            ),
             icon,
             launch_image,
             &options,
