@@ -36,7 +36,7 @@ fn dlsym(env: &mut Environment, handle: MutVoidPtr, symbol: ConstPtr<u8>) -> Mut
     let addr = env
         .dyld
         .create_proc_address(&mut env.mem, &mut env.cpu, &symbol)
-        .unwrap_or_else(|_| log!("dlsym() for unimplemented function {}", symbol));
+        .unwrap_or_else(|_| panic!("dlsym() for unimplemented function {}", symbol));
     Ptr::from_bits(addr.addr_with_thumb_bit())
 }
 
