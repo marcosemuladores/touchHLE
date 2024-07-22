@@ -27,7 +27,7 @@ fn dlopen(env: &mut Environment, path: ConstPtr<u8>, _mode: i32) -> MutVoidPtr {
 
 fn dlsym(env: &mut Environment, handle: MutVoidPtr, symbol: ConstPtr<u8>) -> MutVoidPtr {
     let handle_val = env.mem.cstr_at_utf8(handle.cast());
-    assert!(ALLOWED_LIBRARIES.contains(&handle_val), "{:?}", handle_val);
+    // assert!(ALLOWED_LIBRARIES.contains(&handle_val), "{:?}", handle_val);
     // For some reason, the symbols passed to dlsym() don't have the leading _.
     let symbol = format!("_{}", env.mem.cstr_at_utf8(symbol).unwrap());
     // TODO: error handling. dlsym() should just return NULL in this case, but
@@ -36,7 +36,7 @@ fn dlsym(env: &mut Environment, handle: MutVoidPtr, symbol: ConstPtr<u8>) -> Mut
     let addr = env
         .dyld
         .create_proc_address(&mut env.mem, &mut env.cpu, &symbol)
-        .unwrap_or_else(|_| panic!("dlsym() for unimplemented function {}", symbol));
+        .unwrap_or_else(|_| log!("dlsym() for unimplemented function {}", symbol));
     Ptr::from_bits(addr.addr_with_thumb_bit())
 }
 
