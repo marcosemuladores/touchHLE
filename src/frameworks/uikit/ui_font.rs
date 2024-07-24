@@ -66,7 +66,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 @implementation UIFont: NSObject
 
-+ (id)fontWithName:(id)size
++ (id)fontWithName:(id)name
               size:(CGFloat)size {
     msg_class![env; UIFont systemFontOfSize:size]
 }
