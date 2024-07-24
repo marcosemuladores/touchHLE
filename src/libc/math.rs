@@ -412,7 +412,7 @@ fn getc(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
 fn ungetc(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
-fn hypot(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+fn hypot(env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     sqrt(env, arg1*arg1 + arg2*arg2)
 }
 
