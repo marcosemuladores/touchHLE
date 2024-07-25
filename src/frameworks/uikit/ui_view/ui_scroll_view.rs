@@ -65,6 +65,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())setAlwaysBounceHorizontal:(bool)bounce {
     log!("TODO: setAlwaysBounceHorizontal:{}", bounce);
 }
+
+- (())setShowsHorizontalScrollIndicator:(bool)scroll {
+    log!("TODO: setShowsHorizontalScrollIndicator:{}", scroll);
+}
 - (CGPoint)contentOffset {
     env.objc.borrow::<UIScrollViewHostObject>(this).content_offset
 }
