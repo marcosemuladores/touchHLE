@@ -31,9 +31,10 @@ use std::any::TypeId;
 /// overwriting it.
 #[allow(non_snake_case)]
 fn objc_msgSend_inner(env: &mut Environment, receiver: id, selector: SEL, super2: Option<Class>) {
+    log_dbg!("Dispatching {} for {:?}", selector.as_str(&env.mem), receiver);
     let message_type_info = env.objc.message_type_info.take();
 
-    if receiver == nil {
+    if receiver == nil || selector.as_str(&env.mem) == "FlurryStartTimedEvent" || selector.as_str(&env.mem) == "PlayHavenRequestContent" {
         // https://developer.apple.com/library/archive/documentation/Cocoa/Conceptual/ObjectiveC/Chapters/ocObjectsClasses.html#//apple_ref/doc/uid/TP30001163-CH11-SW7
         log_dbg!("[nil {}]", selector.as_str(&env.mem));
         env.cpu.regs_mut()[0..2].fill(0);
@@ -89,6 +90,7 @@ fn objc_msgSend_inner(env: &mut Environment, receiver: id, selector: SEL, super2
         if let Some(&super::ClassHostObject {
             superclass,
             ref methods,
+            ref ivars,
             ref name,
             ..
         }) = host_object.as_any().downcast_ref()
@@ -101,7 +103,7 @@ fn objc_msgSend_inner(env: &mut Environment, receiver: id, selector: SEL, super2
             }
 
             if let Some(imp) = methods.get(&selector) {
-                // log!("Found method on: {}", name);
+                log_dbg!("Found method on: {}", name);
                 match imp {
                     IMP::Host(host_imp) => {
                         // TODO: do type checks when calling GuestIMPs too.
@@ -111,7 +113,7 @@ fn objc_msgSend_inner(env: &mut Environment, receiver: id, selector: SEL, super2
                         if let Some((sent_type_id, sent_type_desc)) = message_type_info {
                             let (expected_type_id, expected_type_desc) = host_imp.type_info();
                             if sent_type_id != expected_type_id {
-                                panic!(
+                                log!(
                                     "\
 Type mismatch when sending message {} to {:?}!
 - Message has type: {:?} / {}
@@ -131,6 +133,14 @@ Type mismatch when sending message {} to {:?}!
                     // interfere with pass-through of stack arguments.
                     IMP::Guest(guest_imp) => guest_imp.call_without_pushing_stack_frame(env),
                 }
+                return;
+            } else if let Some(ivar_offset_ptr) = ivars.get(&selector) {
+                let ivar_offset = env.mem.read(*ivar_offset_ptr);
+                // TODO: Use host_object's _instance_start property?
+                let ivar_ptr = MutVoidPtr::from_bits(receiver.to_bits() + ivar_offset);
+                let value = env.cpu.regs()[0];
+                env.mem.write(ivar_ptr.cast(), value);
+                env.cpu.regs_mut()[0..2].fill(0); // TODO: Verify if this is necessary
                 return;
             } else {
                 class = superclass;
@@ -173,7 +183,7 @@ Type mismatch when sending message {} to {:?}!
 /// Standard variant of `objc_msgSend`. See [objc_msgSend_inner].
 #[allow(non_snake_case)]
 pub(super) fn objc_msgSend(env: &mut Environment, receiver: id, selector: SEL) {
-    // log!("objc_msgSend SEL {}", selector.as_str(&env.mem));
+    log_dbg!("objc_msgSend SEL {}", selector.as_str(&env.mem));
     objc_msgSend_inner(env, receiver, selector, /* super2: */ None)
 }
 
