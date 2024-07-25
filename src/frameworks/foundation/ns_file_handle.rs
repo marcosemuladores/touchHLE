@@ -127,6 +127,15 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.dealloc_object(this, &mut env.mem)
 }
 
+- (())availableData:(id)data { // NSData *
+    let fd = env.objc.borrow::<NSFileHandleHostObject>(this).fd;
+    let bytes: ConstVoidPtr = msg![env; data bytes];
+    let length: NSUInteger = msg![env; data length];
+    if posix_io::write(env, fd, bytes, length) == -1 {
+        panic!("availableData: failed")
+    }
+}
+
 @end
 
 };
