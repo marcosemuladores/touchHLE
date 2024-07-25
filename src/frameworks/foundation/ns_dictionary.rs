@@ -543,9 +543,15 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; val integerValue]
 }
 
-- (f32)registerDefaults:(id)defaultName {
-    let val: id = msg![env; this registerDefaults:defaultName];
-    msg![env; val floatValue]
+- (())registerDefaults:(id)dict {
+    let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(dict));
+    for (_, key_value) in host_obj.map {
+        let key = key_value[0].0;
+        let value = key_value[0].1;
+        let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+        host_obj.insert(env, key, value, false);
+        *env.objc.borrow_mut(this) = host_obj;
+    }
 }
 
 - (f32)floatForKey:(id)defaultName {
