@@ -10,7 +10,7 @@
 
 use super::ns_dictionary::dict_from_keys_and_objects;
 use super::ns_string;
-use crate::objc::{id, msg_class, objc_classes, ClassExports};
+use crate::objc::{id, msg, msg_class, objc_classes, ClassExports};
 use crate::Environment;
 
 #[derive(Default)]
@@ -41,6 +41,11 @@ pub const CLASSES: ClassExports = objc_classes! {
         State::get(env).standard_defaults = Some(new);
         new
     }
+}
+
+- (bool)boolForKey:(id)defaultName {
+    let val: id = msg![env; this objectForKey:defaultName];
+    msg![env; val boolValue]
 }
 
 // TODO: plist methods etc
