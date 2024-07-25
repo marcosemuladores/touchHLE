@@ -267,7 +267,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         let extension = ns_string::get_static_str(env, "strings");
         let dict_url: id = msg![env; this URLForResource:name withExtension:extension];
         let dict: id = msg_class![env; NSDictionary dictionaryWithContentsOfURL:dict_url];
-        assert!(dict != nil);
+        // assert!(dict != nil);
         retain(env, name);
         retain(env, dict);
         env.framework_state.foundation.ns_bundle.localization_tables.insert(name, dict);
