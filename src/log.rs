@@ -31,7 +31,7 @@ pub fn get_log_file() -> &'static std::fs::File {
 ///
 /// The message is prefixed with the module path, so it is clear where it comes
 /// from.
-macro_rules! log {
+pub macro_rules! log {
     ($($arg:tt)+) => {
         echo!("{}: {}", module_path!(), format_args!($($arg)+));
     }
