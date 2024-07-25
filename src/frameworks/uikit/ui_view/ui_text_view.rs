@@ -152,6 +152,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 }
 
+- (())setIndicatorStyle :(bool)style {
+    log!("TODO: setIndicatorStyle:{}", style);
+}
+
 - (())drawRect:(CGRect)_rect {
     let bounds: CGRect = msg![env; this bounds];
     let context = UIGraphicsGetCurrentContext(env);
