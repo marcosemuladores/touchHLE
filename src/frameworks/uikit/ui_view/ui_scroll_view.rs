@@ -62,6 +62,9 @@ pub const CLASSES: ClassExports = objc_classes! {
     log!("TODO: setPagingEnabled:{}", paging);
 }
 
+- (())setAlwaysBounceHorizontal:(bool)bounce {
+    log!("TODO: setAlwaysBounceHorizontal:{}", bounce);
+}
 - (CGPoint)contentOffset {
     env.objc.borrow::<UIScrollViewHostObject>(this).content_offset
 }
