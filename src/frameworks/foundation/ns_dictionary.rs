@@ -228,7 +228,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (())setFloat:(f32)value forKey:(id)defaultName {
-    todo!();
+    let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+    let value_id: id = msg_class![env; NSNumber numberWithFloat:value];
+    host_obj.insert(env, defaultName, value_id, false);
+    *env.objc.borrow_mut(this) = host_obj;
 }
 
 - (id)stringForKey:(id)defaultName {
