@@ -48,6 +48,13 @@ pub const CLASSES: ClassExports = objc_classes! {
     msg![env; val boolValue]
 }
 
+- (id)objectForKey:(id)key {
+    let host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
+    let res = host_obj.lookup(env, key);
+    *env.objc.borrow_mut(this) = host_obj;
+    res
+}
+
 // TODO: plist methods etc
 
 @end
