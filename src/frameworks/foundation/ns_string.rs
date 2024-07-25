@@ -1119,7 +1119,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     path.starts_with('/') || path.starts_with('~')
 }
 
-
 - (bool)boolValue {
     let string = to_rust_string(env, this);
     let string = string.trim_start_matches(|c: char| {
@@ -1131,6 +1130,12 @@ pub const CLASSES: ClassExports = objc_classes! {
         .next()
         .map(|c| matching_values.contains(c))
         .unwrap_or(false)
+}
+
+- (bool)getCharacters {
+    // TODO: avoid copy?
+    let path = to_rust_string(env, this);
+    path.starts_with('/') || path.starts_with('~')
 }
 
 - (id)dataUsingEncoding:(NSStringEncoding)encoding {
