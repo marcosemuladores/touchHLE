@@ -1134,8 +1134,8 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 - (bool)getCharacters {
     // TODO: avoid copy?
-    let path = to_rust_string(env, this);
-    path.starts_with('/') || path.starts_with('~')
+    let get = to_rust_string(env, this);
+    get.starts_with('/') || get.starts_with('~')
 }
 
 - (id)dataUsingEncoding:(NSStringEncoding)encoding {
