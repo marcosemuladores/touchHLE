@@ -58,6 +58,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.borrow_mut::<UIScrollViewHostObject>(this).scroll_enabled = scroll_enabled;
 }
 
+- (())setPagingEnabled:(bool)paging {
+    log!("TODO: setPagingEnabled:{}", paging);
+}
+
 - (CGPoint)contentOffset {
     env.objc.borrow::<UIScrollViewHostObject>(this).content_offset
 }
