@@ -10,6 +10,7 @@
 
 use super::ns_dictionary::dict_from_keys_and_objects;
 use super::ns_string;
+use crate::frameworks::foundation::ns_dictionary::DictionaryHostObject;
 use crate::objc::{id, msg, msg_class, objc_classes, ClassExports};
 use crate::Environment;
 
