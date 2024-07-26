@@ -144,6 +144,12 @@ pub const CLASSES: ClassExports = objc_classes! {
     CGContextDrawImage(env, context, rect, image);
 }
 
+- (())drawAsPatternInRect:(CGRect)rect {
+    let context = UIGraphicsGetCurrentContext(env);
+    let image = env.objc.borrow::<UIImageHostObject>(this).cg_image;
+    CGContextDrawImage(env, context, rect, image);
+}
+
 @end
 
 };
