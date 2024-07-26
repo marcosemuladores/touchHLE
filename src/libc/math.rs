@@ -418,6 +418,9 @@ fn sqlite3_mprintf(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
 fn sqlite3_close(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
+fn strpbrk(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+    arg1.min(arg2)
+}
 fn putc(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
@@ -677,6 +680,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(sqlite3_finalize(_, _)),
     export_c_func!(sqlite3_mprintf(_, _)),
     export_c_func!(sqlite3_close(_, _)),
+    export_c_func!(strpbrk(_, _)),
     export_c_func!(putc(_, _)),
     export_c_func!(getc(_, _)),
     export_c_func!(ungetc(_, _)),
