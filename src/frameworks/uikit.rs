@@ -32,6 +32,7 @@ pub mod ui_switch;
 pub mod ui_touch;
 pub mod ui_view;
 pub mod ui_view_controller;
+pub mod ui_web_view;
 
 #[derive(Default)]
 pub struct State {
