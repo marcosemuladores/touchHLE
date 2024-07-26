@@ -90,7 +90,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     // TODO: Real error handling. For now, most errors are likely to be caused
     //       by a functionality gap in touchHLE, not the app actually trying to
     //       load a broken file, so panicking is most useful.
-    let image = Image::from_bytes(&bytes).bytes();
+    let image = Image::from_bytes(&bytes).unwrap();
     let cg_image = cg_image::from_image(env, image);
     env.objc.borrow_mut::<UIImageHostObject>(this).cg_image = cg_image;
     this
