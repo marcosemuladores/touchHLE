@@ -17,6 +17,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     log!("TODO: setMinimumValue:{}", minimum);
 }
 
+- (())setMaximumValue:(bool)maximum {
+    log!("TODO: setMaximumValue:{}", maximum);
+}
+
 // TODO: all of it
 
 @end
