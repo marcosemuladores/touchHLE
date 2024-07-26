@@ -516,7 +516,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     // TODO: raise NSInvalidArgumentException
     assert_ne!(object, nil);
     // TODO: raise NSInvalidArgumentException
-    assert_ne!(key, nil);
+    // assert_ne!(key, nil);
     let mut host_obj: DictionaryHostObject = std::mem::take(env.objc.borrow_mut(this));
     host_obj.insert(env, object, key, /* copy_key: */ true);
     *env.objc.borrow_mut(this) = host_obj;
