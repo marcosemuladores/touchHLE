@@ -474,6 +474,11 @@ pub const CLASSES: ClassExports = objc_classes! {
 - (())synchronize {
 }
 
+- (bool)arrayForKey:(id)defaultName {
+    let val: id = msg![env; this objectForKey:defaultName];
+    msg![env; val boolValue]
+}
+
 - (bool)dataForKey:(id)defaultName {
     let val: id = msg![env; this objectForKey:defaultName];
     msg![env; val boolValue]
