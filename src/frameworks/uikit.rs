@@ -12,6 +12,7 @@
 use crate::{msg, Environment};
 use std::time::Instant;
 
+pub mod tap_flies_view_controller;
 pub mod ui_accelerometer;
 pub mod ui_activity_indicator_view;
 pub mod ui_application;
