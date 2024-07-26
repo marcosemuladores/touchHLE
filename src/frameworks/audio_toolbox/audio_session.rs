@@ -81,8 +81,7 @@ fn AudioSessionGetProperty(
         kAudioSessionProperty_CurrentHardwareOutputNumberChannels => guest_size_of::<u32>(),
         kAudioSessionProperty_PreferredHardwareIOBufferDuration => guest_size_of::<f32>(),
         kAudioSessionProperty_PreferredHardwareSampleRate => guest_size_of::<f64>(),
-        // _ => unimplemented!("Unimplemented property ID: {}", debug_fourcc(in_ID)),
-    };
+        _ => todo!()
     let io_data_size_value = env.mem.read(io_data_size);
     if io_data_size_value != required_size {
         log!("Warning: AudioSessionGetProperty() failed");
