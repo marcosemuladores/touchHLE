@@ -121,6 +121,9 @@ pub const CLASSES: ClassExports = objc_classes! {
     // TODO
 }
 
+- (())setStatusBarStyle:(bool)status {
+    log!("TODO: setStatusBarStyle:{}", status);
+}
 - (NSTimeInterval)statusBarOrientationAnimationDuration {
     0.0
 }
