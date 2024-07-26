@@ -394,6 +394,9 @@ fn _exit(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
 fn __sprintf_chk(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
+fn __maskrune(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+    arg1.min(arg2)
+}
 fn shm_open(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
@@ -675,6 +678,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(wcstod(_, _)),
     export_c_func!(_exit(_, _)),
     export_c_func!(__sprintf_chk(_, _)),
+    export_c_func!(__maskrune(_, _)),
     export_c_func!(shm_open(_, _)),
     export_c_func!(sqlite3_open(_, _)),
     export_c_func!(sqlite3_errcode(_, _)),
