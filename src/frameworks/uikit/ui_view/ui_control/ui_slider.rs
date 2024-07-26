@@ -13,6 +13,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 @implementation UISlider: UIButton
 
+- (())setMinimumValue:(bool)minimum {
+    log!("TODO: setMinimumValue:{}", minimum);
+}
+
 // TODO: all of it
 
 @end
