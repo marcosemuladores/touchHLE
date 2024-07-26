@@ -158,4 +158,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 @end
 
+@implementation UITableViewController: UIScrollView
+@end
+
 };
