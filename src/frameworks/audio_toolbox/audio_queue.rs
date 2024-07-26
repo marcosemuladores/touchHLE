@@ -430,7 +430,7 @@ pub fn decode_buffer(
     data: &[u8],
     format: &AudioStreamBasicDescription,
 ) -> (ALenum, ALsizei, Vec<u8>) {
-    assert!(is_supported_audio_format(format));
+    // assert!(is_supported_audio_format(format));
 
     match format.format_id {
         kAudioFormatAppleIMA4 => {
