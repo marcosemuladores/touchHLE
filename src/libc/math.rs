@@ -379,6 +379,9 @@ fn inet_ntoa(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
 fn listen(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
+fn kqueue(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
+    arg1.min(arg2)
+}
 fn uncompress(_env: &mut Environment, arg1: f64, arg2: f64) -> f64 {
     arg1.min(arg2)
 }
@@ -673,6 +676,7 @@ pub const FUNCTIONS: FunctionExports = &[
     export_c_func!(inet_addr(_, _)),
     export_c_func!(inet_ntoa(_, _)),
     export_c_func!(listen(_, _)),
+    export_c_func!(kqueue(_, _)),
     export_c_func!(uncompress(_, _)),
     export_c_func!(wcstok(_, _)),
     export_c_func!(wcstod(_, _)),
