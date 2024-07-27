@@ -218,6 +218,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     update(env, this);
 }
 
+- (())setContentVerticalAlignment:(bool)vertical {
+    log!("TODO: setContentVerticalAlignment:{}", vertical);
+}
+
 - (())setTag:(bool)tag {
     log!("TODO: setTag:{}", tag);
 }
