@@ -554,6 +554,11 @@ pub const CLASSES: ClassExports = objc_classes! {
 + (())setAnimationDuration:(id)duration {
     log!("WARNING: Ignoring setAnimationDuration:");
 }
+
+- (())setImage:(bool)image {
+    log!("TODO: setImage:{}", image);
+}
+
 @end
 
 @implementation UIToolbar: UIView
