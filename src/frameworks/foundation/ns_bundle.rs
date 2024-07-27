@@ -71,7 +71,6 @@ pub const CLASSES: ClassExports = objc_classes! {
         let host_object = NSBundleHostObject {
             bundle: None,
             bundle_path,
-            bundle_class,
             bundle_url: None,
             info_dictionary: None,
         };
