@@ -70,6 +70,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         let bundle_path = ns_string::from_rust_string(env, bundle_path);
         let host_object = NSBundleHostObject {
             bundle: None,
+            bundle_class: None,
             bundle_path,
             bundle_url: None,
             info_dictionary: None,
