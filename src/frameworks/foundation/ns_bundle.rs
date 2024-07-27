@@ -48,7 +48,6 @@ pub struct NSBundleHostObject {
     pub bundle: Option<Bundle>,
     /// NSString with bundle path.
     bundle_path: id,
-    bundle_class: id,
     /// NSURL with bundle path. [None] if not created yet.
     bundle_url: Option<id>,
     /// `NSDictionary*` for the `Info.plist` content. [None] if not created yet.
@@ -70,7 +69,6 @@ pub const CLASSES: ClassExports = objc_classes! {
         let bundle_path = ns_string::from_rust_string(env, bundle_path);
         let host_object = NSBundleHostObject {
             bundle: None,
-            bundle_class: None,
             bundle_path,
             bundle_url: None,
             info_dictionary: None,
@@ -99,7 +97,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     let &NSBundleHostObject {
         bundle: _,
         bundle_path: _, // FIXME?
-        bundle_class,
         bundle_url,
         info_dictionary,
     } = env.objc.borrow(this);
@@ -113,7 +110,7 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (id)bundleForClass {
-    env.objc.borrow::<NSBundleHostObject>(this).bundle_class
+    env.objc.borrow::<NSBundleHostObject>(this).bundle_path
 }
 - (id)bundlePath {
     env.objc.borrow::<NSBundleHostObject>(this).bundle_path
