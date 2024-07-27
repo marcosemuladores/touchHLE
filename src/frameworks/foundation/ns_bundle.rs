@@ -48,6 +48,7 @@ pub struct NSBundleHostObject {
     pub bundle: Option<Bundle>,
     /// NSString with bundle path.
     bundle_path: id,
+    bundle_class: id,
     /// NSURL with bundle path. [None] if not created yet.
     bundle_url: Option<id>,
     /// `NSDictionary*` for the `Info.plist` content. [None] if not created yet.
@@ -70,6 +71,7 @@ pub const CLASSES: ClassExports = objc_classes! {
         let host_object = NSBundleHostObject {
             bundle: None,
             bundle_path,
+            bundle_class,
             bundle_url: None,
             info_dictionary: None,
         };
@@ -97,6 +99,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     let &NSBundleHostObject {
         bundle: _,
         bundle_path: _, // FIXME?
+        bundle_class,
         bundle_url,
         info_dictionary,
     } = env.objc.borrow(this);
@@ -110,12 +113,24 @@ pub const CLASSES: ClassExports = objc_classes! {
 }
 
 - (id)bundleForClass {
-    env.objc.borrow::<NSBundleHostObject>(this).bundle_path
+    env.objc.borrow::<NSBundleHostObject>(this).bundle_class
 }
 - (id)bundlePath {
     env.objc.borrow::<NSBundleHostObject>(this).bundle_path
 }
 - (id)bundleURL {
+    if let Some(url) = env.objc.borrow::<NSBundleHostObject>(this).bundle_url {
+        url
+    } else {
+        let bundle_path: id = msg![env; this bundlePath];
+        let new: id = msg_class![env; NSURL alloc];
+        let new: id = msg![env; new initFileURLWithPath:bundle_path];
+        env.objc.borrow_mut::<NSBundleHostObject>(this).bundle_url = Some(new);
+        new
+    }
+}
+
+- (id)bundleIdentifier {
     if let Some(url) = env.objc.borrow::<NSBundleHostObject>(this).bundle_url {
         url
     } else {
