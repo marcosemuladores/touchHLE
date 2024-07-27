@@ -31,10 +31,6 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.alloc_object(this, host_object, &mut env.mem)
 }
 
-+ (())setAnimationDuration:(id)duration {
-    log!("WARNING: Ignoring setAnimationDuration:");
-}
-
 - (id)initWithFrame:(CGRect)frame {
     let this: id = msg_super![env; this initWithFrame:frame];
     // Not sure if UIImageView does this unconditionally, or only for images
@@ -80,6 +76,10 @@ pub const CLASSES: ClassExports = objc_classes! {
 
     let layer: id = msg![env; this layer];
     () = msg![env; layer setNeedsDisplay];
+}
+
+- (())setAnimationDuration:(bool)duration {
+    log!("TODO: setAnimationDuration:{}", duration);
 }
 
 // Normally a UIKit view is drawn into a CGContextRef by drawRect:, which is
