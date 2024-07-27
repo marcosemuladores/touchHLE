@@ -68,6 +68,16 @@ pub const CLASSES: ClassExports = objc_classes! {
     env.objc.borrow::<UIImageViewHostObject>(this).image
 }
 
+- (())animationImages:(id)new_image { // UIImage*
+    let host_obj = env.objc.borrow_mut::<UIImageViewHostObject>(this);
+    let old_image = std::mem::replace(&mut host_obj.image, new_image);
+    retain(env, new_image);
+    release(env, old_image);
+
+    let layer: id = msg![env; this layer];
+    () = msg![env; layer setNeedsDisplay];
+}
+
 - (())setImage:(id)new_image { // UIImage*
     let host_obj = env.objc.borrow_mut::<UIImageViewHostObject>(this);
     let old_image = std::mem::replace(&mut host_obj.image, new_image);
