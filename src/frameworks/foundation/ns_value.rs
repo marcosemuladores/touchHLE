@@ -208,6 +208,11 @@ pub const CLASSES: ClassExports = objc_classes! {
     }
 }
 
+- (i32)stringValue {
+    let d: i64 = msg![env; this longLongValue];
+    d as i32
+}
+
 - (i32)intValue {
     let d: i64 = msg![env; this longLongValue];
     d as i32
