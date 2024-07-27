@@ -222,6 +222,10 @@ pub const CLASSES: ClassExports = objc_classes! {
     log!("TODO: setContentVerticalAlignment:{}", vertical);
 }
 
+- (())setContentHorizontalAlignment:(bool)horizontal {
+    log!("TODO: setContentHorizontalAlignment:{}", horizontal);
+}
+
 - (())setTag:(bool)tag {
     log!("TODO: setTag:{}", tag);
 }
