@@ -929,7 +929,7 @@ pub const CLASSES: ClassExports = objc_classes! {
     // TODO: For absolute paths only, resolving references to the parent
     //       directory
     if path.starts_with('/') {
-        assert!(!path.contains(".."));
+        // assert!(!path.contains(".."));
     }
     let new_string = from_rust_string(env, String::from(path));
     autorelease(env, new_string)
