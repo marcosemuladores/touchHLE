@@ -72,4 +72,8 @@ pub const CLASSES: ClassExports = objc_classes! {
 
 @end
 
+@implementation NSRecursiveLock: NSObject
+
+@end
+
 };
