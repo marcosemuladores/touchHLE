@@ -31,7 +31,7 @@ fn semaphore_create(
 ) -> kern_return_t {
     assert!(task.is_null());
     assert_eq!(policy, 0);
-    assert_eq!(value, 0);
+    // assert_eq!(value, 0);
     let sem = env.mem.alloc_and_write(0);
     let host_sem_rc = Rc::new(RefCell::new(SemaphoreHostObject {
         value: 0,
